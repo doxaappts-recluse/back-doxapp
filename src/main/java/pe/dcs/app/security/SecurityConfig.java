@@ -70,8 +70,8 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOrigins(List.of(
-                "http://localhost:4200",
-                "https://resplance2025.web.app/"
+                //"http://localhost:4200",
+                "https://doxapp-2e3c7.web.app/"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Métodos HTTP permitidos
         config.setAllowedHeaders(List.of("*")); // Permite todos los encabezados
