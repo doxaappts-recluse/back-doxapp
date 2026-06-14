@@ -2,6 +2,7 @@ package pe.dcs.app.features.event.request.registration;
 
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.auditable.AuditableFilter;
 import pe.dcs.app.util.enums.events.RegistrationCategory;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class EventRegistrationFilter {
+public class EventRegistrationFilter extends AuditableFilter {
     private UUID eventId;
     private RegistrationCategory category;
     private RegistrationStatus status;

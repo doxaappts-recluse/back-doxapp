@@ -2,6 +2,7 @@ package pe.dcs.app.features.event.response.registration;
 
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.auditable.AuditableResponse;
 import pe.dcs.app.util.enums.events.RegistrationCategory;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class EventRegistrationResponse {
+public class EventRegistrationResponse extends AuditableResponse {
 
     private UUID id;
 

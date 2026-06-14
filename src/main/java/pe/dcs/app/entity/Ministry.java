@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
-import pe.dcs.app.util.Auditable;
+import pe.dcs.app.util.auditable.Auditable;
 
 import java.util.UUID;
 

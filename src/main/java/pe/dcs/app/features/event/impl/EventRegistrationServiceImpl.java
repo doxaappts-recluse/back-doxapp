@@ -174,7 +174,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         validateEvent(event);
 
-        validateCapacity(event);
+        //validateCapacity(event);
 
         EventRegistration registration =
                 new EventRegistration();
@@ -595,6 +595,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         return category == RegistrationCategory.VISITOR
                 || category == RegistrationCategory.GUEST
+                || category == RegistrationCategory.TEMP_MEMBER
+                || category == RegistrationCategory.TEMP_STAFF
                 || category == RegistrationCategory.SCHOLARSHIP;
     }
 

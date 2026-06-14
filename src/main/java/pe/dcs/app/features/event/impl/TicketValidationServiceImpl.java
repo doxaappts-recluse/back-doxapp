@@ -1,6 +1,7 @@
 package pe.dcs.app.features.event.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.EventAttendance;
@@ -9,6 +10,7 @@ import pe.dcs.app.features.event.response.attendance.TicketValidationResponse;
 import pe.dcs.app.features.event.service.ticket.TicketValidationService;
 import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
+import pe.dcs.app.util.Exceptions;
 
 import java.time.LocalDateTime;
 
@@ -25,7 +27,10 @@ public class TicketValidationServiceImpl implements TicketValidationService {
 
         // 1. Buscar registro
         EventRegistration reg = registrationRepository.findByQrToken(qrToken)
-                .orElseThrow(() -> new RuntimeException("QR inválido"));
+                .orElseThrow(() -> new Exceptions(
+                        "QR inválido",
+                        HttpStatus.NOT_FOUND
+                ));
 
         // 2. Si ya fue usado → bloquear
         if (Boolean.TRUE.equals(reg.getQrUsed())) {

@@ -25,34 +25,20 @@ public class EventRegistrationSpecification {
             List<Predicate> predicates =
                     new ArrayList<>();
 
-            if (filter != null) {
-
-                if (filter.getEventId() == null) {
-                    return cb.disjunction();
-                }
-
-                predicates.add(
-                        cb.equal(
-                                root.get("event").get("id"),
-                                filter.getEventId()
-                        )
-                );
-            }
-
             if (filter == null) {
-                return cb.and(predicates.toArray(new Predicate[0]));
+                return cb.conjunction();
             }
 
-            if (filter.getEventId() != null) {
-
-                predicates.add(
-                        cb.equal(
-                                root.get("event")
-                                        .get("id"),
-                                filter.getEventId()
-                        )
-                );
+            if (filter.getEventId() == null) {
+                return cb.disjunction();
             }
+
+            predicates.add(
+                    cb.equal(
+                            root.get("event").get("id"),
+                            filter.getEventId()
+                    )
+            );
 
             if (filter.getCategory() != null) {
 
@@ -74,39 +60,27 @@ public class EventRegistrationSpecification {
                 );
             }
 
-            if (StringUtils.hasText(
-                    filter.getName()
-            )) {
+            if (StringUtils.hasText(filter.getName())) {
 
                 predicates.add(
                         cb.like(
-                                cb.lower(
-                                        root.get("name")
-                                ),
-                                "%" + filter.getName()
-                                        .toLowerCase() + "%"
+                                cb.lower(root.get("name")),
+                                "%" + filter.getName().toLowerCase() + "%"
                         )
                 );
             }
 
-            if (StringUtils.hasText(
-                    filter.getLastname()
-            )) {
+            if (StringUtils.hasText(filter.getLastname())) {
 
                 predicates.add(
                         cb.like(
-                                cb.lower(
-                                        root.get("lastname")
-                                ),
-                                "%" + filter.getLastname()
-                                        .toLowerCase() + "%"
+                                cb.lower(root.get("lastname")),
+                                "%" + filter.getLastname().toLowerCase() + "%"
                         )
                 );
             }
 
-            if (StringUtils.hasText(
-                    filter.getPhone()
-            )) {
+            if (StringUtils.hasText(filter.getPhone())) {
 
                 predicates.add(
                         cb.like(
@@ -116,10 +90,106 @@ public class EventRegistrationSpecification {
                 );
             }
 
+            // =========================
+            // CREATED AT
+            // =========================
+
+            if (filter.getCreatedAtFrom() != null) {
+
+                predicates.add(
+                        cb.greaterThanOrEqualTo(
+                                root.get("createdAt"),
+                                filter.getCreatedAtFrom()
+                        )
+                );
+            }
+
+            if (filter.getCreatedAtTo() != null) {
+
+                predicates.add(
+                        cb.lessThanOrEqualTo(
+                                root.get("createdAt"),
+                                filter.getCreatedAtTo()
+                        )
+                );
+            }
+
+            // =========================
+            // UPDATED AT
+            // =========================
+
+            if (filter.getUpdatedAtFrom() != null) {
+
+                predicates.add(
+                        cb.greaterThanOrEqualTo(
+                                root.get("updatedAt"),
+                                filter.getUpdatedAtFrom()
+                        )
+                );
+            }
+
+            if (filter.getUpdatedAtTo() != null) {
+
+                predicates.add(
+                        cb.lessThanOrEqualTo(
+                                root.get("updatedAt"),
+                                filter.getUpdatedAtTo()
+                        )
+                );
+            }
+
+            // =========================
+            // CREATED BY
+            // =========================
+
+            if (StringUtils.hasText(filter.getCreatedBy())) {
+
+                String search =
+                        "%" + filter.getCreatedBy().toLowerCase() + "%";
+
+                predicates.add(
+                        cb.like(
+                                cb.lower(
+                                        cb.concat(
+                                                cb.concat(
+                                                        root.get("createdBy").get("name"),
+                                                        " "
+                                                ),
+                                                root.get("createdBy").get("lastname")
+                                        )
+                                ),
+                                search
+                        )
+                );
+            }
+
+            // =========================
+            // UPDATED BY
+            // =========================
+
+            if (StringUtils.hasText(filter.getUpdatedBy())) {
+
+                String search =
+                        "%" + filter.getUpdatedBy().toLowerCase() + "%";
+
+                predicates.add(
+                        cb.like(
+                                cb.lower(
+                                        cb.concat(
+                                                cb.concat(
+                                                        root.get("updatedBy").get("name"),
+                                                        " "
+                                                ),
+                                                root.get("updatedBy").get("lastname")
+                                        )
+                                ),
+                                search
+                        )
+                );
+            }
+
             return cb.and(
-                    predicates.toArray(
-                            Predicate[]::new
-                    )
+                    predicates.toArray(new Predicate[0])
             );
         };
     }

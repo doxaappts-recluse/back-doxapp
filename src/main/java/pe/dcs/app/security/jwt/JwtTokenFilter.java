@@ -61,6 +61,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         } catch (Exception ex) {
             filterLogger.error("Error en el filtro JWT: {}", ex.getMessage());
+            SecurityContextHolder.clearContext();
             sendUnauthorizedResponse(res, req.getServletPath(), "Error de autenticación.");
         }
     }

@@ -5,14 +5,17 @@ import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.EventRegistration;
 import pe.dcs.app.features.event.response.registration.EventRegistrationDetailResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 
 @Component
-public class EventRegistrationMapper {
+public class EventRegistrationMapper extends BaseMapper {
 
     public EventRegistrationResponse simple(EventRegistration entity) {
 
         EventRegistrationResponse response =
                 new EventRegistrationResponse();
+
+        mapAudit(entity, response);
 
         response.setId(entity.getId());
 
@@ -46,17 +49,9 @@ public class EventRegistrationMapper {
 
         response.setStatus(entity.getStatus());
 
-        response.setRegularPrice(
-                entity.getRegularPrice()
-        );
-
-        response.setDiscount(
-                entity.getDiscount()
-        );
-
-        response.setFinalPrice(
-                entity.getFinalPrice()
-        );
+        response.setRegularPrice(entity.getRegularPrice());
+        response.setDiscount(entity.getDiscount());
+        response.setFinalPrice(entity.getFinalPrice());
 
         return response;
     }
