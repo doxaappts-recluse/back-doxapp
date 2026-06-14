@@ -41,4 +41,14 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
     Optional<User> findByOrganizationIdAndRole_Value(UUID organizationId, String roleValue);
 
     boolean existsByDniAndOrganizationIdAndIdNot(String dni, UUID organizationId, UUID id);
+
+    @Query("""
+        SELECT u
+        FROM User u
+        LEFT JOIN FETCH u.role
+        LEFT JOIN FETCH u.organization
+        LEFT JOIN FETCH u.credential
+        WHERE u.credential.username = :username
+    """)
+    Optional<User> findProfileByUsername(String username);
 }

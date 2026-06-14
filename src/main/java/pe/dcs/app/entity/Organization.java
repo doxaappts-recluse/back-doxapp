@@ -7,7 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
 
-import pe.dcs.app.util.Auditable;
+import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.StatusType;
 
 @Entity

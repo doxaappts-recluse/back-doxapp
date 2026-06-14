@@ -1,11 +1,8 @@
 server:
   port: ${PORT:8080}
-
+  
 spring:
   datasource:
-    #url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-    #username: postgres.eehevpofwzkhmfetldyz
-    #password: ":XY>Xwp;Pj/5NM4k"
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
@@ -41,8 +38,6 @@ spring:
           provider_disables_autocommit: true
 
 supabase:
-  #url: https://eehevpofwzkhmfetldyz.supabase.co
-  #serviceKey: sb_secret_ECnwK-OqYyF0OlN-stFnrw_mhgWX9SF
   url: ${SB_URL}
   serviceKey: ${SB_SERVICE_KEY}
 
@@ -53,5 +48,4 @@ supabase:
 app:
   jwt:
     time-in-minutes: 20
-    #secret: r3g157ry_499l1c4t10n_574nd4rd_cl13n7_53cr37
     secret: ${JWT_SECRET}

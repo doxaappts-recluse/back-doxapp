@@ -8,6 +8,7 @@ import pe.dcs.app.features.event.service.FinanceReportService;
 import pe.dcs.app.repository.EventFinanceRepository;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -27,8 +28,19 @@ public class FinanceReportServiceImpl implements FinanceReportService {
                 .map(r -> {
                     FinanceReportResponse dto = new FinanceReportResponse();
                     dto.setDate(((java.sql.Date) r[0]).toLocalDate());
-                    dto.setIncome(r[1] != null ? new BigDecimal(r[1].toString()) : BigDecimal.ZERO);
-                    dto.setExpense(r[2] != null ? new BigDecimal(r[2].toString()) : BigDecimal.ZERO);
+                    dto.setIncome(
+                            r[1] != null
+                                    ? new BigDecimal(r[1].toString())
+                                    .setScale(2, RoundingMode.HALF_UP)
+                                    : BigDecimal.ZERO
+                    );
+
+                    dto.setExpense(
+                            r[2] != null
+                                    ? new BigDecimal(r[2].toString())
+                                    .setScale(2, RoundingMode.HALF_UP)
+                                    : BigDecimal.ZERO
+                    );
                     return dto;
                 })
                 .toList();

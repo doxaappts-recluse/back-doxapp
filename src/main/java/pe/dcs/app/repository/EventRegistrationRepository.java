@@ -54,26 +54,27 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     long countByEventId(UUID eventId);
 
     @Query(value = """
-    SELECT
-        CAST(r.created_at AS DATE),
-        SUM(CASE WHEN r.status = 'REGISTERED' THEN 1 ELSE 0 END),
-        SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END)
-    FROM event_registrations r
-    WHERE r.event_id = :eventId
-    GROUP BY CAST(r.created_at AS DATE)
-    ORDER BY CAST(r.created_at AS DATE)
+        SELECT
+            CAST((r.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/LIMA') AS date),
+            SUM(CASE WHEN r.status = 'REGISTERED' THEN 1 ELSE 0 END),
+            SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END)
+        FROM event_registrations r
+        WHERE r.event_id = :eventId
+        GROUP BY CAST((r.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/LIMA') AS date)
+        ORDER BY CAST((r.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/LIMA') AS date)
     """, nativeQuery = true)
     List<Object[]> registrationReport(UUID eventId);
 
-    @Query("""
+    @Query(value = """
         SELECT
-            DATE(r.createdAt),
-            SUM(CASE WHEN r.status = 'REGISTERED' THEN 1 ELSE 0 END)
-        FROM EventRegistration r
-        WHERE r.event.id = :eventId
-        GROUP BY DATE(r.createdAt)
-        ORDER BY DATE(r.createdAt)
-    """)
+            CAST((r.created_at AT TIME ZONE 'UTC') AT TIME ZONE 'America/Lima' AS date),
+            SUM(CASE WHEN r.status = 'REGISTERED' THEN 1 ELSE 0 END),
+            SUM(CASE WHEN r.status = 'CANCELLED' THEN 1 ELSE 0 END)
+        FROM event_registrations r
+        WHERE r.event_id = :eventId
+        GROUP BY CAST((r.created_at AT TIME ZONE 'UTC') AT TIME ZONE 'America/Lima' AS date)
+        ORDER BY CAST((r.created_at AT TIME ZONE 'UTC') AT TIME ZONE 'America/Lima' AS date)
+    """, nativeQuery = true)
     List<Object[]> occupancyReport(@Param("eventId") UUID eventId);
 
 }

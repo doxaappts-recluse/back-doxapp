@@ -5,5 +5,7 @@ public enum RegistrationCategory {
     VISITOR,
     GUEST,
     SCHOLARSHIP,
-    STAFF
+    STAFF,
+    TEMP_MEMBER,
+    TEMP_STAFF,
 }

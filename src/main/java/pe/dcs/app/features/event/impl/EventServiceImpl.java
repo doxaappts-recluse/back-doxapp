@@ -109,7 +109,7 @@ public class EventServiceImpl implements EventService {
                 ).orElseThrow();
 
         Event event = new Event();
-
+        System.out.println("DB VALUE: " + request.getStartDateTime());
         event.setName(request.getName());
         event.setDescription(request.getDescription());
         event.setStartDateTime(request.getStartDateTime());
@@ -121,6 +121,7 @@ public class EventServiceImpl implements EventService {
         event.setExpectedBudget(request.getExpectedBudget());
         event.setStatus(EventStatus.DRAFT);
         event.setOrganization(organization);
+        System.out.println("DB2 VALUE: " + event.getStartDateTime());
 
         // 1. persistir primero para obtener ID
         Event saved = eventRepository.save(event);

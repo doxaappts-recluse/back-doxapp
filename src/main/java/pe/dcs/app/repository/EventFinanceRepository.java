@@ -68,15 +68,18 @@ public interface EventFinanceRepository extends JpaRepository<EventFinance, UUID
             EventFinanceType type
     );
 
-    @Query("""
+    @Query(value = """
         SELECT
-            DATE(f.createdAt),
+            CAST((f.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima') AS date),
+    
             SUM(CASE WHEN f.type = 'INCOME' AND f.status = 'APPROVED' THEN f.amount ELSE 0 END),
+    
             SUM(CASE WHEN f.type = 'EXPENSE' AND f.status = 'APPROVED' THEN f.amount ELSE 0 END)
-        FROM EventFinance f
-        WHERE f.event.id = :eventId
-        GROUP BY DATE(f.createdAt)
-        ORDER BY DATE(f.createdAt)
-    """)
-    List<Object[]> financeReport(@Param("eventId") UUID eventId);
+    
+        FROM event_finances f
+        WHERE f.event_id = :eventId
+        GROUP BY CAST((f.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima') AS date)
+        ORDER BY CAST((f.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Lima') AS date)
+    """, nativeQuery = true)
+    List<Object[]> financeReport(UUID eventId);
 }

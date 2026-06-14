@@ -4,12 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
-import pe.dcs.app.util.Auditable;
-import pe.dcs.app.util.enums.SystemRoleType;
+import pe.dcs.app.util.auditable.Auditable;
 
-import java.time.LocalDateTime;
-
-import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 
