@@ -5,9 +5,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pe.dcs.app.features.event.response.reports.AgeReportResponse;
 import pe.dcs.app.features.event.response.reports.FinanceReportResponse;
 import pe.dcs.app.features.event.response.reports.OccupancyReportResponse;
 import pe.dcs.app.features.event.response.reports.RegistrationReportResponse;
+import pe.dcs.app.features.event.service.AgeReportService;
 import pe.dcs.app.features.event.service.FinanceReportService;
 import pe.dcs.app.features.event.service.OccupancyReportService;
 import pe.dcs.app.features.event.service.RegistrationReportService;
@@ -24,6 +26,8 @@ public class ReportController {
     private final RegistrationReportService registrationReportService;
     private final FinanceReportService financeReportService;
     private final OccupancyReportService occupancyReportService;
+    private final AgeReportService ageReportService;
+
 
     @GetMapping("/registrations/{eventId}")
     public ApiResponse<List<RegistrationReportResponse>> getRegistration(@PathVariable UUID eventId) {
@@ -51,5 +55,18 @@ public class ReportController {
                 "Reporte de finanzas obtenido correctamente",
                 occupancyReportService.get(eventId)
         );
+    }
+
+    @GetMapping("/age-report/{eventId}")
+    public ApiResponse<List<AgeReportResponse>> ageReport(
+            @PathVariable UUID eventId
+    ) {
+
+        return new ApiResponse<>(
+                200,
+                "Reporte de edades obtenido correctamente",
+                ageReportService.get(eventId)
+        );
+
     }
 }
