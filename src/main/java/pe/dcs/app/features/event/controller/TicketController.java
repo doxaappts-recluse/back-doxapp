@@ -5,6 +5,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.event.response.attendance.TicketValidationResponse;
+import pe.dcs.app.features.event.response.event.TicketResponse;
 import pe.dcs.app.features.event.service.ticket.TicketService;
 import pe.dcs.app.features.event.service.ticket.TicketValidationService;
 import pe.dcs.app.util.ApiResponse;
@@ -38,6 +39,18 @@ public class TicketController {
                 200,
                 "OK",
                 validationService.validate(qrToken)
+        );
+    }
+
+    @GetMapping("/getTicket/{registrationId}")
+    public ApiResponse<TicketResponse> getTicket(
+            @PathVariable UUID registrationId
+    ) {
+
+        return new ApiResponse<>(
+                200,
+                "OK",
+                ticketService.getTicket(registrationId)
         );
     }
 }

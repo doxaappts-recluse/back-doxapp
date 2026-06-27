@@ -178,4 +178,35 @@ public class SupabaseStorageService {
             throw new RuntimeException("Error parsing signed URL", e);
         }
     }
+
+    // -------------------------
+    // SIGNED URL FULL (FRONTEND)
+    // -------------------------
+    public String createSignedUrlFull(
+            String bucketKey,
+            String path,
+            int expiresInSeconds
+    ) {
+
+        String bucket = resolveBucket(bucketKey);
+
+        String json = webClient.post()
+                .uri(props.getUrl()
+                        + "/storage/v1/object/sign/"
+                        + bucket
+                        + "/"
+                        + path)
+                .header("Authorization", "Bearer " + props.getServiceKey())
+                .header("apikey", props.getServiceKey())
+                .bodyValue(Map.of("expiresIn", expiresInSeconds))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+
+        String signedPath = extractUrl(json);
+
+        return props.getUrl()
+                + "/storage/v1"
+                + signedPath;
+    }
 }
