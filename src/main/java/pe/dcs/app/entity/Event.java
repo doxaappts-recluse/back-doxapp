@@ -1,9 +1,12 @@
 package pe.dcs.app.entity;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.events.EventStatus;
 
@@ -78,8 +81,9 @@ public class Event extends Auditable {
     @Column(name = "template_path")
     private String templatePath;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "template_config", columnDefinition = "jsonb")
-    private String templateConfig;
+    private JsonNode templateConfig;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(

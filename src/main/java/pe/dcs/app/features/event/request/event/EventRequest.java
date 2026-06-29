@@ -1,5 +1,6 @@
 package pe.dcs.app.features.event.request.event;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -36,5 +37,5 @@ public class EventRequest {
 
     private BigDecimal expectedBudget;
 
-    private String templateConfig;
+    private JsonNode templateConfig;
 }
