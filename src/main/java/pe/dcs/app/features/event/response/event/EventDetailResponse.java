@@ -1,5 +1,6 @@
 package pe.dcs.app.features.event.response.event;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.events.EventStatus;
@@ -34,5 +35,5 @@ public class EventDetailResponse {
 
     private EventStatus status;
 
-    private String templateConfig;
+    private JsonNode templateConfig;
 }
