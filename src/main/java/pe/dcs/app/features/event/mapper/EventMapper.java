@@ -76,6 +76,8 @@ public class EventMapper {
                 event.getStatus()
         );
 
+        response.setTemplateConfig(event.getTemplateConfig());
+
         return response;
     }
 }

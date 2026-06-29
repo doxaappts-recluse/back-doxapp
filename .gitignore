@@ -73,6 +73,7 @@ Thumbs.db
 # =========================
 # Spring Boot
 # =========================
+application.yml
 application-local.yml
 application-local.properties
 

@@ -121,6 +121,7 @@ public class EventServiceImpl implements EventService {
         event.setExpectedBudget(request.getExpectedBudget());
         event.setStatus(EventStatus.DRAFT);
         event.setOrganization(organization);
+        event.setTemplateConfig(request.getTemplateConfig());
         System.out.println("DB2 VALUE: " + event.getStartDateTime());
 
         // 1. persistir primero para obtener ID
@@ -175,6 +176,7 @@ public class EventServiceImpl implements EventService {
         event.setCapacity(request.getCapacity());
         event.setGoal(request.getGoal());
         event.setExpectedBudget(request.getExpectedBudget());
+        event.setTemplateConfig(request.getTemplateConfig());
 
         // 1. upload opcional (overwrite)
         if (file != null && !file.isEmpty()) {

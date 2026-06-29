@@ -35,4 +35,6 @@ public class EventRequest {
     private Integer goal;
 
     private BigDecimal expectedBudget;
+
+    private String templateConfig;
 }

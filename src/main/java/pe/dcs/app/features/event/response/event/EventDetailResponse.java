@@ -33,4 +33,6 @@ public class EventDetailResponse {
     private BigDecimal expectedBudget;
 
     private EventStatus status;
+
+    private String templateConfig;
 }
