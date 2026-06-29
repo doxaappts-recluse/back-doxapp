@@ -78,6 +78,9 @@ public class Event extends Auditable {
     @Column(name = "template_path")
     private String templatePath;
 
+    @Column(name = "template_config", columnDefinition = "jsonb")
+    private String templateConfig;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "organization_id",
