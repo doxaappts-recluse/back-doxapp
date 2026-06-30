@@ -7,9 +7,11 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Event;
 import pe.dcs.app.entity.EventRegistration;
 import pe.dcs.app.features.event.response.event.TicketResponse;
+import pe.dcs.app.features.event.response.event.TicketTemplateResponse;
 import pe.dcs.app.features.event.service.ticket.TicketGeneratorService;
 import pe.dcs.app.features.event.service.ticket.TicketService;
 import pe.dcs.app.repository.EventRegistrationRepository;
+import pe.dcs.app.repository.EventRepository;
 import pe.dcs.app.service.supabase.StorageBucketResolver;
 import pe.dcs.app.service.supabase.SupabaseStorageService;
 import pe.dcs.app.util.Exceptions;
@@ -23,6 +25,7 @@ public class TicketServiceImpl implements TicketService {
 
     private final EventRegistrationRepository registrationRepository;
     private final TicketGeneratorService generatorService;
+    private final EventRepository eventRepository;
 
     private final SupabaseStorageService storageService;
     private final StorageBucketResolver bucketResolver;
@@ -44,6 +47,30 @@ public class TicketServiceImpl implements TicketService {
                 event,
                 reg.getQrToken()
         );
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public TicketTemplateResponse getTicketTemplate(UUID eventId) {
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Evento no encontrado",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
+
+        String templateUrl = storageService.createSignedUrlFull(
+                bucketResolver.resolve(StorageBucket.EVENTS),
+                event.getTemplatePath(),
+                300
+        );
+
+        return TicketTemplateResponse.builder()
+                .templateUrl(templateUrl)
+                .templateConfig(event.getTemplateConfig())
+                .build();
     }
 
     @Override

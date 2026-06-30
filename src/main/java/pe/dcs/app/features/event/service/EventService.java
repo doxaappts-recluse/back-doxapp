@@ -6,6 +6,7 @@ import pe.dcs.app.features.event.request.event.EventRequest;
 import pe.dcs.app.features.event.request.event.EventSearchRequest;
 import pe.dcs.app.features.event.response.event.EventDetailResponse;
 import pe.dcs.app.features.event.response.event.EventResponse;
+import pe.dcs.app.features.event.response.event.TicketTemplateResponse;
 import pe.dcs.app.util.pagination.PageResponse;
 
 import java.util.UUID;
@@ -40,4 +41,5 @@ public interface EventService {
     );
 
     Event findById(UUID id);
+
 }
