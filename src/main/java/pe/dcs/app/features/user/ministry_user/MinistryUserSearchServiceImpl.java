@@ -22,7 +22,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MinistryUserSearchServiceImpl implements MinistryUserSearchService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final AuthContext authContext;
 
     public PageResponse<MinistryUserSearchResponse> search(
@@ -65,5 +65,5 @@ public class MinistryUserSearchServiceImpl implements MinistryUserSearchService 
                         page.getNumber()
                 )
         );
-    }
+    }*/
 }

@@ -30,10 +30,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class ContractModuleServiceImpl
-        implements ContractModuleService {
+public class ContractModuleServiceImpl implements ContractModuleService {
 
-    private final ModuleRepository moduleRepository;
+    /*private final ModuleRepository moduleRepository;
 
     private final PermissionRepository permissionRepository;
 
@@ -170,5 +169,5 @@ public class ContractModuleServiceImpl
         }
 
         return response;
-    }
+    }*/
 }

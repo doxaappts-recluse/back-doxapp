@@ -3,9 +3,9 @@ package pe.dcs.app.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import pe.dcs.app.entity.User;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 import pe.dcs.app.util.Exceptions;
+import pe.dcs.app.util.constant.RoleConstant;
 
 import java.util.UUID;
 
@@ -13,93 +13,165 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthorizationService {
 
-    // =========================================================
-    // ROLE CHECKS
-    // =========================================================
-
-    public boolean isSystem(CredentialDetailsImpl user) {
-        return hasPrefix(user, "SYSTEM");
+    public boolean isSystem(CredentialDetailsImpl user){
+        return user.isSystem();
     }
 
-    public boolean isOrgAdmin(CredentialDetailsImpl user) {
-        return hasRole(user, "ORG_ADMIN");
+    public boolean hasRole(
+            CredentialDetailsImpl user,
+            String role
+    ){
+        return user.hasRole(role);
     }
 
-    public boolean isOrgUser(CredentialDetailsImpl user) {
-        return hasRole(user, "ORG_USER");
+    public boolean isOrgAdmin(
+            CredentialDetailsImpl user,
+            UUID organizationId
+    ){
+
+        return user.hasOrganizationAdminAccess(
+                organizationId
+        );
     }
 
-    public boolean isOrganizationUser(CredentialDetailsImpl user) {
-        return isOrgAdmin(user) || isOrgUser(user);
+    public boolean isBranchAdmin(
+            CredentialDetailsImpl user,
+            UUID organizationId,
+            UUID branchId
+    ){
+
+        return user.hasBranchAdminAccess(
+                organizationId,
+                branchId
+        );
     }
 
+    public boolean isOrgBranchAdmin(
+            CredentialDetailsImpl user,
+            UUID organizationId,
+            UUID branchId
+    ){
 
-    // =========================================================
-    // HELPERS
-    // =========================================================
-
-    private boolean hasRole(CredentialDetailsImpl user, String role) {
-        return user.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().equals(role));
+        return user.hasBranchAdminAccess(
+                organizationId,
+                branchId
+        );
     }
 
-    private boolean hasPrefix(CredentialDetailsImpl user, String prefix) {
-        return user.getAuthorities()
-                .stream()
-                .anyMatch(a -> a.getAuthority().startsWith(prefix));
+    public boolean isOrgUser(
+            CredentialDetailsImpl user,
+            UUID organizationId,
+            UUID branchId
+    ){
+        return user.hasOrganizationUser(
+                organizationId,
+                branchId
+        );
     }
 
-    // =========================================================
-    // ORGANIZATION CONTEXT
-    // =========================================================
+    public boolean hasOrganizationAccess(
+            CredentialDetailsImpl user,
+            UUID organizationId
+    ){
 
-    public UUID getOrganizationId(CredentialDetailsImpl user) {
-        if (user.getOrganizationId() == null) {
-            throw new Exceptions("User without organization", HttpStatus.BAD_REQUEST);
-        }
-        return user.getOrganizationId();
-    }
-
-    public boolean sameOrganization(CredentialDetailsImpl a, CredentialDetailsImpl b) {
-        return getOrganizationId(a).equals(getOrganizationId(b));
-    }
-
-    public boolean sameOrganization(CredentialDetailsImpl user, UUID organizationId) {
-        return getOrganizationId(user).equals(organizationId);
-    }
-
-    // =========================================================
-    // SECURITY RULES
-    // =========================================================
-
-    public void assertCanAccessUser(CredentialDetailsImpl actor, CredentialDetailsImpl target) {
-
-        if (isSystem(actor)) return;
-
-        if (!isOrganizationUser(actor)) {
-            throw new Exceptions("Invalid role", HttpStatus.FORBIDDEN);
+        if(isSystem(user)){
+            return true;
         }
 
-        if (isSystem(target)) {
-            throw new Exceptions("Cannot manage system users", HttpStatus.FORBIDDEN);
+        return user.hasOrganization(
+                organizationId
+        );
+    }
+
+    public boolean hasBranchAccess(
+            CredentialDetailsImpl user,
+            UUID organizationId,
+            UUID branchId
+    ){
+
+        if(isSystem(user)){
+            return true;
         }
 
-        if (!sameOrganization(actor, target.getOrganizationId())) {
-            throw new Exceptions("Different organization", HttpStatus.FORBIDDEN);
+        if(user.hasOrganizationAdminAccess(organizationId)){
+            return true;
+        }
+
+        return user.hasBranch(
+                organizationId,
+                branchId
+        );
+    }
+
+    public void assertCanAccessOrganization(
+            CredentialDetailsImpl actor,
+            UUID organizationId
+    ){
+
+        if(!hasOrganizationAccess(
+                actor,
+                organizationId
+        )){
+            throw new Exceptions(
+                    "Organization access denied",
+                    HttpStatus.FORBIDDEN
+            );
         }
     }
 
-    public void assertCanAccessOrganization(CredentialDetailsImpl actor, UUID organizationId) {
+    public void assertCanAccessBranch(
+            CredentialDetailsImpl actor,
+            UUID organizationId,
+            UUID branchId
+    ){
 
-        if (isSystem(actor)) return;
+        if(!hasBranchAccess(
+                actor,
+                organizationId,
+                branchId
+        )){
+            throw new Exceptions(
+                    "Branch access denied",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
-        if (!isOrganizationUser(actor)) {
-            throw new Exceptions("Invalid role", HttpStatus.FORBIDDEN);
+    public void assertCanManageUser(
+            CredentialDetailsImpl actor,
+            UUID targetOrganizationId,
+            UUID targetBranchId
+    ){
+
+        if(isSystem(actor)){
+            return;
         }
 
-        if (!sameOrganization(actor, organizationId)) {
-            throw new Exceptions("Organization access denied", HttpStatus.FORBIDDEN);
+        if(!hasOrganizationAccess(
+                actor,
+                targetOrganizationId
+        )){
+            throw new Exceptions(
+                    "Different organization",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+
+        if(actor.hasOrganizationAdminAccess(
+                targetOrganizationId
+        )){
+            return;
+        }
+
+        if(!hasBranchAccess(
+                actor,
+                targetOrganizationId,
+                targetBranchId
+        )){
+            throw new Exceptions(
+                    "Different branch",
+                    HttpStatus.FORBIDDEN
+            );
         }
     }
 }

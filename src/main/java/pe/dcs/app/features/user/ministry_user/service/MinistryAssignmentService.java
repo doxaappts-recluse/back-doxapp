@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface MinistryAssignmentService {
 
-    MinistryAssignmentResponse create(
+    /*MinistryAssignmentResponse create(
             UUID userId,
             MinistryAssignmentRequest request
     );
@@ -33,5 +33,5 @@ public interface MinistryAssignmentService {
 
     List<MinistryOptionResponse> getMinistries();
 
-    List<MinistryRoleOptionResponse> getRoles();
+    List<MinistryRoleOptionResponse> getRoles();*/
 }

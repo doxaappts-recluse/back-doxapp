@@ -25,6 +25,7 @@ import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PageableUtil;
 import pe.dcs.app.util.pagination.PaginationResponse;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -96,7 +97,13 @@ public class EventFinanceServiceImpl
                 request.getObservations()
         );
 
-        if (authContext.isOrgAdmin()) {
+        if(
+                authContext.isSystem()
+                ||
+                authContext.isCurrentOrganizationAdmin()
+                ||
+                authContext.isCurrentBranchAdmin()
+        ) {
 
             finance.setStatus(
                     EventFinanceStatus.APPROVED
@@ -107,7 +114,7 @@ public class EventFinanceServiceImpl
             );
 
             finance.setApprovedAt(
-                    LocalDateTime.now()
+                    Instant.now()
             );
 
         } else {
@@ -154,7 +161,13 @@ public class EventFinanceServiceImpl
          * ORG_USER solamente puede editar
          * movimientos creados por él mismo.
          */
-        if (authContext.isOrgUser()) {
+        if (
+                !authContext.isSystem()
+                &&
+                !authContext.isCurrentOrganizationAdmin()
+                &&
+                !authContext.isCurrentBranchAdmin()
+        ) {
 
             UUID ownerId =
                     finance.getCreatedByUser()
@@ -225,7 +238,7 @@ public class EventFinanceServiceImpl
         }
 
         finance.setUpdatedAt(
-                LocalDateTime.now()
+                Instant.now()
         );
 
         return eventFinanceMapper.simple(
@@ -240,7 +253,13 @@ public class EventFinanceServiceImpl
             EventFinanceApproveRequest request
     ) {
 
-        if (!authContext.isOrgAdmin()) {
+        if (
+                !authContext.isSystem()
+                &&
+                !authContext.isCurrentOrganizationAdmin()
+                &&
+                !authContext.isCurrentBranchAdmin()
+        ) {
 
             throw new Exceptions(
                     "No tiene permisos para aprobar movimientos",
@@ -286,7 +305,7 @@ public class EventFinanceServiceImpl
         );
 
         finance.setApprovedAt(
-                LocalDateTime.now()
+                Instant.now()
         );
 
         if (request != null &&
@@ -309,10 +328,16 @@ public class EventFinanceServiceImpl
             EventFinanceRejectRequest request
     ) {
 
-        if (!authContext.isOrgAdmin()) {
+        if (
+                !authContext.isSystem()
+                &&
+                !authContext.isCurrentOrganizationAdmin()
+                &&
+                !authContext.isCurrentBranchAdmin()
+        ) {
 
             throw new Exceptions(
-                    "No tiene permisos para rechazar movimientos",
+                    "No tiene permisos para aprobar movimientos",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -344,7 +369,7 @@ public class EventFinanceServiceImpl
         );
 
         finance.setUpdatedAt(
-                LocalDateTime.now()
+                Instant.now()
         );
 
         return eventFinanceMapper.simple(

@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MinistryAssignmentController {
 
-    private final MinistryAssignmentService service;
+    /*private final MinistryAssignmentService service;
 
     @PostMapping("/create/{userId}")
     public ApiResponse<MinistryAssignmentResponse> create(
@@ -105,5 +105,5 @@ public class MinistryAssignmentController {
                 "Ministry roles retrieved successfully",
                 service.getRoles()
         );
-    }
+    }*/
 }

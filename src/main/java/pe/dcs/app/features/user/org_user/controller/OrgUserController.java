@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgUserController {
 
-    private final OrgUserService userOrgService;
+    /*private final OrgUserService userOrgService;
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<OrgUserResponse>> search(
@@ -66,5 +66,5 @@ public class OrgUserController {
                 "User retrieved",
                 userOrgService.getById(id)
         );
-    }
+    }*/
 }

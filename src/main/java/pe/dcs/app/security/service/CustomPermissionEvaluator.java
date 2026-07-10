@@ -16,7 +16,7 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
-class CustomPermissionEvaluator implements PermissionEvaluator {
+public class CustomPermissionEvaluator implements PermissionEvaluator {
 
     private final AuthContext authContext;
     private final ContractRepository contractRepository;
@@ -28,7 +28,7 @@ class CustomPermissionEvaluator implements PermissionEvaluator {
             Authentication auth,
             Object targetDomainObject,
             Object permission
-    ) {
+    ){
         return false;
     }
 
@@ -38,40 +38,94 @@ class CustomPermissionEvaluator implements PermissionEvaluator {
             Serializable targetId,
             String moduleCode,
             Object permission
-    ) {
+    ){
+
+        if(auth == null ||
+                !(auth.getPrincipal()
+                        instanceof CredentialDetailsImpl)){
+
+            return false;
+        }
 
         CredentialDetailsImpl user =
-                (CredentialDetailsImpl) auth.getPrincipal();
+                (CredentialDetailsImpl)
+                        auth.getPrincipal();
 
         // =====================================================
-        // 1. SYSTEM → FULL ACCESS
+        // SYSTEM
         // =====================================================
-        if (isSystem(user)) {
+
+        if(user.isSystem()){
             return true;
         }
 
         // =====================================================
-        // 2. ORGANIZATION CONTEXT
+        // CONTEXTO ACTUAL
         // =====================================================
-        UUID orgId = authContext.getOrganizationId();
 
-        if (orgId == null) {
+        UUID organizationId =
+                authContext
+                        .getCurrentOrganizationId();
+
+        UUID branchId =
+                authContext
+                        .getCurrentBranchId();
+
+        if(organizationId == null ||
+                branchId == null){
+
             return false;
         }
+
+        // =====================================================
+        // VALIDAR ACCESO ORGANIZACION
+        // =====================================================
+
+        if(!user.hasOrganization(
+                organizationId
+        )){
+
+            return false;
+        }
+
+        // =====================================================
+        // VALIDAR ACCESO SEDE
+        // =====================================================
+
+        if(!user.hasBranch(
+                organizationId,
+                branchId
+        )){
+            // ORG_ADMIN puede entrar
+            // a todas las sedes de su organización
+
+            if(!user.hasOrganizationAdminAccess(
+                    organizationId
+            )){
+                return false;
+            }
+        }
+
+        // =====================================================
+        // CONTRATO ACTIVO DE LA SEDE
+        // =====================================================
 
         Contract contract =
                 contractRepository
-                        .findActiveByOrganizationId(orgId)
+                        .findActiveByBranchId(
+                                branchId
+                        )
                         .orElse(null);
 
-        if (contract == null) {
+        if(contract == null){
             return false;
         }
 
         // =====================================================
-        // 3. MODULE ENABLED
+        // MODULO CONTRATADO
         // =====================================================
-        ContractModule module =
+
+        ContractModule contractModule =
                 contractModuleRepository
                         .findByContractIdAndModuleCode(
                                 contract.getId(),
@@ -79,29 +133,21 @@ class CustomPermissionEvaluator implements PermissionEvaluator {
                         )
                         .orElse(null);
 
-        if (module == null) {
+        if(contractModule == null){
+
             return false;
         }
 
         // =====================================================
-        // 4. PERMISSION CHECK
+        // PERMISO DEL MODULO
         // =====================================================
+
         return contractModulePermissionRepository
                 .existsByContractModuleIdAndPermissionCode(
-                        module.getId(),
+                        contractModule.getId(),
                         permission.toString()
                 );
+
     }
 
-    // =========================================================
-    // SYSTEM CHECK
-    // =========================================================
-    private boolean isSystem(CredentialDetailsImpl user) {
-
-        return user.getAuthorities()
-                .stream()
-                .anyMatch(a ->
-                        a.getAuthority().equals("SYSTEM")
-                );
-    }
 }

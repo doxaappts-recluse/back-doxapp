@@ -9,8 +9,8 @@ import pe.dcs.app.util.enums.events.RegistrationCategory;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -118,7 +118,7 @@ public class EventRegistration extends Auditable {
     private Boolean qrUsed = false;
 
     @Column(name = "qr_used_at")
-    private LocalDateTime qrUsedAt;
+    private Instant qrUsedAt;
 
     @OneToOne(
             mappedBy = "registration",

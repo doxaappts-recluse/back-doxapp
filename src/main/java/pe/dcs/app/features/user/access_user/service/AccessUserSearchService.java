@@ -9,12 +9,12 @@ import java.util.UUID;
 
 public interface AccessUserSearchService {
 
-    PageResponse<AccessUserSearchResponse> search(AccessUserSearchRequest request);
+    /*PageResponse<AccessUserSearchResponse> search(AccessUserSearchRequest request);
 
     void enable(UUID id);
 
     void disable(UUID id);
 
-    void changePassword(UUID id, UserCredentialsRequest request);
+    void changePassword(UUID id, UserCredentialsRequest request);*/
 
 }

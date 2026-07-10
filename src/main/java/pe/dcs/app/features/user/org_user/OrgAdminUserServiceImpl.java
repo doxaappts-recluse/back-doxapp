@@ -5,14 +5,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.dcs.app.entity.Credential;
-import pe.dcs.app.entity.Organization;
-import pe.dcs.app.entity.Role;
-import pe.dcs.app.entity.User;
-import pe.dcs.app.repository.CredentialRepository;
-import pe.dcs.app.repository.OrganizationRepository;
-import pe.dcs.app.repository.RoleRepository;
-import pe.dcs.app.repository.UserRepository;
+import pe.dcs.app.entity.*;
+import pe.dcs.app.repository.*;
 import pe.dcs.app.features.user.org_user.request.OrgAdminCreateRequest;
 import pe.dcs.app.features.user.org_user.request.OrgAdminUpdateRequest;
 import pe.dcs.app.features.user.org_user.response.OrgAdminResponse;
@@ -27,9 +21,10 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgAdminUserServiceImpl implements OrgAdminUserService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final CredentialRepository credentialRepository;
     private final OrganizationRepository organizationRepository;
+    private final UserAccessRepository userAccessRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -43,31 +38,35 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
             OrgAdminCreateRequest request
     ) {
 
-        Organization org = organizationRepository
-                .findById(request.getOrganizationId())
-                .orElseThrow(() ->
-                        new Exceptions(
-                                "Organization not found",
-                                HttpStatus.NOT_FOUND
-                        )
-                );
+        Organization org =
+                organizationRepository
+                        .findById(request.getOrganizationId())
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Organization not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
 
-        Role role = roleRepository
-                .findByValue("ORG_ADMIN")
-                .orElseThrow(() ->
-                        new Exceptions(
-                                "ORG_ADMIN role not found",
-                                HttpStatus.NOT_FOUND
-                        )
-                );
+        Role role =
+                roleRepository
+                        .findByValue("ORG_ADMIN")
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "ORG_ADMIN role not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
 
         boolean existsAdmin =
-                userRepository.existsByOrganizationIdAndRole_Value(
-                        org.getId(),
-                        "ORG_ADMIN"
-                );
+                userAccessRepository
+                        .existsByOrganizationIdAndRoleValue(
+                                org.getId(),
+                                "ORG_ADMIN"
+                        );
 
         if (existsAdmin) {
+
             throw new Exceptions(
                     "Organization already has an ORG_ADMIN",
                     HttpStatus.CONFLICT
@@ -75,22 +74,24 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
         }
 
         boolean existsDni =
-                userRepository.existsByDniAndOrganizationId(
-                        request.getDni(),
-                        org.getId()
-                );
+                userRepository
+                        .existsByDni(
+                                request.getDni()
+                        );
 
         if (existsDni) {
+
             throw new Exceptions(
-                    "DNI already exists in this organization",
+                    "DNI already exists",
                     HttpStatus.CONFLICT
             );
         }
 
         boolean existsUsername =
-                credentialRepository.existsByUsername(
-                        request.getUsername()
-                );
+                credentialRepository
+                        .existsByUsername(
+                                request.getUsername()
+                        );
 
         if (existsUsername) {
             throw new Exceptions(
@@ -98,6 +99,10 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
                     HttpStatus.CONFLICT
             );
         }
+
+        // =========================
+        // USER
+        // =========================
 
         User user = new User();
 
@@ -111,31 +116,56 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
         user.setMaritalStatus(request.getMaritalStatus());
         user.setChildren(request.getChildren());
         user.setDateAdmission(request.getDateAdmission());
-        user.setOrganization(org);
-        user.setRole(role);
 
         user = userRepository.save(user);
 
+        // =========================
+        // CREDENTIAL
+        // =========================
+
         Credential credential = new Credential();
+
         credential.setUser(user);
-        credential.setUsername(request.getUsername());
+        credential.setUsername(
+                request.getUsername()
+        );
 
-        String rawPassword = request.getPassword();
+        String rawPassword =
+                request.getPassword();
 
-        if (rawPassword == null || rawPassword.isBlank()) {
+        if(rawPassword == null || rawPassword.isBlank()){
             rawPassword = "iglesia2026";
         }
 
         credential.setPassword(
                 passwordEncoder.encode(rawPassword)
         );
-        credential.setStatus(StatusType.ACTIVE);
+
+        credential.setStatus(
+                StatusType.ACTIVE
+        );
 
         credentialRepository.save(credential);
 
         user.setCredential(credential);
 
-        return UserSystemMapper.mapToOrgAdminResponse(user);
+        // =========================
+        // USER ACCESS
+        // =========================
+
+        UserAccess access = new UserAccess();
+
+        access.setUser(user);
+        access.setOrganization(org);
+        // null = toda la organización
+        access.setBranch(null);
+        access.setRole(role);
+        access.setActive(true);
+
+        userAccessRepository.save(access);
+
+        return UserSystemMapper
+                .mapToOrgAdminResponse(user);
     }
 
     @Override
@@ -192,11 +222,10 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
         if (request.getUsername() != null) {
 
             boolean existsUsername =
-                    credentialRepository
-                            .existsByUsernameAndUserIdNot(
-                                    request.getUsername(),
-                                    user.getId()
-                            );
+                    credentialRepository.existsByUsernameAndIdNot(
+                            request.getUsername(),
+                            credential.getId()
+                    );
 
             if (existsUsername) {
                 throw new Exceptions(
@@ -217,8 +246,8 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
     @Transactional(readOnly = true)
     public OrgAdminResponse getOrgAdmin(UUID orgId) {
 
-        User admin = userRepository
-                .findByOrganizationIdAndRole_Value(
+        Credential credential = credentialRepository
+                .findByUser_Organization_IdAndRole_Value(
                         orgId,
                         "ORG_ADMIN"
                 )
@@ -229,7 +258,9 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
                         )
                 );
 
-        return UserSystemMapper.mapToOrgAdminResponse(admin);
+        return UserSystemMapper.mapToOrgAdminResponse(
+                credential.getUser()
+        );
     }
 
     // =========================================================
@@ -245,6 +276,6 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
                                 HttpStatus.NOT_FOUND
                         )
                 );
-    }
+    }*/
 
 }

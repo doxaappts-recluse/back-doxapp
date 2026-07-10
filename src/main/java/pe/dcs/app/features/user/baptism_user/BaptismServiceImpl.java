@@ -30,7 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BaptismServiceImpl implements BaptismService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final BaptismRepository baptismRepository;
     private final AuthContext authContext;
     private final BaptismMapper baptismMapper;
@@ -195,5 +195,5 @@ public class BaptismServiceImpl implements BaptismService {
                         page.getNumber()
                 )
         );
-    }
+    }*/
 }

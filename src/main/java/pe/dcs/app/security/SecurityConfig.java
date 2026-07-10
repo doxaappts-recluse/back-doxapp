@@ -50,18 +50,46 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(
+            HttpSecurity http
+    ) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Configura CORS
-                .csrf().disable() // Deshabilita CSRF (es común en APIs REST, si usas formularios lo habilitarías)
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()  // Permite acceso a rutas de autenticación sin necesidad de login
-                        .requestMatchers("/api/**").authenticated()  // Rutas de la API deben estar autenticadas
-                        .anyRequest().authenticated()  // Cualquier otra petición también debe estar autenticada
+                .cors(cors ->
+                        cors.configurationSource(
+                                corsConfigurationSource()
+                        )
                 )
-                .headers().frameOptions().sameOrigin() // Protección contra clickjacking
-                .and()
-                .addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);  // Registra el filtro JWT antes de la autenticación estándar
+                .csrf(csrf ->
+                        csrf.disable()
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/login"
+                        )
+                        .permitAll()
+                        .requestMatchers(
+                                "/auth/context",
+                                "/api/v1/context/available"
+                        )
+                        .authenticated()
+                        .requestMatchers(
+                                "/api/**"
+                        )
+                        .authenticated()
+                        .anyRequest()
+                        .authenticated()
+
+                )
+                .headers(headers ->
+                        headers
+                                .frameOptions(frame ->
+                                        frame.sameOrigin()
+                                )
+                )
+                .addFilterBefore(
+                        jwtTokenFilter(),
+                        UsernamePasswordAuthenticationFilter.class
+                );
 
         return http.build();
     }

@@ -17,7 +17,7 @@ import pe.dcs.app.util.pagination.PageResponse;
 @RequiredArgsConstructor
 public class MinistryUserController {
 
-    private final MinistryUserSearchService service;
+    /*private final MinistryUserSearchService service;
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<MinistryUserSearchResponse>> search(
@@ -29,5 +29,5 @@ public class MinistryUserController {
                 "Ministry users retrieved successfully",
                 service.search(request)
         );
-    }
+    }*/
 }

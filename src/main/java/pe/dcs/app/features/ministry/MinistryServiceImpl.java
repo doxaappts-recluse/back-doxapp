@@ -20,6 +20,7 @@ import pe.dcs.app.util.pagination.PaginationResponse;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.pagination.PageableUtil;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -39,7 +40,7 @@ public class MinistryServiceImpl implements MinistryService {
         ministry.setName(request.getName());
         ministry.setDescription(request.getDescription());
         ministry.setActive(true);
-        ministry.setCreatedAt(LocalDateTime.now());
+        ministry.setCreatedAt(Instant.now());
 
         return ministryMapper.simple(ministryRepository.save(ministry));
     }
@@ -53,7 +54,7 @@ public class MinistryServiceImpl implements MinistryService {
 
         ministry.setName(request.getName());
         ministry.setDescription(request.getDescription());
-        ministry.setUpdatedAt(LocalDateTime.now());
+        ministry.setUpdatedAt(Instant.now());
 
         return ministryMapper.simple(ministryRepository.save(ministry));
     }

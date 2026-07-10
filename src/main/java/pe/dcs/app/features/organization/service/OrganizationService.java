@@ -21,8 +21,6 @@ public interface OrganizationService {
 
     List<OrganizationResponse> list();
 
-    void delete(UUID id);
-
     void enable(UUID id);
 
     void disable(UUID id);

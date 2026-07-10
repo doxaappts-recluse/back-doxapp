@@ -22,6 +22,7 @@ import pe.dcs.app.repository.MinistryRoleRepository;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.pagination.PageableUtil;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -84,7 +85,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
             role.setRequiresActiveMembership(request.getRequiresActiveMembership());
         }
 
-        role.setUpdatedAt(LocalDateTime.now());
+        role.setUpdatedAt(Instant.now());
 
         return mapper.simple(repository.save(role));
     }

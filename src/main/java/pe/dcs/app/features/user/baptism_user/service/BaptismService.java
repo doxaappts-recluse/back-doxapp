@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface BaptismService {
 
-    BaptismDetailResponse create(
+    /*BaptismDetailResponse create(
             BaptismRequest request
     );
 
@@ -25,6 +25,6 @@ public interface BaptismService {
 
     PageResponse<BaptismSearchResponse> search(
             BaptismSearchRequest request
-    );
+    );*/
 
 }

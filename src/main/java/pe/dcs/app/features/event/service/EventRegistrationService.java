@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public interface EventRegistrationService {
 
-    EventRegistrationResponse create(
+    /*EventRegistrationResponse create(
             EventRegistrationRequest request
     );
 
@@ -35,5 +35,5 @@ public interface EventRegistrationService {
 
     EventRegistrationBulkResponse bulkCreate(
             EventRegistrationBulkRequest request
-    );
+    );*/
 }

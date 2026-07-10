@@ -15,7 +15,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccessModuleController {
 
-    private final AccessModuleUserService service;
+    /*private final AccessModuleUserService service;
 
     @GetMapping("/{userId}/config")
     public ResponseEntity<ApiResponse<UserAccessConfigResponse>> getConfig(
@@ -63,5 +63,5 @@ public class AccessModuleController {
                         null
                 )
         );
-    }
+    }*/
 }

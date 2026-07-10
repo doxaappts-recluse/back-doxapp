@@ -35,7 +35,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MembershipUserSearchServiceImpl implements MembershipUserSearchService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final AuthContext authContext;
     private final MembershipRepository membershipRepository;
 
@@ -350,5 +350,5 @@ public class MembershipUserSearchServiceImpl implements MembershipUserSearchServ
                     HttpStatus.FORBIDDEN
             );
         }
-    }
+    }*/
 }

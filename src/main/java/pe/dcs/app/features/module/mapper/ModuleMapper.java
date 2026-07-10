@@ -10,7 +10,7 @@ import java.util.List;
 @Component
 public class ModuleMapper {
 
-    public ModuleResponse base(Module module) {
+    public ModuleResponse simple(Module module){
 
         ModuleResponse dto = new ModuleResponse();
 
@@ -21,46 +21,23 @@ public class ModuleMapper {
         dto.setRoute(module.getRoute());
         dto.setOrderNum(module.getOrderNum());
 
-        dto.setRoot(module.getParent() == null);
-        dto.setStatus(module.getStatus() == StatusType.ACTIVE);
+        dto.setStatus(module.isActive());
 
-        if (module.getParent() != null) {
+        dto.setRoot(module.isRoot());
+
+        if(module.getParent() != null){
             dto.setParentId(module.getParent().getId());
             dto.setParentName(module.getParent().getName());
         }
 
-        return dto;
-    }
-
-    public ModuleResponse system(Module module, List<ModuleResponse> children) {
-
-        ModuleResponse dto = base(module);
-
-        dto.setSource("SYSTEM");
-        dto.setPermissions(List.of("VIEW", "CREATE", "EDIT", "DELETE", "DOWNLOAD"));
-        dto.setChildren(children);
-
-        return dto;
-    }
-
-    public ModuleResponse organization(
-            Module module,
-            List<String> permissions,
-            List<ModuleResponse> children
-    ) {
-
-        ModuleResponse dto = base(module);
-
-        dto.setSource("ORGANIZATION");
-        dto.setPermissions(permissions);
-        dto.setChildren(children);
-
-        return dto;
-    }
-
-    public ModuleResponse simple(Module module) {
-
-        ModuleResponse dto = base(module);
+        /*
+         * Este mapper es únicamente
+         * para CRUD.
+         *
+         * Los permisos y el árbol del
+         * sidebar los construye
+         * SidebarMapper.
+         */
 
         dto.setPermissions(List.of());
         dto.setChildren(List.of());

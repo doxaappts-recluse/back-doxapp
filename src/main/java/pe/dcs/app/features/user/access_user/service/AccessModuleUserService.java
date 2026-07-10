@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public interface AccessModuleUserService {
 
-    UserAccessConfigResponse getConfig(UUID userId);
+    /*UserAccessConfigResponse getConfig(UUID userId);
 
-    void upsertAccess(UUID userId, UserAccessUpsertRequest request);
+    void upsertAccess(UUID userId, UserAccessUpsertRequest request);*/
 }

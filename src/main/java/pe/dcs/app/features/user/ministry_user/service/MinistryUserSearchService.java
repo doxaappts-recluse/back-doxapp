@@ -6,7 +6,7 @@ import pe.dcs.app.util.pagination.PageResponse;
 
 public interface MinistryUserSearchService {
 
-    PageResponse<MinistryUserSearchResponse> search(
+    /*PageResponse<MinistryUserSearchResponse> search(
             MinistryUserSearchRequest request
-    );
+    );*/
 }

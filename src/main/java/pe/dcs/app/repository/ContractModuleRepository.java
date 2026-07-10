@@ -14,9 +14,10 @@ import java.util.UUID;
 @Repository
 public interface ContractModuleRepository extends JpaRepository<ContractModule, UUID> {
 
-    // =========================================
-    // FIND MODULE BY CONTRACT + MODULE CODE
-    // =========================================
+    // =========================================================
+    // BUSCAR MODULO POR CONTRATO + CODIGO
+    // =========================================================
+
     @Query("""
         SELECT cm
         FROM ContractModule cm
@@ -30,19 +31,53 @@ public interface ContractModuleRepository extends JpaRepository<ContractModule, 
             @Param("moduleCode") String moduleCode
     );
 
+    // =========================================================
+    // MODULOS ACTIVOS DE UN CONTRATO
+    // =========================================================
+
     @Query("""
         SELECT cm.module.id
         FROM ContractModule cm
         WHERE cm.contract.id = :contractId
           AND cm.status = 'ACTIVE'
     """)
-    List<UUID> findModuleIdsByContractId(UUID contractId);
+    List<UUID> findModuleIdsByContractId(
+            @Param("contractId") UUID contractId
+    );
 
-    List<ContractModule> findByContractId(UUID contractId);
+    // =========================================================
+    // MODULOS COMPLETOS DE UN CONTRATO
+    // =========================================================
+
+    @Query("""
+        SELECT cm
+        FROM ContractModule cm
+        JOIN FETCH cm.module m
+        WHERE cm.contract.id = :contractId
+          AND cm.status = 'ACTIVE'
+    """)
+    List<ContractModule> findActiveByContractId(
+            @Param("contractId") UUID contractId
+    );
+
+    // =========================================================
+    // ADMINISTRACION
+    // =========================================================
+
+    List<ContractModule> findByContractId(
+            UUID contractId
+    );
 
     List<ContractModule> findByContractIdAndStatus(
             UUID contractId,
             StatusType status
     );
+
+    boolean existsByContractIdAndModuleId(
+            UUID contractId,
+            UUID moduleId
+    );
+
+    boolean existsByModuleId(UUID moduleId);
 
 }

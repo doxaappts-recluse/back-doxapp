@@ -1,99 +1,120 @@
 package pe.dcs.app.features.auth.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
-import pe.dcs.app.constant.ControllerConstant;
-import pe.dcs.app.features.auth.response.JwtResponse;
-import pe.dcs.app.features.auth.request.LoginRequest;
-import pe.dcs.app.security.jwt.JwtProvider;
-import pe.dcs.app.security.payload.JwtTimesResponse;
-import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
-import pe.dcs.app.util.ApiResponse;
-import pe.dcs.app.util.Exceptions;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pe.dcs.app.features.auth.request.ContextRequest;
+import pe.dcs.app.features.auth.request.LoginRequest;
+import pe.dcs.app.features.auth.response.ContextResponse;
+import pe.dcs.app.features.auth.response.JwtResponse;
+import pe.dcs.app.features.auth.service.AuthService;
+import pe.dcs.app.security.jwt.JwtProvider;
+import pe.dcs.app.security.payload.JwtTimesResponse;
+import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
+import pe.dcs.app.util.ApiResponse;
 
-import java.util.UUID;
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtProvider jwtProvider;
-
-    public AuthController(
-            AuthenticationManager authenticationManager,
-            JwtProvider jwtProvider
-    ) {
-        this.authenticationManager = authenticationManager;
-        this.jwtProvider = jwtProvider;
-    }
+    private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<JwtResponse>> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<JwtResponse>> login(
+            @RequestBody LoginRequest request
+    ) {
 
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            loginRequest.getUsername(),
-                            loginRequest.getPassword()
-                    )
-            );
+        Authentication authentication =
+                authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(
+                                request.getUsername(),
+                                request.getPassword()
+                        )
+                );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+        SecurityContextHolder
+                .getContext()
+                .setAuthentication(authentication);
 
-            String token = jwtProvider.generateJWT(authentication);
+        CredentialDetailsImpl principal =
+                (CredentialDetailsImpl)
+                        authentication.getPrincipal();
 
-            CredentialDetailsImpl userDetails =
-                    (CredentialDetailsImpl) authentication.getPrincipal();
+        String token =
+                jwtProvider.generateLoginToken(
+                        principal
+                );
 
-            String username = userDetails.getUsername();
-            UUID idusuario = userDetails.getId();
-            String nombre = userDetails.getNombre();
+        JwtTimesResponse times =
+                jwtProvider.getTimesFromJWT(
+                        token
+                );
 
-            String rol = authentication.getAuthorities()
-                    .stream()
-                    .findFirst()
-                    .map(GrantedAuthority::getAuthority)
-                    .orElse(null);
+        List<String> roles =
+                principal.getAuthorities()
+                        .stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .distinct()
+                        .toList();
 
-            JwtTimesResponse fechas = jwtProvider.getTimesFromJWT(token);
+        JwtResponse response =
+                new JwtResponse(
+                        token,
+                        principal.getUserId(),
+                        principal.getUsername(),
+                        principal.getName(),
+                        principal.getLastname(),
+                        roles,
+                        principal.getAccesses(),
+                        principal.getCurrentOrganizationId(),
+                        principal.getCurrentBranchId(),
+                        times.issuedAt(),
+                        times.expiration()
+                );
 
-            JwtResponse response = new JwtResponse(
-                    token,
-                    username,
-                    nombre,
-                    rol,
-                    fechas.getEmision(),
-                    fechas.getExpiracion()
-            );
+        return ResponseEntity.ok(
+                new ApiResponse<>(
+                        200,
+                        "Login exitoso",
+                        response
+                )
+        );
+    }
 
-            return ResponseEntity.ok(
-                    new ApiResponse<>(200, "Login exitoso", response)
-            );
+    @PostMapping("/context")
+    public ApiResponse<ContextResponse> changeContext(
+            @Valid
+            @RequestBody ContextRequest request,
+            Authentication authentication
+    ) {
 
-        } catch (BadCredentialsException e) {
+        CredentialDetailsImpl user =
+                (CredentialDetailsImpl)
+                        authentication.getPrincipal();
 
-            throw new Exceptions(
-                    ControllerConstant.CREDENCIALES_INVALIDAS,
-                    HttpStatus.BAD_REQUEST
-            );
+        String token =
+                authService.changeContext(
+                        user,
+                        request.organizationId(),
+                        request.branchId()
+                );
 
-        } catch (Exception e) {
+        return new ApiResponse<>(
+                        200,
+                        "Context changed.",
+                        new ContextResponse(token)
+        );
 
-            throw new Exceptions(
-                    ControllerConstant.ERROR_SERVER,
-                    HttpStatus.INTERNAL_SERVER_ERROR
-            );
-        }
     }
 }

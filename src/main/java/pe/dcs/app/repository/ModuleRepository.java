@@ -8,37 +8,69 @@ import pe.dcs.app.entity.Module;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface ModuleRepository extends JpaRepository<Module, UUID>, JpaSpecificationExecutor<Module> {
+public interface ModuleRepository extends JpaRepository<Module, UUID>,
+        JpaSpecificationExecutor<Module> {
 
-    @Query("""
-        SELECT m
-        FROM Module m
-        WHERE m.status = 'ACTIVE'
-    """)
-    List<Module> findAllActive();
+    // =========================================================
+    // SIDEBAR
+    // =========================================================
 
-    // =========================================
-    // PARENT MODULES
-    // =========================================
+    List<Module> findByStatusOrderByOrderNumAsc(
+            StatusType status
+    );
 
-    List<Module> findByParentIsNullAndStatus(StatusType status);
+    default List<Module> findAllActive() {
+        return findByStatusOrderByOrderNumAsc(
+                StatusType.ACTIVE
+        );
+    }
 
-    List<Module> findByParentIsNullAndStatusAndIdNot(
+    // =========================================================
+    // PADRES
+    // =========================================================
+
+    List<Module> findByParentIsNullAndStatusOrderByOrderNumAsc(
+            StatusType status
+    );
+
+    List<Module> findByParentIsNullAndStatusAndIdNotOrderByOrderNumAsc(
             StatusType status,
             UUID id
     );
 
-    // =========================================
-    // CHILD MODULES
-    // =========================================
+    // =========================================================
+    // HIJOS
+    // =========================================================
 
-    List<Module> findByParentIsNotNullAndStatus(StatusType status);
+    List<Module> findByParentIsNotNullAndStatusOrderByOrderNumAsc(
+            StatusType status
+    );
 
-    List<Module> findByParentIsNotNullAndStatusAndIdNot(
+    List<Module> findByParentIsNotNullAndStatusAndIdNotOrderByOrderNumAsc(
             StatusType status,
             UUID id
     );
+
+    // =========================================================
+    // VALIDACIONES
+    // =========================================================
+
+    Optional<Module> findByCodeAndStatus(
+            String code,
+            StatusType status
+    );
+
+    boolean existsByCodeIgnoreCase(
+            String code
+    );
+
+    boolean existsByCodeIgnoreCaseAndIdNot(
+            String code,
+            UUID id
+    );
+
 }

@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MembershipUserController {
 
-    private final MembershipUserSearchService service;
+    /*private final MembershipUserSearchService service;
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<MembershipUserSearchResponse>> search(
@@ -101,5 +101,5 @@ public class MembershipUserController {
                 "Membership history retrieved successfully",
                 service.getHistory(userId, request)
         );
-    }
+    }*/
 }

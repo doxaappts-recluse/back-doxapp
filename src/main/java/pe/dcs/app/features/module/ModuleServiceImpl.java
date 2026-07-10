@@ -6,15 +6,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Module;
 import pe.dcs.app.features.module.request.ModuleFilter;
 import pe.dcs.app.features.module.request.ModuleRequest;
 import pe.dcs.app.features.module.request.ModuleSearchRequest;
 import pe.dcs.app.features.module.response.ModuleOptionResponse;
 import pe.dcs.app.features.module.response.ModuleResponse;
+import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ModuleRepository;
 import pe.dcs.app.features.module.mapper.ModuleMapper;
 import pe.dcs.app.features.module.service.ModuleService;
+import pe.dcs.app.repository.UserModuleRepository;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PaginationResponse;
 import pe.dcs.app.util.Exceptions;
@@ -29,6 +32,8 @@ import java.util.*;
 public class ModuleServiceImpl implements ModuleService {
 
     private final ModuleRepository moduleRepository;
+    private final ContractModuleRepository contractModuleRepository;
+    private final UserModuleRepository userModuleRepository;
     private final ModuleMapper moduleMapper;
 
 
@@ -72,43 +77,100 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public List<ModuleOptionResponse> getParentModules(UUID currentId) {
+    public List<ModuleOptionResponse> getParentModules(UUID currentId){
+
         List<Module> modules =
                 currentId != null
-                        ? moduleRepository.findByParentIsNullAndStatusAndIdNot(StatusType.ACTIVE, currentId)
-                        : moduleRepository.findByParentIsNullAndStatus(StatusType.ACTIVE);
+                        ? moduleRepository.findByParentIsNullAndStatusAndIdNotOrderByOrderNumAsc(
+                        StatusType.ACTIVE,
+                        currentId
+                )
+                        : moduleRepository.findByParentIsNullAndStatusOrderByOrderNumAsc(
+                        StatusType.ACTIVE
+                );
 
         return modules.stream()
-                .map(m -> new ModuleOptionResponse(m.getId(), m.getName()))
+                .map(m ->
+                        new ModuleOptionResponse(
+                                m.getId(),
+                                m.getName()
+                        )
+                )
                 .toList();
     }
 
     @Override
-    public List<ModuleOptionResponse> getChildModules(UUID currentId) {
+    public List<ModuleOptionResponse> getChildModules(UUID currentId){
+
         List<Module> modules =
                 currentId != null
-                        ? moduleRepository.findByParentIsNotNullAndStatusAndIdNot(StatusType.ACTIVE, currentId)
-                        : moduleRepository.findByParentIsNotNullAndStatus(StatusType.ACTIVE);
+                        ? moduleRepository.findByParentIsNotNullAndStatusAndIdNotOrderByOrderNumAsc(
+                        StatusType.ACTIVE,
+                        currentId
+                )
+                        : moduleRepository.findByParentIsNotNullAndStatusOrderByOrderNumAsc(
+                        StatusType.ACTIVE
+                );
 
         return modules.stream()
-                .map(m -> new ModuleOptionResponse(m.getId(), m.getName()))
+                .map(m ->
+                        new ModuleOptionResponse(
+                                m.getId(),
+                                m.getName()
+                        )
+                )
                 .toList();
     }
 
     @Override
-    public ModuleResponse create(ModuleRequest request) {
+    @Transactional
+    public ModuleResponse create(ModuleRequest request){
+
+        if(moduleRepository.existsByCodeIgnoreCase(request.getCode())){
+            new Exceptions(
+                    "Module code already exists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         Module module = new Module();
 
         module.setName(request.getName());
-        module.setCode(request.getCode());
+        module.setCode(request.getCode().trim().toUpperCase());
         module.setIcon(request.getIcon());
         module.setRoute(request.getRoute());
         module.setOrderNum(request.getOrderNum());
         module.setStatus(StatusType.ACTIVE);
 
-        if (request.getParentId() != null) {
-            Module parent = moduleRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new Exceptions("Parent module not found", HttpStatus.NOT_FOUND));
+        if(request.getParentId() != null){
+
+            Module parent =
+                    moduleRepository.findById(request.getParentId())
+                            .orElseThrow(() ->
+                                    new Exceptions(
+                                            "Parent module not found",
+                                            HttpStatus.NOT_FOUND
+                                    )
+                            );
+
+            if(!parent.isActive()){
+                new Exceptions(
+                        "Parent module is inactive",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            /*
+             * Solo se permiten
+             * dos niveles.
+             */
+
+            if(parent.getParent() != null){
+                new Exceptions(
+                        "Only one nesting level is allowed",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
 
             module.setParent(parent);
         }
@@ -119,24 +181,99 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public ModuleResponse update(UUID id, ModuleRequest request) {
+    @Transactional
+    public ModuleResponse update(
+            UUID id,
+            ModuleRequest request
+    ){
 
-        Module module = moduleRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
+        Module module =
+                moduleRepository.findById(id)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Module not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        // =====================================================
+        // CODE IS IMMUTABLE
+        // =====================================================
+
+        if(!module.getCode().equalsIgnoreCase(request.getCode())){
+            new Exceptions(
+                    "Module code cannot be modified.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        // =====================================================
+        // PARENT IS IMMUTABLE
+        // =====================================================
+
+        UUID currentParentId =
+                module.getParent() != null
+                        ? module.getParent().getId()
+                        : null;
+
+        if(!Objects.equals(currentParentId, request.getParentId())){
+            new Exceptions(
+                    "Module parent cannot be modified.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        // =====================================================
+        // UPDATE ALLOWED FIELDS
+        // =====================================================
 
         module.setName(request.getName());
-        module.setCode(request.getCode());
         module.setIcon(request.getIcon());
         module.setRoute(request.getRoute());
         module.setOrderNum(request.getOrderNum());
 
-        if (request.getParentId() != null) {
-            Module parent = moduleRepository.findById(request.getParentId())
-                    .orElseThrow(() -> new Exceptions("Parent module not found", HttpStatus.NOT_FOUND));
+        moduleRepository.save(module);
 
-            module.setParent(parent);
-        } else {
-            module.setParent(null);
+        return moduleMapper.simple(module);
+    }
+
+    @Override
+    @Transactional
+    public ModuleResponse enable(UUID id){
+
+        Module module =
+                moduleRepository.findById(id)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Module not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        module.setStatus(StatusType.ACTIVE);
+
+        moduleRepository.save(module);
+
+        return moduleMapper.simple(module);
+    }
+
+    @Override
+    @Transactional
+    public ModuleResponse disable(UUID id){
+
+        Module module =
+                moduleRepository.findById(id)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Module not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        module.setStatus(StatusType.INACTIVE);
+
+        for(Module child : module.getChildren()){
+            child.setStatus(StatusType.INACTIVE);
         }
 
         moduleRepository.save(module);
@@ -145,33 +282,25 @@ public class ModuleServiceImpl implements ModuleService {
     }
 
     @Override
-    public ModuleResponse enable(UUID id) {
-        Module module = moduleRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
+    @Transactional
+    public ModuleResponse delete(UUID id){
 
-        module.setStatus(StatusType.ACTIVE);
-        moduleRepository.save(module);
-
-        return moduleMapper.simple(module);
-    }
-
-    @Override
-    public ModuleResponse disable(UUID id) {
-        Module module = moduleRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
+        Module module =
+                moduleRepository.findById(id)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Module not found",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
 
         module.setStatus(StatusType.INACTIVE);
+
+        for(Module child : module.getChildren()){
+            child.setStatus(StatusType.INACTIVE);
+        }
+
         moduleRepository.save(module);
-
-        return moduleMapper.simple(module);
-    }
-
-    @Override
-    public ModuleResponse delete(UUID id) {
-        Module module = moduleRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
-
-        moduleRepository.delete(module);
 
         return moduleMapper.simple(module);
     }

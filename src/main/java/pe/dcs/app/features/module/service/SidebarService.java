@@ -6,12 +6,13 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import pe.dcs.app.entity.Contract;
+import pe.dcs.app.entity.Module;
+import pe.dcs.app.features.module.ContractResolver;
+import pe.dcs.app.features.module.mapper.SidebarMapper;
 import pe.dcs.app.features.module.response.MeAccessResponse;
 import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ModuleRepository;
 import pe.dcs.app.repository.UserModuleRepository;
-import pe.dcs.app.features.module.ContractResolver;
-import pe.dcs.app.features.module.mapper.SidebarMapper;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 import pe.dcs.app.util.enums.SystemRoleType;
 
@@ -30,24 +31,28 @@ public class SidebarService {
     private final ModuleRepository moduleRepository;
     private final SidebarMapper sidebarMapper;
 
-    @Cacheable(value = "sidebar", key = "#auth.principal.userId + '-' + #auth.principal.organizationId")
-    public MeAccessResponse getSidebar(Authentication auth) {
+    @Cacheable(
+            value = "sidebar",
+            key = "#auth.principal.userId + '-' + #auth.principal.currentBranchId"
+    )
+    public MeAccessResponse getSidebar(Authentication auth){
 
-        CredentialDetailsImpl user =
-                (CredentialDetailsImpl) auth.getPrincipal();
+        CredentialDetailsImpl user = (CredentialDetailsImpl) auth.getPrincipal();
 
         MeAccessResponse response = new MeAccessResponse();
 
-        // =========================================================
-        // SYSTEM USERS
-        // =========================================================
-        if (user.isSystem()) {
+        // =====================================================
+        // SYSTEM
+        // =====================================================
+
+        if(user.isSystem()){
 
             response.setAccessType(SystemRoleType.SYSTEM);
 
             response.setModules(
                     sidebarMapper.toTree(
                             moduleRepository.findAllActive(),
+                            null,
                             null,
                             null
                     )
@@ -56,52 +61,109 @@ public class SidebarService {
             return response;
         }
 
-        // =========================================================
-        // ORGANIZATION CONTEXT
-        // =========================================================
-        UUID orgId = user.getOrganizationId();
+        // =====================================================
+        // CONTEXTO
+        // =====================================================
 
-        Contract contract =
-                contractResolver.getActiveContract(orgId);
+        UUID organizationId = user.getCurrentOrganizationId();
 
-        if (contract == null) {
+        UUID branchId = user.getCurrentBranchId();
+
+        if(organizationId == null || branchId == null){
+            response.setAccessType(SystemRoleType.UNKNOWN);
+            response.setModules(List.of());
+            return response;
+        }
+
+        // =====================================================
+        // CONTRATO ACTIVO
+        // =====================================================
+
+        Contract contract = contractResolver.getActiveContract(branchId);
+
+        if(contract == null){
             response.setAccessType(SystemRoleType.NO_CONTRACT);
             response.setModules(List.of());
             return response;
         }
 
+        // =====================================================
+        // CARGAR UNA SOLA VEZ
+        // =====================================================
+
+        List<Module> modules = moduleRepository.findAllActive();
+
         Set<UUID> contractModules =
                 new HashSet<>(
-                        contractModuleRepository.findModuleIdsByContractId(contract.getId())
+                        contractModuleRepository
+                                .findModuleIdsByContractId(
+                                        contract.getId()
+                                )
                 );
 
-        // =========================================================
-        // ORG_ADMIN
-        // =========================================================
-        if (user.isOrgAdmin()) {
+        // =====================================================
+        // ORGANIZATION ADMIN
+        // =====================================================
+
+        if(user.hasOrganizationAdminAccess(organizationId)){
 
             response.setAccessType(SystemRoleType.ORG_ADMIN);
 
             response.setModules(
                     sidebarMapper.toTree(
-                            moduleRepository.findAllActive(),
+                            modules,
                             contractModules,
-                            contract.getId()
+                            contract.getId(),
+                            null
                     )
             );
 
             return response;
         }
 
-        // =========================================================
-        // ORG_USER
-        // =========================================================
-        if (user.isOrgUser()) {
+        // =====================================================
+        // BRANCH ADMIN
+        // =====================================================
+
+        if(user.hasBranchAdminAccess(organizationId, branchId)){
+
+            response.setAccessType(SystemRoleType.ORG_BRANCH_ADMIN);
+
+            response.setModules(
+                    sidebarMapper.toTree(
+                            modules,
+                            contractModules,
+                            contract.getId(),
+                            null
+                    )
+            );
+
+            return response;
+        }
+
+        // =====================================================
+        // ORGANIZATION USER
+        // =====================================================
+
+        if(user.hasOrganizationUser(organizationId, branchId)){
 
             Set<UUID> userModules =
                     new HashSet<>(
-                            userModuleRepository.findModuleIdsByUserId(user.getUserId())
+                            userModuleRepository
+                                    .findActiveModuleIdsByUserId(
+                                            user.getUserId()
+                                    )
                     );
+
+            /*
+             * Seguridad:
+             *
+             * El usuario solamente podrá
+             * visualizar módulos que:
+             *
+             * 1. Están asignados al usuario.
+             * 2. Existen en el contrato activo.
+             */
 
             userModules.retainAll(contractModules);
 
@@ -109,18 +171,20 @@ public class SidebarService {
 
             response.setModules(
                     sidebarMapper.toTree(
-                            moduleRepository.findAllActive(),
+                            modules,
                             userModules,
-                            contract.getId()
+                            contract.getId(),
+                            user.getUserId()
                     )
             );
 
             return response;
         }
 
-        // =========================================================
-        // FALLBACK
-        // =========================================================
+        // =====================================================
+        // UNKNOWN
+        // =====================================================
+
         response.setAccessType(SystemRoleType.UNKNOWN);
         response.setModules(List.of());
 
@@ -128,5 +192,7 @@ public class SidebarService {
     }
 
     @CacheEvict(value = "sidebar", allEntries = true)
-    public void clearCache() {}
+    public void clearCache(){
+    }
+
 }

@@ -93,23 +93,6 @@ public class OrganizationController {
     }
 
     // =====================================================
-    // DELETE
-    // =====================================================
-    @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> delete(
-            @PathVariable UUID id
-    ) {
-
-        service.delete(id);
-
-        return new ApiResponse<>(
-                HttpStatus.OK.value(),
-                "Organización eliminada",
-                null
-        );
-    }
-
-    // =====================================================
     // ENABLE
     // =====================================================
     @PatchMapping("/{id}/enable")

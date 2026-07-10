@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccessUserController {
 
-    private final AccessUserSearchService service;
+    /*private final AccessUserSearchService service;
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<AccessUserSearchResponse>> search(
@@ -86,6 +86,6 @@ public class AccessUserController {
                 "Password updated successfully",
                 "OK"
         );
-    }
+    }*/
 
 }

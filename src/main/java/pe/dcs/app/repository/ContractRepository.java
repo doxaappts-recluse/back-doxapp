@@ -20,107 +20,94 @@ import java.util.UUID;
 @Repository
 public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSpecificationExecutor<Contract> {
 
+    // =========================================================
+    // CONTRATO ACTIVO POR SEDE
+    // =========================================================
+
     @Query("""
         SELECT c
         FROM Contract c
-        WHERE c.organization.id = :organizationId
+        WHERE c.branch.id = :branchId
           AND c.status = 'ACTIVE'
           AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
         ORDER BY c.startDate DESC
     """)
-    Optional<Contract> findActiveByOrganizationId(UUID organizationId);
-
-    @Query(
-            value = """
-            SELECT ranked.*
-                  FROM (
-                      SELECT
-                          c.*,
-                          o.name AS organization_name,
-                          ROW_NUMBER() OVER (
-                              PARTITION BY c.organization_id
-                              ORDER BY
-                                  CASE c.status
-                                      WHEN 'ACTIVE' THEN 1
-                                      WHEN 'PENDING' THEN 2
-                                      WHEN 'SUSPENDED' THEN 3
-                                      WHEN 'EXPIRED' THEN 4
-                                      WHEN 'CANCELLED' THEN 5
-                                      ELSE 999
-                                  END,
-                                  c.end_date DESC
-                          ) rn
-                      FROM contracts c
-                      JOIN organizations o ON o.id = c.organization_id
-                  ) ranked
-                  WHERE ranked.rn = 1
-            """,
-            nativeQuery = true
-    )
-    Page<Contract> findRepresentativeContracts(Pageable pageable);
-
-    Optional<Contract>
-    findTopByOrganizationIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByEndDateDesc(
-            UUID organizationId,
-            ContractStatus status,
-            LocalDate now1,
-            LocalDate now2
+    Optional<Contract> findActiveByBranchId(
+            @Param("branchId") UUID branchId
     );
 
-    List<Contract> findByOrganizationId(UUID organizationId);
+    // =========================================================
+    // HISTORIAL DE CONTRATOS DE UNA SEDE
+    // =========================================================
+
+    List<Contract> findByBranchId(
+            UUID branchId
+    );
+
+    // =========================================================
+    // CONTRATOS POR ESTADO
+    // =========================================================
+
+    List<Contract> findByBranchIdAndStatusIn(
+            UUID branchId,
+            List<ContractStatus> statuses
+    );
+
+    Optional<Contract>
+    findTopByBranchIdOrderByEndDateDesc(
+            UUID branchId
+    );
+
+    Optional<Contract>
+    findTopByBranchIdAndStatusOrderByEndDateDesc(
+            UUID branchId,
+            ContractStatus status
+    );
+
+    // =========================================================
+    // VALIDAR SOLAPAMIENTO
+    // =========================================================
 
     @Query("""
-        SELECT c FROM Contract c
-        WHERE c.organization.id = :orgId
-        AND c.startDate <= :endDate
-        AND c.endDate >= :startDate
+        SELECT c
+        FROM Contract c
+        WHERE c.branch.id = :branchId
+          AND c.startDate <= :endDate
+          AND c.endDate >= :startDate
     """)
     List<Contract> findOverlappingContracts(
-            @Param("orgId") UUID orgId,
+            @Param("branchId") UUID branchId,
             @Param("startDate") LocalDate startDate,
             @Param("endDate") LocalDate endDate
     );
 
-    @Lock(LockModeType
-            .PESSIMISTIC_WRITE)
-        @Query("""
-        SELECT c FROM Contract c
-        WHERE c.organization.id = :orgId
-    """)
-    List<Contract> lockByOrganization(@Param("orgId") UUID orgId);
-
-    Optional<Contract> findTopByOrganizationIdOrderByEndDateDesc(UUID organizationId);
+    // =========================================================
+    // LOCK PARA OPERACIONES CRITICAS
+    // =========================================================
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Contract> findById(UUID id);
-
-    Optional<Contract>
-    findTopByOrganizationIdAndStatusInOrderByEndDateDesc(
-            UUID organizationId,
-            List<ContractStatus> statuses
-    );
-
-    boolean existsByOrganizationIdAndStatus(
-            UUID organizationId,
-            ContractStatus status
-    );
-
-    List<Contract> findByOrganizationIdAndStatusIn(
-            UUID organizationId,
-            List<ContractStatus> statuses
+    @Query("""
+        SELECT c
+        FROM Contract c
+        WHERE c.branch.id = :branchId
+    """)
+    List<Contract> lockByBranch(
+            @Param("branchId") UUID branchId
     );
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
-       SELECT c
-       FROM Contract c
-       WHERE c.id = :id
-       """)
-    Optional<Contract> findByIdForUpdate(UUID id);
+        SELECT c
+        FROM Contract c
+        WHERE c.id = :id
+    """)
+    Optional<Contract> findByIdForUpdate(
+            @Param("id") UUID id
+    );
 
-    // =========================================
+    // =========================================================
     // JOBS
-    // =========================================
+    // =========================================================
 
     List<Contract> findByStatusAndEndDateBefore(
             ContractStatus status,
@@ -132,10 +119,35 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
             LocalDate date
     );
 
-    Optional<Contract> findFirstByOrganizationIdAndStatusOrderByStartDateDesc(
-            UUID organizationId,
-            ContractStatus status
+    // =========================================================
+    // ADMINISTRACION
+    // =========================================================
+
+    long countByBranchId(
+            UUID branchId
     );
 
-    long countByOrganizationId(UUID organizationId);
+    @Query("""
+        SELECT COUNT(c) > 0
+        FROM Contract c
+        WHERE c.branch.id = :branchId
+          AND c.status = 'ACTIVE'
+          AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
+    """)
+    boolean existsActiveByBranchId(
+            @Param("branchId") UUID branchId
+    );
+
+    boolean existsByBranchOrganizationIdAndStatusAndEndDateGreaterThanEqual(
+            UUID organizationId,
+            ContractStatus status,
+            LocalDate endDate
+    );
+
+    boolean existsByBranchIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            UUID branchId,
+            ContractStatus status,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 }

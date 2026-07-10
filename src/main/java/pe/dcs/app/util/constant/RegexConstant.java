@@ -1,4 +1,4 @@
-package pe.dcs.app.constant;
+package pe.dcs.app.util.constant;
 
 public class RegexConstant {
 

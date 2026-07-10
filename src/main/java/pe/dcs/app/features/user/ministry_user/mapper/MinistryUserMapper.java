@@ -7,7 +7,7 @@ import pe.dcs.app.features.user.shared.BaseUserSearchResponse;
 
 public class MinistryUserMapper {
 
-    public static MinistryUserSearchResponse map(User user) {
+    /*public static MinistryUserSearchResponse map(User user) {
 
         MinistryUserSearchResponse res =
                 new MinistryUserSearchResponse();
@@ -25,5 +25,5 @@ public class MinistryUserMapper {
         );
 
         return res;
-    }
+    }*/
 }

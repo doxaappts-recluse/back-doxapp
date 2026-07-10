@@ -17,7 +17,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgAdminUserController {
 
-    private final OrgAdminUserService service;
+    /*private final OrgAdminUserService service;
 
     @GetMapping("/admin/{idOrg}")
     public ApiResponse<OrgAdminResponse> getOrgAdmin(
@@ -56,5 +56,5 @@ public class OrgAdminUserController {
                 "ORG_ADMIN updated successfully",
                 null
         );
-    }
+    }*/
 }

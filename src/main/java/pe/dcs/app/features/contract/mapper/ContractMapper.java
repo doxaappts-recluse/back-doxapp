@@ -9,7 +9,7 @@ import java.util.List;
 
 public class ContractMapper {
 
-    private ContractMapper(){}
+    /*private ContractMapper(){}
 
     public static ContractResponse toResponse(
             Contract contract,
@@ -95,5 +95,5 @@ public class ContractMapper {
         );
 
         return response;
-    }
+    }*/
 }

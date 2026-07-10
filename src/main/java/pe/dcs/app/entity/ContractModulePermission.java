@@ -13,7 +13,7 @@ import java.util.UUID;
         name = "contract_module_permissions",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_cmp",
+                        name = "uk_contract_module_permission",
                         columnNames = {
                                 "contract_module_id",
                                 "permission_id"
@@ -40,6 +40,14 @@ public class ContractModulePermission extends Auditable {
     @UuidGenerator
     private UUID id;
 
+    // =========================
+    // CONTRACT MODULE
+    // =========================
+
+    /**
+     * Módulo habilitado dentro
+     * del contrato de la sede.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "contract_module_id",
@@ -47,6 +55,14 @@ public class ContractModulePermission extends Auditable {
     )
     private ContractModule contractModule;
 
+    // =========================
+    // PERMISSION
+    // =========================
+
+    /**
+     * Permiso disponible
+     * para ese módulo.
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
             name = "permission_id",

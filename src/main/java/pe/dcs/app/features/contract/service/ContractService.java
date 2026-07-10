@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface ContractService {
 
-    PageResponse<ContractResponseSearch>
+    /*PageResponse<ContractResponseSearch>
     search(ContractListRequest request);
 
     PageResponse<ContractResponseSearch>
@@ -31,7 +31,7 @@ public interface ContractService {
 
     void  cancel(UUID id);
 
-    void  activate(UUID id);
+    void  activate(UUID id);*/
 
 
 }

@@ -1,74 +1,144 @@
 package pe.dcs.app.security.service.credentials;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Credential;
 import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.repository.CredentialRepository;
-import pe.dcs.app.repository.UserRepository;
+import pe.dcs.app.security.service.UserAccessContext;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 @Service
+@RequiredArgsConstructor
 public class CredentialDetailsService implements UserDetailsService {
 
     private final CredentialRepository credentialRepository;
-    private final UserRepository userRepository;
 
-    public CredentialDetailsService(
-            CredentialRepository credentialRepository,
-            UserRepository userRepository
-    ) {
-        this.credentialRepository = credentialRepository;
-        this.userRepository = userRepository;
+    /**
+     * Login inicial.
+     *
+     * Todavía no existe contexto seleccionado.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(
+            String username
+    ) throws UsernameNotFoundException {
+        return loadUserByUsername(
+                username,
+                null,
+                null
+        );
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String username)
-            throws UsernameNotFoundException {
+    /**
+     * Reconstrucción desde JWT.
+     *
+     * Lee:
+     *
+     * organizationId
+     * branchId
+     *
+     * del token contextual.
+     */
+    @Transactional(readOnly = true)
+    public CredentialDetailsImpl loadUserByUsername(
+            String username,
+            UUID currentOrganizationId,
+            UUID currentBranchId
+    ){
 
         Credential credential =
-                credentialRepository.findByUsername(username)
-                        .orElseThrow(() ->
-                                new UsernameNotFoundException("Credencial no encontrada")
+                credentialRepository
+                        .findFullAccessByUsername(username)
+                        .orElseThrow(
+                                () ->
+                                        new UsernameNotFoundException(
+                                                "Credential not found"
+                                        )
                         );
 
-        User user = userRepository.findByIdWithRole(credential.getUser().getId())
-                .orElseThrow(() ->
-                        new UsernameNotFoundException("Usuario no encontrado")
-                );
+        User user =
+                credential.getUser();
 
-        String roleValue = user.getRole().getValue();
+        List<UserAccessContext> accesses =
+                user.getAccesses()
+                        .stream()
 
-        List<GrantedAuthority> authorities = List.of(
-                new SimpleGrantedAuthority(roleValue)
-        );
+                        .filter(
+                                UserAccess::getActive
+                        )
+                        .map(access ->
+                                new UserAccessContext(
+                                        /*
+                                         *
+                                         * SYSTEM:
+                                         *
+                                         * organization = null
+                                         *
+                                         */
+                                        access.getOrganization() != null
+                                                ?
+                                                access.getOrganization()
+                                                        .getId()
+                                                :
+                                                null,
+                                        /*
+                                         *
+                                         * Branch:
+                                         *
+                                         * puede ser null
+                                         *
+                                         */
 
-        UUID organizationId =
-                user.getOrganization() != null
-                        ? user.getOrganization().getId()
-                        : null;
+                                        access.getBranch() != null
+                                                ?
+                                                access.getBranch()
+                                                        .getId()
+                                                :
+                                                null,
+                                        access.getRole()
+                                                .getValue()
+                                )
+
+                        )
+                        .toList();
+
+        Collection<GrantedAuthority> authorities =
+                accesses
+                        .stream()
+                        .map(access ->
+                                new SimpleGrantedAuthority(
+                                        access.roleCode()
+                                )
+                        )
+                        .collect(
+                                Collectors.toList()
+                        );
 
         return new CredentialDetailsImpl(
                 credential.getId(),
                 user.getId(),
-                organizationId,
                 credential.getUsername(),
                 credential.getPassword(),
                 user.getName(),
                 user.getLastname(),
-                true,
-                authorities
+                credential.canLogin(),
+                accesses,
+                authorities,
+                currentOrganizationId,
+                currentBranchId
         );
     }
 
-    private CredentialDetailsImpl getPrincipal() {
-        return (CredentialDetailsImpl) SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getPrincipal();
-    }
 }

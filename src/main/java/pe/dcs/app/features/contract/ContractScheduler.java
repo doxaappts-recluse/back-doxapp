@@ -19,7 +19,7 @@ import java.util.UUID;
 @Slf4j
 public class ContractScheduler {
 
-    private final ContractRepository contractRepository;
+    /*private final ContractRepository contractRepository;
 
     @Scheduled(
             cron = "0 0 0 * * *",
@@ -121,5 +121,5 @@ public class ContractScheduler {
                     activated.size()
             );
         }
-    }
+    }*/
 }

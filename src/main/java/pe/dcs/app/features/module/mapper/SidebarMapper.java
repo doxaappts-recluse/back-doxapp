@@ -18,18 +18,36 @@ public class SidebarMapper {
     public List<ModuleResponse> toTree(
             List<Module> modules,
             Set<UUID> allowedModuleIds,
-            UUID contractId
-    ) {
+            UUID contractId,
+            UUID userId
+    ){
 
         Map<UUID, List<Module>> grouped =
                 modules.stream()
                         .filter(m -> m.getParent() != null)
-                        .collect(Collectors.groupingBy(m -> m.getParent().getId()));
+                        .collect(
+                                Collectors.groupingBy(
+                                        m -> m.getParent().getId()
+                                )
+                        );
 
         return modules.stream()
                 .filter(m -> m.getParent() == null)
-                .map(m -> map(m, grouped, allowedModuleIds, contractId))
+                .map(m ->
+                        map(
+                                m,
+                                grouped,
+                                allowedModuleIds,
+                                contractId,
+                                userId
+                        )
+                )
                 .filter(Objects::nonNull)
+                .sorted(
+                        Comparator.comparing(
+                                ModuleResponse::getOrderNum
+                        )
+                )
                 .toList();
     }
 
@@ -37,22 +55,45 @@ public class SidebarMapper {
             Module node,
             Map<UUID, List<Module>> grouped,
             Set<UUID> allowedModuleIds,
-            UUID contractId
-    ) {
+            UUID contractId,
+            UUID userId
+    ){
 
-        List<Module> children = grouped.getOrDefault(node.getId(), List.of());
-
-        List<ModuleResponse> mappedChildren =
-                children.stream()
-                        .map(c -> map(c, grouped, allowedModuleIds, contractId))
+        List<ModuleResponse> children =
+                grouped.getOrDefault(
+                                node.getId(),
+                                List.of()
+                        )
+                        .stream()
+                        .map(child ->
+                                map(
+                                        child,
+                                        grouped,
+                                        allowedModuleIds,
+                                        contractId,
+                                        userId
+                                )
+                        )
                         .filter(Objects::nonNull)
+                        .sorted(
+                                Comparator.comparing(
+                                        ModuleResponse::getOrderNum
+                                )
+                        )
                         .toList();
 
-        boolean isAllowed = allowedModuleIds == null
-                || allowedModuleIds.contains(node.getId())
-                || !mappedChildren.isEmpty();
+        boolean moduleAllowed =
+                allowedModuleIds == null
+                        || allowedModuleIds.contains(node.getId());
 
-        if (!isAllowed) return null;
+        /*
+         * Si no tiene acceso al módulo
+         * y tampoco tiene hijos visibles,
+         * desaparece completamente.
+         */
+        if(!moduleAllowed && children.isEmpty()){
+            return null;
+        }
 
         ModuleResponse dto = new ModuleResponse();
 
@@ -63,14 +104,35 @@ public class SidebarMapper {
         dto.setRoute(node.getRoute());
         dto.setOrderNum(node.getOrderNum());
 
-        dto.setPermissions(
-                contractId != null
-                        ? permissionService.getPermissions(contractId, node.getId())
-                        : List.of()
-        );
+        /*
+         * ADMIN -> permisos del contrato
+         * USER  -> permisos asignados al usuario
+         */
+        if(userId == null){
 
-        dto.setChildren(mappedChildren);
+            dto.setPermissions(
+                    contractId != null
+                            ? permissionService.getPermissions(
+                            contractId,
+                            node.getId()
+                    )
+                            : List.of()
+            );
+
+        }else{
+
+            dto.setPermissions(
+                    permissionService.getUserPermissions(
+                            userId,
+                            node.getId()
+                    )
+            );
+
+        }
+
+        dto.setChildren(children);
 
         return dto;
     }
+
 }

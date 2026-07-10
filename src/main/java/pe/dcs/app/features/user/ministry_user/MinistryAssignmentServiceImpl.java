@@ -26,10 +26,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class MinistryAssignmentServiceImpl
-        implements MinistryAssignmentService {
+public class MinistryAssignmentServiceImpl implements MinistryAssignmentService {
 
-    private final MemberMinistryAssignmentRepository assignmentRepository;
+    /*private final MemberMinistryAssignmentRepository assignmentRepository;
     private final MinistryRepository ministryRepository;
     private final MinistryRoleRepository ministryRoleRepository;
     private final MinistryAssignmentValidator validator;
@@ -217,5 +216,5 @@ public class MinistryAssignmentServiceImpl
                 .stream()
                 .map(MinistryAssignmentMapper::toRoleOptionResponse)
                 .toList();
-    }
+    }*/
 }

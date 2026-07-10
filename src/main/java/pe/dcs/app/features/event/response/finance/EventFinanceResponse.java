@@ -6,6 +6,7 @@ import pe.dcs.app.util.enums.events.EventFinanceStatus;
 import pe.dcs.app.util.enums.events.EventFinanceType;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -33,10 +34,10 @@ public class EventFinanceResponse {
     private UUID approvedByUserId;
     private String approvedByUserName;
 
-    private LocalDateTime approvedAt;
+    private Instant approvedAt;
 
     private String rejectionReason;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant createdAt;
+    private Instant updatedAt;
 }

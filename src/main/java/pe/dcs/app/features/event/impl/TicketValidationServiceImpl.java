@@ -12,6 +12,7 @@ import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
 import pe.dcs.app.util.Exceptions;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Service
@@ -48,7 +49,7 @@ public class TicketValidationServiceImpl implements TicketValidationService {
             );
         }
 
-        LocalDateTime now = LocalDateTime.now();
+        Instant now = Instant.now();
 
         // 3. Marcar QR como usado
         reg.setQrUsed(true);

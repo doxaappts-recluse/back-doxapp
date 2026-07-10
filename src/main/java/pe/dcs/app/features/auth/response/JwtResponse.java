@@ -1,70 +1,34 @@
 package pe.dcs.app.features.auth.response;
 
+import pe.dcs.app.security.service.UserAccessContext;
+
+import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
-public class JwtResponse {
-    private String token;
-    private String username;
-    private String nombre;
-    private String rol;
-    private String emissionTime;
-    private String expirationTime;
+public record JwtResponse(
 
-    public JwtResponse(String token, String username, String nombre, String rol, String emissionTime, String expirationTime) {
-        this.token = token;
-        this.username = username;
-        this.nombre = nombre;
-        this.rol = rol;
-        this.emissionTime = emissionTime;
-        this.expirationTime = expirationTime;
-    }
+        String token,
 
-    public String getToken() {
-        return token;
-    }
+        UUID userId,
 
-    public void setToken(String token) {
-        this.token = token;
-    }
+        String username,
 
-    public String getUsername() {
-        return username;
-    }
+        String name,
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+        String lastname,
 
-    public String getNombre() {
-        return nombre;
-    }
+        List<String> roles,
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
+        List<UserAccessContext> accesses,
 
-    public String getRol() {
-        return rol;
-    }
+        UUID currentOrganizationId,
 
-    public void setRol(String rol) {
-        this.rol = rol;
-    }
+        UUID currentBranchId,
 
-    public String getEmissionTime() {
-        return emissionTime;
-    }
+        Instant emissionTime,
 
-    public void setEmissionTime(String emissionTime) {
-        this.emissionTime = emissionTime;
-    }
+        Instant expirationTime
 
-    public String getExpirationTime() {
-        return expirationTime;
-    }
-
-    public void setExpirationTime(String expirationTime) {
-        this.expirationTime = expirationTime;
-    }
-
+) {
 }

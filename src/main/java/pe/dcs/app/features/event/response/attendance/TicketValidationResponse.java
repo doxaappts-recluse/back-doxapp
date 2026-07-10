@@ -1,4 +1,5 @@
 package pe.dcs.app.features.event.response.attendance;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,7 +14,7 @@ public record TicketValidationResponse(
         String eventName,
         String attendeeName,
 
-        LocalDateTime usedAt,
+        Instant usedAt,
 
         boolean alreadyUsed,
 

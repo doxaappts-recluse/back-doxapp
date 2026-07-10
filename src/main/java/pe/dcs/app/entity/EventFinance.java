@@ -9,6 +9,7 @@ import pe.dcs.app.util.enums.events.EventFinanceStatus;
 import pe.dcs.app.util.enums.events.EventFinanceType;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -63,7 +64,7 @@ public class EventFinance extends Auditable {
     @JoinColumn(name = "approved_by_user_id")
     private User approvedByUser;
 
-    private LocalDateTime approvedAt;
+    private Instant approvedAt;
 
     private String rejectionReason;
 

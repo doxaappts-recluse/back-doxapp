@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface MembershipUserSearchService {
 
-    PageResponse<MembershipUserSearchResponse> search(
+    /*PageResponse<MembershipUserSearchResponse> search(
             MembershipUserSearchRequest request
     );
 
@@ -35,6 +35,6 @@ public interface MembershipUserSearchService {
     PageResponse<MembershipResponse> getHistory(
             UUID userId,
             MembershipHistoryRequest request
-    );
+    );*/
 
 }

@@ -37,7 +37,7 @@ import java.util.*;
 @Transactional
 public class ContractServiceImpl implements ContractService {
 
-    private final ContractRepository contractRepository;
+    /*private final ContractRepository contractRepository;
     private final OrganizationRepository organizationRepository;
     private final ContractModuleService contractModuleService;
 
@@ -482,5 +482,5 @@ public class ContractServiceImpl implements ContractService {
                     HttpStatus.CONFLICT
             );
         }
-    }
+    }*/
 }

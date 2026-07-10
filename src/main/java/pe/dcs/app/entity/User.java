@@ -6,15 +6,25 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(
-        name = "users",
-        indexes = {
-                @Index(name = "idx_user_name", columnList = "name"),
-                @Index(name = "idx_user_lastname", columnList = "lastname")
+        name="users",
+        indexes={
+
+                @Index(
+                        name="idx_user_org_branch",
+                        columnList="organization_id,branch_id"
+                ),
+
+                @Index(
+                        name="idx_user_dni",
+                        columnList="dni"
+                )
+
         }
 )
 @Getter
@@ -24,13 +34,11 @@ public class User extends Auditable {
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(name = "id")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable=false)
     private String name;
 
-    @Column(name = "lastname")
     private String lastname;
 
     private String dni;
@@ -41,32 +49,59 @@ public class User extends Auditable {
 
     private String address;
 
-    @Column(name = "date_birth")
     private String dateBirth;
 
-    @Column(name = "marital_status")
     private String maritalStatus;
 
     private String children;
 
-    @Column(name = "date_admission")
     private String dateAdmission;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private Credential credential;
-
+    /**
+     * Organización donde pertenece la persona
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id")
+    @JoinColumn(
+            name="organization_id"
+    )
     private Organization organization;
 
+    /**
+     * Sede actual donde pertenece
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "role_id")
-    private Role role;
+    @JoinColumn(
+            name="branch_id"
+    )
+    private Branch branch;
 
-    @OneToMany(mappedBy = "user")
-    private List<Membership> memberships;
+    /**
+     * Login del sistema
+     * opcional
+     */
+    @OneToOne(
+            mappedBy="user",
+            cascade=CascadeType.ALL
+    )
+    private Credential credential;
 
-    @OneToMany(mappedBy = "user")
-    private List<MemberMinistryAssignment> memberMinistryAssignments;
+    /**
+     * Permisos del sistema
+     */
+    @OneToMany(
+            mappedBy="user",
+            cascade=CascadeType.ALL
+    )
+    private List<UserAccess> accesses =
+            new ArrayList<>();
+
+    /**
+     * Membresía opcional
+     */
+    @OneToMany(
+            mappedBy="user"
+    )
+    private List<Membership> memberships =
+            new ArrayList<>();
 
 }

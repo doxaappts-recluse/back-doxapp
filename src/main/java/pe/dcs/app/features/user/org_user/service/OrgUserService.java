@@ -11,11 +11,11 @@ import java.util.UUID;
 
 public interface OrgUserService {
 
-    PageResponse<OrgUserResponse> search(OrgUserListRequest request);
+    /*PageResponse<OrgUserResponse> search(OrgUserListRequest request);
 
     OrgUserResponse create(OrgUserCreateRequest request);
 
     OrgUserResponse update(UUID id, OrgUserUpdateRequest request);
 
-    OrgUserCreateResponse getById(UUID id);
+    OrgUserCreateResponse getById(UUID id);*/
 }

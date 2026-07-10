@@ -4,11 +4,13 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.contract.ContractRenewalType;
 import pe.dcs.app.util.enums.contract.ContractStatus;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -16,173 +18,209 @@ import java.util.UUID;
 @Table(
         name = "contracts",
         indexes = {
-                @Index(name = "idx_contract_org", columnList = "organization_id"),
-                @Index(name = "idx_contract_status", columnList = "status"),
-                @Index(name = "idx_contract_org_start_date", columnList = "organization_id, start_date")
+                @Index(
+                        name = "idx_contract_branch",
+                        columnList = "branch_id"
+                ),
+                @Index(
+                        name = "idx_contract_status",
+                        columnList = "status"
+                ),
+                @Index(
+                        name = "idx_contract_branch_start_date",
+                        columnList = "branch_id,start_date"
+                ),
+                @Index(
+                        name = "idx_contract_branch_status",
+                        columnList = "branch_id,status"
+                )
         }
 )
 @Getter
 @Setter
-public class Contract {
+public class Contract extends Auditable {
 
     @Id
     @GeneratedValue
     @UuidGenerator
     private UUID id;
 
+    /**
+     * Contrato perteneciente a una sede.
+     *
+     * La sede determina:
+     * - módulos disponibles
+     * - permisos
+     * - capacidad contratada
+     */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "organization_id", nullable = false)
-    private Organization organization;
+    @JoinColumn(
+            name = "branch_id",
+            nullable = false
+    )
+    private Branch branch;
 
     // =========================
     // PLAN
     // =========================
+
     private String planName;
+
     private Double price;
+
     private String currency;
 
     // =========================
     // VIGENCIA
     // =========================
+
     private LocalDate startDate;
+
     private LocalDate endDate;
 
     // =========================
     // CAPACIDAD
     // =========================
+
     private Integer numberUsers;
 
     // =========================
-    // ESTADO (SOURCE OF TRUTH)
+    // ESTADO
     // =========================
+
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ContractStatus status;
 
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
+    private Instant suspendedAt;
 
-    private LocalDateTime suspendedAt;
-    private LocalDateTime cancelledAt;
-    private LocalDateTime activatedAt;
+    private Instant cancelledAt;
+
+    private Instant activatedAt;
 
     // =========================
     // CICLO DE VIDA
     // =========================
+
     private UUID previousContractId;
 
     @Enumerated(EnumType.STRING)
     private ContractRenewalType renewalType;
 
-    @OneToMany(mappedBy = "contract", fetch = FetchType.LAZY)
-    private List<ContractModule> contractModules;
+    // =========================
+    // MODULES
+    // =========================
+
+    @OneToMany(
+            mappedBy = "contract",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ContractModule> contractModules =
+            new ArrayList<>();
 
     // =========================================================
     // DOMAIN BEHAVIOR
     // =========================================================
 
-    public void activate() {
-        assertNotTerminalState();
-
-        if (this.status == ContractStatus.ACTIVE) {
-            return;
-        }
-
-        if (this.status == ContractStatus.CANCELLED) {
-            throw new IllegalStateException("Cannot reactivate a cancelled contract");
-        }
-
-        this.status = ContractStatus.ACTIVE;
-        this.activatedAt = LocalDateTime.now();
-    }
-
-    public void suspend() {
+    public void activate(){
 
         assertNotTerminalState();
 
-        if (this.status == ContractStatus.SUSPENDED) {
+        if(status == ContractStatus.ACTIVE){
             return;
         }
 
-        this.status = ContractStatus.SUSPENDED;
-        this.suspendedAt = LocalDateTime.now();
-    }
-
-    public void cancel() {
-        if (this.status == ContractStatus.CANCELLED) {
-            return;
-        }
-
-        if (this.status == ContractStatus.EXPIRED) {
-            throw new IllegalStateException("Cannot cancel an expired contract");
-        }
-
-        this.status = ContractStatus.CANCELLED;
-        this.cancelledAt = LocalDateTime.now();
-    }
-
-    public void expireManually() {
-        this.status = ContractStatus.EXPIRED;
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    public void activateManually() {
-
-        if (this.status == ContractStatus.CANCELLED) {
-            throw new IllegalStateException("Cancelled contract cannot be activated");
-        }
-
-        if (this.status == ContractStatus.EXPIRED) {
-            throw new IllegalStateException("Expired contract cannot be activated");
-        }
-
-        if (this.status != ContractStatus.PENDING) {
-            throw new IllegalStateException("Only pending contracts can be activated");
-        }
-
-        if (LocalDate.now().isBefore(this.startDate)) {
+        if(status == ContractStatus.CANCELLED){
             throw new IllegalStateException(
-                    "Contract cannot be activated before start date"
+                    "Cannot reactivate a cancelled contract"
             );
         }
 
-        this.status = ContractStatus.ACTIVE;
-        this.activatedAt = LocalDateTime.now();
+        status = ContractStatus.ACTIVE;
+
+        activatedAt =
+                Instant.now();
     }
 
-    // =========================================================
-    // DERIVED RULES
-    // =========================================================
+    public void suspend(){
 
-    private void assertNotTerminalState() {
-        if (this.status == ContractStatus.CANCELLED) {
-            throw new IllegalStateException("Contract is cancelled and cannot be modified");
-        }
+        assertNotTerminalState();
 
-        if (this.status == ContractStatus.EXPIRED) {
-            throw new IllegalStateException("Contract is expired and cannot be modified");
-        }
-    }
-
-    public boolean isActive() {
-        return this.status == ContractStatus.ACTIVE;
-    }
-
-    public boolean overlapsWith(Contract other) {
-        return !(this.endDate.isBefore(other.startDate)
-                || this.startDate.isAfter(other.endDate));
-    }
-
-    public void expire() {
-
-        if (this.status == ContractStatus.CANCELLED) {
+        if(status == ContractStatus.SUSPENDED){
             return;
         }
 
-        if (this.status == ContractStatus.EXPIRED) {
+        status = ContractStatus.SUSPENDED;
+
+        suspendedAt =
+                Instant.now();
+    }
+
+    public void cancel(){
+
+        if(status == ContractStatus.CANCELLED){
             return;
         }
 
-        this.status = ContractStatus.EXPIRED;
+        if(status == ContractStatus.EXPIRED){
+
+            throw new IllegalStateException(
+                    "Cannot cancel expired contract"
+            );
+        }
+
+        status = ContractStatus.CANCELLED;
+
+        cancelledAt =
+                Instant.now();
+    }
+
+    public void expire(){
+
+        if(status == ContractStatus.CANCELLED){
+            return;
+        }
+
+        if(status == ContractStatus.EXPIRED){
+            return;
+        }
+
+        status = ContractStatus.EXPIRED;
+
+        setUpdatedAt(Instant.now());
+    }
+
+    public boolean isActive(){
+
+        return status == ContractStatus.ACTIVE;
+    }
+
+    public boolean overlapsWith(
+            Contract other
+    ){
+
+        return !(endDate.isBefore(other.startDate)
+                ||
+                startDate.isAfter(other.endDate));
+    }
+
+    private void assertNotTerminalState(){
+
+        if(status == ContractStatus.CANCELLED){
+
+            throw new IllegalStateException(
+                    "Contract is cancelled"
+            );
+        }
+
+        if(status == ContractStatus.EXPIRED){
+
+            throw new IllegalStateException(
+                    "Contract is expired"
+            );
+        }
     }
 
 }

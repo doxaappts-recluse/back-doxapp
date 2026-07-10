@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ContractController {
 
-    private final ContractService contractService;
+   /* private final ContractService contractService;
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<ContractResponseSearch>>
@@ -114,5 +114,5 @@ public class ContractController {
                 "Contrato reactivado correctamente",
                 null
         );
-    }
+    }*/
 }

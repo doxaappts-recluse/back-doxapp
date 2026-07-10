@@ -30,7 +30,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class OrgUserServiceImpl implements OrgUserService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final AuthContext authContext;
 
 
@@ -183,6 +183,6 @@ public class OrgUserServiceImpl implements OrgUserService {
         }
 
         return OrgUserCreateMapper.toResponse(user);
-    }
+    }*/
 
 }

@@ -10,8 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import pe.dcs.app.entity.User;
 
-import java.time.LocalDateTime;
-import java.util.UUID;
+import java.time.Instant;
 
 @Getter
 @Setter
@@ -21,10 +20,10 @@ public abstract class Auditable {
 
     @CreatedDate
     @Column(updatable = false)
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @LastModifiedDate
-    private LocalDateTime updatedAt;
+    private Instant updatedAt;
 
     @CreatedBy
     @ManyToOne(fetch = FetchType.LAZY)
@@ -36,3 +35,4 @@ public abstract class Auditable {
     @JoinColumn(name = "updated_by")
     private User updatedBy;
 }
+

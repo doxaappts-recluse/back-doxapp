@@ -6,6 +6,7 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -41,7 +42,7 @@ public class EventAttendance extends Auditable {
     private EventRegistration registration;
 
     @Column(name = "attended_at")
-    private LocalDateTime attendedAt;
+    private Instant attendedAt;
 
     private String observations;
 }

@@ -15,8 +15,22 @@ import java.util.UUID;
 @Table(
         name = "modules",
         indexes = {
-                @Index(name = "idx_module_code", columnList = "code"),
-                @Index(name = "idx_module_status", columnList = "status")
+
+                @Index(
+                        name = "idx_module_code",
+                        columnList = "code"
+                ),
+
+                @Index(
+                        name = "idx_module_status",
+                        columnList = "status"
+                ),
+
+                @Index(
+                        name = "idx_module_parent",
+                        columnList = "parent_id"
+                )
+
         }
 )
 @Getter
@@ -26,36 +40,74 @@ public class Module extends Auditable {
     @Id
     @GeneratedValue
     @UuidGenerator
-    @Column(name = "id")
     private UUID id;
+
+    // =========================
+    // INFORMATION
+    // =========================
 
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "code",
+    @Column(
             nullable = false,
             unique = true
     )
     private String code;
 
-    @Column(name = "icon")
     private String icon;
 
-    @Column(name = "route")
     private String route;
 
-    @Column(name = "order_num")
     private Integer orderNum;
 
+
+    // =========================
+    // STATUS
+    // =========================
+
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
+    @Column(nullable = false)
     private StatusType status;
 
+    // =========================
+    // TREE STRUCTURE
+    // =========================
+
+    /**
+     * Módulo padre.
+     *
+     * Ejemplo:
+     *
+     * Usuarios
+     *    |
+     *    +-- Lista
+     *    +-- Crear
+     */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
     private Module parent;
 
-    @OneToMany(mappedBy = "parent")
+    /**
+     * Hijos del módulo.
+     */
+    @OneToMany(
+            mappedBy = "parent",
+            fetch = FetchType.LAZY
+    )
     private List<Module> children =
             new ArrayList<>();
+
+    // =========================
+    // HELPERS
+    // =========================
+
+    public boolean isActive(){
+        return status == StatusType.ACTIVE;
+    }
+
+    public boolean isRoot(){
+        return parent == null;
+    }
+
 }

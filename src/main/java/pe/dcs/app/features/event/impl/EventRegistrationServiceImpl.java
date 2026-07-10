@@ -50,7 +50,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     private final EventRegistrationMapper eventRegistrationMapper;
     private final AuthContext authContext;
 
-    @Override
+    /*@Override
     @Transactional(readOnly = true)
     public PageResponse<EventRegistrationResponse> search(
             EventRegistrationSearchRequest request
@@ -629,5 +629,5 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                     HttpStatus.BAD_REQUEST
             );
         }
-    }
+    }*/
 }

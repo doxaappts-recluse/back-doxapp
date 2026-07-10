@@ -1,19 +1,12 @@
 package pe.dcs.app.security.payload;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
-public class JwtTimesResponse {
+import java.time.Instant;
 
-    //Atributos
-    private String emision;
-    private String expiracion;
-
-    //Constructores
-    public JwtTimesResponse(String emision, String expiracion) {
-        this.emision = emision;
-        this.expiracion = expiracion;
-    }
-}
+public record JwtTimesResponse(
+        Instant issuedAt,
+        Instant expiration
+){}

@@ -16,7 +16,7 @@ import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.events.EventStatus;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @RequiredArgsConstructor
 @Service
@@ -69,13 +69,13 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         // 6. Crear asistencia
         EventAttendance attendance = new EventAttendance();
         attendance.setRegistration(registration);
-        attendance.setAttendedAt(LocalDateTime.now());
+        attendance.setAttendedAt(Instant.now());
 
         attendanceRepository.save(attendance);
 
         // 7. Marcar QR como usado (IMPORTANTE)
         registration.setQrUsed(true);
-        registration.setQrUsedAt(LocalDateTime.now());
+        registration.setQrUsedAt(Instant.now());
 
         registrationRepository.save(registration);
 

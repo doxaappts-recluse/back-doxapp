@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class SystemUserController {
 
-    private final UserSystemService service;
+    /*private final UserSystemService service;
 
     // =====================================================
     // SEARCH
@@ -161,5 +161,5 @@ public class SystemUserController {
                 "User deleted successfully",
                 "OK"
         );
-    }
+    }*/
 }

@@ -1,6 +1,6 @@
 package pe.dcs.app.util;
 
-import pe.dcs.app.constant.GeneralConstant;
+import pe.dcs.app.util.constant.GeneralConstant;
 
 import java.time.LocalDate;
 import java.time.Period;

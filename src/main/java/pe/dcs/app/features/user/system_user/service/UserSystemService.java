@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface UserSystemService {
 
-    PageResponse<UserSystemResponse> findAllSystem(UserSystemListRequest request);
+    /*PageResponse<UserSystemResponse> findAllSystem(UserSystemListRequest request);
     PageResponse<UserSystemResponse> findAllOrg(UserSystemListRequest request);
 
     UserSystemResponse findById(UUID id);
@@ -26,6 +26,6 @@ public interface UserSystemService {
 
     void delete(UUID id);
 
-    void changePassword(UUID id, UserChangePasswordRequest request);
+    void changePassword(UUID id, UserChangePasswordRequest request);*/
 
 }

@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 @Transactional
 public class AccessModuleUserServiceImpl implements AccessModuleUserService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final ContractRepository contractRepository;
     private final ContractModuleRepository contractModuleRepository;
     private final ContractModulePermissionRepository contractModulePermissionRepository;
@@ -292,5 +292,5 @@ public class AccessModuleUserServiceImpl implements AccessModuleUserService {
                     HttpStatus.FORBIDDEN
             );
         }
-    }
+    }*/
 }

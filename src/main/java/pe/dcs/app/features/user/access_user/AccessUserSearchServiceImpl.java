@@ -5,6 +5,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AccessUserSearchServiceImpl implements AccessUserSearchService {
 
-    private final UserRepository userRepository;
+    /*private final UserRepository userRepository;
     private final AuthContext authContext;
     private final AuthorizationService authorizationService;
     private final CredentialRepository credentialRepository;
@@ -111,7 +112,6 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
         );
     }
 
-    //********************** GLOBAL USER **********************//
     // =========================================================
     // ENABLE
     // =========================================================
@@ -143,11 +143,10 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
                 );
 
         long activeUsers =
-                credentialRepository
-                        .countByUserOrganizationIdAndStatus(
-                                organizationId,
-                                StatusType.ACTIVE
-                        );
+                credentialRepository.countByUser_Organization_IdAndStatus(
+                        organizationId,
+                        StatusType.ACTIVE
+                );
 
         if (activeUsers >= activeContract.getNumberUsers() + 1) {
             throw new Exceptions(
@@ -222,34 +221,52 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
 
     private CredentialDetailsImpl toCredentialDetails(User user) {
 
+        Credential credential = user.getCredential();
+
         return new CredentialDetailsImpl(
-                user.getCredential().getId(),
+                credential.getId(),
                 user.getId(),
+
                 user.getOrganization() != null
                         ? user.getOrganization().getId()
                         : null,
-                user.getCredential().getUsername(),
-                user.getCredential().getPassword(),
+
+                user.getBranch() != null
+                        ? user.getBranch().getId()
+                        : null,
+
+                credential.getUsername(),
+                credential.getPassword(),
+
                 user.getName(),
                 user.getLastname(),
-                user.getCredential().getStatus() == StatusType.ACTIVE,
-                List.of(() -> user.getRole().getValue())
+
+                credential.isActive(),
+
+                List.of(
+                        new SimpleGrantedAuthority(
+                                credential.getRole().getValue()
+                        )
+                )
         );
     }
 
     private CredentialDetailsImpl toWithoutCredentialDetails(User user) {
 
         Credential credential = user.getCredential();
-        Role role = user.getRole();
+        Role role = credential != null ? credential.getRole() : null;
 
         Collection<? extends GrantedAuthority> authorities =
                 role != null
                         ? List.of(
-                        (GrantedAuthority) role::getValue
+                        new SimpleGrantedAuthority(
+                                role.getValue()
+                        )
                 )
                         : List.of();
 
         return new CredentialDetailsImpl(
+
                 credential != null
                         ? credential.getId()
                         : null,
@@ -258,6 +275,10 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
 
                 user.getOrganization() != null
                         ? user.getOrganization().getId()
+                        : null,
+
+                user.getBranch() != null
+                        ? user.getBranch().getId()
                         : null,
 
                 credential != null
@@ -272,7 +293,7 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
                 user.getLastname(),
 
                 credential != null
-                        && credential.getStatus() == StatusType.ACTIVE,
+                        && credential.isActive(),
 
                 authorities
         );
@@ -310,24 +331,26 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
             UserCredentialsRequest request
     ) {
 
-        // 1. USER EXISTS
+        // =========================================================
+        // USER EXISTS
+        // =========================================================
         User target = getUser(id);
 
-        // 2. SECURITY
+        // =========================================================
+        // SECURITY
+        // =========================================================
         authorizationService.assertCanAccessUser(
                 authContext.getPrincipal(),
-                toWithoutCredentialDetails(target)
+                toCredentialDetails(target)
         );
 
-        UUID organizationId =
-                authContext.getOrganizationId();
+        UUID organizationId = authContext.getOrganizationId();
 
-        Credential credential =
-                target.getCredential();
+        Credential credential = target.getCredential();
 
-        // =========================================
+        // =========================================================
         // FIRST ACTIVATION
-        // =========================================
+        // =========================================================
         if (credential == null) {
 
             Contract contract =
@@ -357,9 +380,7 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
                 );
             }
 
-            if (credentialRepository.existsByUsername(
-                    request.getUsername()
-            )) {
+            if (credentialRepository.existsByUsername(request.getUsername())) {
                 throw new Exceptions(
                         "Username already exists",
                         HttpStatus.CONFLICT
@@ -377,23 +398,22 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
 
             credential = new Credential();
             credential.setUser(target);
+            credential.setRole(role);
             credential.setStatus(StatusType.ACTIVE);
 
-            target.setRole(role);
             target.setCredential(credential);
         }
 
-        // =========================================
+        // =========================================================
         // UPDATE EXISTING
-        // =========================================
+        // =========================================================
         else {
 
             boolean usernameExists =
-                    credentialRepository
-                            .existsByUsernameAndIdNot(
-                                    request.getUsername(),
-                                    credential.getId()
-                            );
+                    credentialRepository.existsByUsernameAndIdNot(
+                            request.getUsername(),
+                            credential.getId()
+                    );
 
             if (usernameExists) {
                 throw new Exceptions(
@@ -403,9 +423,7 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
             }
         }
 
-        credential.setUsername(
-                request.getUsername()
-        );
+        credential.setUsername(request.getUsername());
 
         credential.setPassword(
                 passwordEncoder.encode(
@@ -414,6 +432,5 @@ public class AccessUserSearchServiceImpl implements AccessUserSearchService {
         );
 
         credentialRepository.save(credential);
-    }
-
+    }*/
 }

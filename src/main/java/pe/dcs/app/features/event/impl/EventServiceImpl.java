@@ -36,7 +36,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventServiceImpl implements EventService {
 
-    private final AuthContext authContext;
+    /*private final AuthContext authContext;
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
     private final OrganizationRepository organizationRepository;
@@ -336,5 +336,5 @@ public class EventServiceImpl implements EventService {
                     HttpStatus.BAD_REQUEST
             );
         }
-    }
+    }*/
 }

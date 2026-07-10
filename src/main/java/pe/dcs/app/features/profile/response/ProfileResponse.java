@@ -2,7 +2,9 @@ package pe.dcs.app.features.profile.response;
 
 import pe.dcs.app.util.enums.StatusType;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record ProfileResponse(
@@ -18,10 +20,8 @@ public record ProfileResponse(
         String maritalStatus,
         String children,
         String dateAdmission,
-        String role,
-        String organization,
+        List<ProfileAccessResponse> accesses,
         StatusType status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
-}
+        Instant createdAt,
+        Instant updatedAt
+){}

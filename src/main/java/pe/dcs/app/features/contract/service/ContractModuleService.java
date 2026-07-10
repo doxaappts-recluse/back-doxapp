@@ -9,12 +9,12 @@ import java.util.UUID;
 
 public interface ContractModuleService {
 
-    List<ContractModuleResponse>
+    /*List<ContractModuleResponse>
     saveModules(
             Contract contract,
             List<ContractModuleRequest> requests
     );
 
     List<ContractModuleResponse>
-    getModules(UUID contractId);
+    getModules(UUID contractId);*/
 }

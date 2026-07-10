@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class MinistryAssignmentValidator {
 
-    private static final LocalDate MAX_DATE =
+    /*private static final LocalDate MAX_DATE =
             LocalDate.of(9999, 12, 31);
 
     private final UserRepository userRepository;
@@ -378,5 +378,5 @@ public class MinistryAssignmentValidator {
         if (!authOrgId.equals(targetOrgId)) {
             throw new RuntimeException("Cross-organization access denied");
         }
-    }
+    }*/
 }

@@ -2,24 +2,16 @@ package pe.dcs.app.repository;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import pe.dcs.app.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificationExecutor<User> {
-
-    @Query("""
-        SELECT u
-        FROM User u
-        JOIN FETCH u.role
-        WHERE u.id = :id
-    """)
-    Optional<User> findByIdWithRole(UUID id);
 
     Optional<User> findByCredentialUsername(
             String username
@@ -34,21 +26,31 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
             UUID id
     );
 
-    boolean existsByDniAndOrganizationId(String dni, UUID organizationId);
+    boolean existsByDniAndOrganizationId(
+            String dni,
+            UUID organizationId
+    );
 
-    boolean existsByOrganizationIdAndRole_Value(UUID organizationId, String value);
-
-    Optional<User> findByOrganizationIdAndRole_Value(UUID organizationId, String roleValue);
-
-    boolean existsByDniAndOrganizationIdAndIdNot(String dni, UUID organizationId, UUID id);
+    boolean existsByDniAndOrganizationIdAndIdNot(
+            String dni,
+            UUID organizationId,
+            UUID id
+    );
 
     @Query("""
-        SELECT u
+        SELECT DISTINCT u
         FROM User u
-        LEFT JOIN FETCH u.role
         LEFT JOIN FETCH u.organization
-        LEFT JOIN FETCH u.credential
-        WHERE u.credential.username = :username
+        LEFT JOIN FETCH u.branch
+        LEFT JOIN FETCH u.credential c
+        LEFT JOIN FETCH u.accesses ua
+        LEFT JOIN FETCH ua.organization
+        LEFT JOIN FETCH ua.branch
+        LEFT JOIN FETCH ua.role
+        WHERE c.username = :username
     """)
-    Optional<User> findProfileByUsername(String username);
+    Optional<User> findProfileByUsername(
+            @Param("username") String username
+    );
+
 }
