@@ -19,6 +19,7 @@ public class OrganizationMapper {
                 .name(organization.getName())
                 .address(organization.getAddress())
                 .ruc(organization.getRuc())
+                .foundedDate(organization.getFoundedDate())
                 .status(organization.getStatus() == StatusType.ACTIVE)
                 .build();
     }

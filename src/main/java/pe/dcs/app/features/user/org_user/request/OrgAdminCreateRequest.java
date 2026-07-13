@@ -9,6 +9,9 @@ import java.util.UUID;
 @Setter
 public class OrgAdminCreateRequest {
 
+    private UUID organizationId;
+    private UUID branchId;
+
     private String name;
     private String lastname;
     private String dni;
@@ -23,5 +26,4 @@ public class OrgAdminCreateRequest {
     private String username;
     private String password;
 
-    private UUID organizationId;
 }

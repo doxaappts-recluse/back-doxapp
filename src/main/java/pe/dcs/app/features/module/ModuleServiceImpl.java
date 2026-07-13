@@ -13,11 +13,9 @@ import pe.dcs.app.features.module.request.ModuleRequest;
 import pe.dcs.app.features.module.request.ModuleSearchRequest;
 import pe.dcs.app.features.module.response.ModuleOptionResponse;
 import pe.dcs.app.features.module.response.ModuleResponse;
-import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ModuleRepository;
 import pe.dcs.app.features.module.mapper.ModuleMapper;
 import pe.dcs.app.features.module.service.ModuleService;
-import pe.dcs.app.repository.UserModuleRepository;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PaginationResponse;
 import pe.dcs.app.util.Exceptions;
@@ -32,10 +30,7 @@ import java.util.*;
 public class ModuleServiceImpl implements ModuleService {
 
     private final ModuleRepository moduleRepository;
-    private final ContractModuleRepository contractModuleRepository;
-    private final UserModuleRepository userModuleRepository;
     private final ModuleMapper moduleMapper;
-
 
     // =====================================================
     // RESTO SIN CAMBIOS
@@ -127,7 +122,7 @@ public class ModuleServiceImpl implements ModuleService {
     public ModuleResponse create(ModuleRequest request){
 
         if(moduleRepository.existsByCodeIgnoreCase(request.getCode())){
-            new Exceptions(
+            throw new Exceptions(
                     "Module code already exists",
                     HttpStatus.BAD_REQUEST
             );
@@ -154,7 +149,7 @@ public class ModuleServiceImpl implements ModuleService {
                             );
 
             if(!parent.isActive()){
-                new Exceptions(
+                throw new Exceptions(
                         "Parent module is inactive",
                         HttpStatus.BAD_REQUEST
                 );
@@ -166,7 +161,7 @@ public class ModuleServiceImpl implements ModuleService {
              */
 
             if(parent.getParent() != null){
-                new Exceptions(
+                throw new Exceptions(
                         "Only one nesting level is allowed",
                         HttpStatus.BAD_REQUEST
                 );
@@ -201,7 +196,7 @@ public class ModuleServiceImpl implements ModuleService {
         // =====================================================
 
         if(!module.getCode().equalsIgnoreCase(request.getCode())){
-            new Exceptions(
+            throw new Exceptions(
                     "Module code cannot be modified.",
                     HttpStatus.BAD_REQUEST
             );
@@ -217,7 +212,7 @@ public class ModuleServiceImpl implements ModuleService {
                         : null;
 
         if(!Objects.equals(currentParentId, request.getParentId())){
-            new Exceptions(
+            throw new Exceptions(
                     "Module parent cannot be modified.",
                     HttpStatus.BAD_REQUEST
             );
@@ -281,27 +276,4 @@ public class ModuleServiceImpl implements ModuleService {
         return moduleMapper.simple(module);
     }
 
-    @Override
-    @Transactional
-    public ModuleResponse delete(UUID id){
-
-        Module module =
-                moduleRepository.findById(id)
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "Module not found",
-                                        HttpStatus.NOT_FOUND
-                                )
-                        );
-
-        module.setStatus(StatusType.INACTIVE);
-
-        for(Module child : module.getChildren()){
-            child.setStatus(StatusType.INACTIVE);
-        }
-
-        moduleRepository.save(module);
-
-        return moduleMapper.simple(module);
-    }
 }

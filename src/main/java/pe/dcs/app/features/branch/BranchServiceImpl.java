@@ -97,6 +97,7 @@ public class BranchServiceImpl implements BranchService {
         branch.setAddress(request.getAddress());
         branch.setPhone(request.getPhone());
         branch.setEmail(request.getEmail());
+        branch.setOpeningDate(request.getOpeningDate());
 
         branch.setMain(false);
         branch.setStatus(StatusType.ACTIVE);
@@ -126,6 +127,7 @@ public class BranchServiceImpl implements BranchService {
         branch.setAddress(request.getAddress());
         branch.setPhone(request.getPhone());
         branch.setEmail(request.getEmail());
+        branch.setOpeningDate(request.getOpeningDate());
 
         repository.save(branch);
 
@@ -144,7 +146,7 @@ public class BranchServiceImpl implements BranchService {
 
         if (branch.getOrganization().getStatus() == StatusType.INACTIVE) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "La organización se encuentra deshabilitada.",
                     HttpStatus.CONFLICT
             );
@@ -167,7 +169,7 @@ public class BranchServiceImpl implements BranchService {
 
         if (Boolean.TRUE.equals(branch.getMain())) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "No se puede deshabilitar la sede principal de la organización.",
                     HttpStatus.CONFLICT
             );
@@ -205,7 +207,7 @@ public class BranchServiceImpl implements BranchService {
 
         if (branch.getStatus() == StatusType.INACTIVE) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "No se puede establecer como principal una sede deshabilitada.",
                     HttpStatus.CONFLICT
             );
@@ -213,7 +215,7 @@ public class BranchServiceImpl implements BranchService {
 
         if (branch.getOrganization().getStatus() == StatusType.INACTIVE) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "No se puede cambiar la sede principal porque la organización está deshabilitada.",
                     HttpStatus.CONFLICT
             );
@@ -239,7 +241,7 @@ public class BranchServiceImpl implements BranchService {
 
         if (repository.existsByCodeAndOrganizationId(code, organizationId)) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "Ya existe una sede con ese código dentro de la organización.",
                     HttpStatus.CONFLICT
             );
@@ -258,7 +260,7 @@ public class BranchServiceImpl implements BranchService {
                 id
         )) {
 
-            new Exceptions(
+            throw new Exceptions(
                     "Ya existe una sede con ese código dentro de la organización.",
                     HttpStatus.CONFLICT
             );

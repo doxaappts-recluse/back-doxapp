@@ -28,7 +28,7 @@ public class MemberMinistryAssignment extends Auditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private Person user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ministry_id", nullable = false)

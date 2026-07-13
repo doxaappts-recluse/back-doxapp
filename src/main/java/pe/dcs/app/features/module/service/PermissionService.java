@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.repository.ContractModulePermissionRepository;
-import pe.dcs.app.repository.UserModulePermissionRepository;
+import pe.dcs.app.repository.UserAccessModulePermissionRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -14,7 +14,7 @@ import java.util.UUID;
 public class PermissionService {
 
     private final ContractModulePermissionRepository contractModulePermissionRepository;
-    private final UserModulePermissionRepository userModulePermissionRepository;
+    private final UserAccessModulePermissionRepository userModulePermissionRepository;
 
     /**
      * Permisos del módulo según el contrato.

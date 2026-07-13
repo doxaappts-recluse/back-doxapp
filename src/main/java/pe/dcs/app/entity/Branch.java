@@ -7,6 +7,7 @@ import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.StatusType;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -44,6 +45,9 @@ public class Branch extends Auditable {
 
     private String email;
 
+    @Column(nullable = false)
+    private LocalDate openingDate;
+    
     @Column(
             name = "is_main",
             nullable = false
@@ -65,19 +69,8 @@ public class Branch extends Auditable {
     )
     private Organization organization;
 
-    // =========================
-    // USERS
-    // =========================
-
-    /**
-     * Personas pertenecientes
-     * físicamente a esta sede.
-     */
-    @OneToMany(
-            mappedBy = "branch"
-    )
-    private List<User> users =
-            new ArrayList<>();
+    @OneToMany(mappedBy = "branch")
+    private List<PersonBranch> personBranches = new ArrayList<>();
 
     // =========================
     // ACCESS

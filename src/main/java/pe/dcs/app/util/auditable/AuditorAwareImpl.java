@@ -6,8 +6,8 @@ import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import pe.dcs.app.entity.User;
-import pe.dcs.app.repository.UserRepository;
+import pe.dcs.app.entity.Person;
+import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 
 import java.util.Optional;
@@ -15,12 +15,12 @@ import java.util.Optional;
 @Component("auditorAware")
 @RequiredArgsConstructor
 public class AuditorAwareImpl
-        implements AuditorAware<User> {
+        implements AuditorAware<Person> {
 
-    private final UserRepository userRepository;
+    private final PersonRepository userRepository;
 
     @Override
-    public Optional<User> getCurrentAuditor() {
+    public Optional<Person> getCurrentAuditor() {
 
         Authentication auth =
                 SecurityContextHolder.getContext()

@@ -6,105 +6,55 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.*;
+import pe.dcs.app.features.user.org_user.mapper.OrgAdminMapper;
 import pe.dcs.app.repository.*;
 import pe.dcs.app.features.user.org_user.request.OrgAdminCreateRequest;
 import pe.dcs.app.features.user.org_user.request.OrgAdminUpdateRequest;
 import pe.dcs.app.features.user.org_user.response.OrgAdminResponse;
 import pe.dcs.app.features.user.org_user.service.OrgAdminUserService;
-import pe.dcs.app.features.user.system_user.mapper.UserSystemMapper;
 import pe.dcs.app.util.Exceptions;
+import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrgAdminUserServiceImpl implements OrgAdminUserService {
 
-    /*private final UserRepository userRepository;
+    /*private final PersonRepository userRepository;
     private final CredentialRepository credentialRepository;
-    private final OrganizationRepository organizationRepository;
     private final UserAccessRepository userAccessRepository;
+
+    private final OrganizationRepository organizationRepository;
+    private final BranchRepository branchRepository;
     private final RoleRepository roleRepository;
+
     private final PasswordEncoder passwordEncoder;
 
-    // =========================================================
-    // CREATE ORG ADMIN
-    // =========================================================
-
     @Override
-    @Transactional
-    public OrgAdminResponse createOrgAdmin(
-            OrgAdminCreateRequest request
-    ) {
+    public OrgAdminResponse createOrgAdmin(OrgAdminCreateRequest request) {
 
-        Organization org =
-                organizationRepository
-                        .findById(request.getOrganizationId())
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "Organization not found",
-                                        HttpStatus.NOT_FOUND
-                                )
-                        );
+        Organization organization = getOrganization(request.getOrganizationId());
+        Branch branch = getBranch(request.getBranchId());
 
-        Role role =
-                roleRepository
-                        .findByValue("ORG_ADMIN")
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "ORG_ADMIN role not found",
-                                        HttpStatus.NOT_FOUND
-                                )
-                        );
+        validateOrganizationActive(organization);
+        validateBranchBelongsOrganization(branch, organization);
+        validateBranchActive(branch);
+        validateOrgAdminNotExists(organization.getId());
+        validateDniCreate(request.getDni());
+        validateUsernameCreate(request.getUsername());
 
-        boolean existsAdmin =
-                userAccessRepository
-                        .existsByOrganizationIdAndRoleValue(
-                                org.getId(),
-                                "ORG_ADMIN"
-                        );
+        Role role = getOrgAdminRole();
 
-        if (existsAdmin) {
-
-            throw new Exceptions(
-                    "Organization already has an ORG_ADMIN",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        boolean existsDni =
-                userRepository
-                        .existsByDni(
-                                request.getDni()
-                        );
-
-        if (existsDni) {
-
-            throw new Exceptions(
-                    "DNI already exists",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        boolean existsUsername =
-                credentialRepository
-                        .existsByUsername(
-                                request.getUsername()
-                        );
-
-        if (existsUsername) {
-            throw new Exceptions(
-                    "Username already exists",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        // =========================
+        // ==========================
         // USER
-        // =========================
+        // ==========================
 
-        User user = new User();
+        Person user = new Person();
+
+        user.setBranch(branch);
 
         user.setName(request.getName());
         user.setLastname(request.getLastname());
@@ -117,165 +67,256 @@ public class OrgAdminUserServiceImpl implements OrgAdminUserService {
         user.setChildren(request.getChildren());
         user.setDateAdmission(request.getDateAdmission());
 
-        user = userRepository.save(user);
+        userRepository.save(user);
 
-        // =========================
+        // ==========================
         // CREDENTIAL
-        // =========================
+        // ==========================
 
         Credential credential = new Credential();
 
-        credential.setUser(user);
-        credential.setUsername(
-                request.getUsername()
-        );
+        credential.setPerson(user);
+        credential.setUsername(request.getUsername());
 
-        String rawPassword =
-                request.getPassword();
+        String password = request.getPassword();
 
-        if(rawPassword == null || rawPassword.isBlank()){
-            rawPassword = "iglesia2026";
+        if (password == null || password.isBlank()) {
+            password = "iglesia2025";
         }
 
-        credential.setPassword(
-                passwordEncoder.encode(rawPassword)
-        );
-
-        credential.setStatus(
-                StatusType.ACTIVE
-        );
+        credential.setPassword(passwordEncoder.encode(password));
+        credential.setStatus(StatusType.ACTIVE);
 
         credentialRepository.save(credential);
 
         user.setCredential(credential);
 
-        // =========================
-        // USER ACCESS
-        // =========================
+        // ==========================
+        // ACCESS
+        // ==========================
 
         UserAccess access = new UserAccess();
 
-        access.setUser(user);
-        access.setOrganization(org);
-        // null = toda la organización
-        access.setBranch(null);
+        access.setPerson(user);
+        access.setOrganization(organization);
+        access.setBranch(branch);
         access.setRole(role);
         access.setActive(true);
 
         userAccessRepository.save(access);
 
-        return UserSystemMapper
-                .mapToOrgAdminResponse(user);
+        return OrgAdminMapper.toResponse(user);
     }
 
     @Override
-    @Transactional
-    public OrgAdminResponse updateOrgAdmin(
-            UUID id,
-            OrgAdminUpdateRequest request
-    ) {
+    public OrgAdminResponse updateOrgAdmin(UUID id, OrgAdminUpdateRequest request) {
 
-        User user = getUser(id);
+        Person user = getUser(id);
 
-        if (request.getName() != null) {
-            user.setName(request.getName());
-        }
+        Branch branch = getBranch(request.getBranchId());
 
-        if (request.getLastname() != null) {
-            user.setLastname(request.getLastname());
-        }
+        UserAccess access = getActiveAccess(user);
 
-        if (request.getDni() != null) {
-            user.setDni(request.getDni());
-        }
+        validateBranchBelongsOrganization(branch, access.getOrganization());
+        validateBranchActive(branch);
+        validateDniUpdate(request.getDni(), user.getId());
+        validateUsernameUpdate(request.getUsername(), user.getCredential().getId());
 
-        if (request.getSex() != null) {
-            user.setSex(request.getSex());
-        }
+        user.setName(request.getName());
+        user.setLastname(request.getLastname());
+        user.setDni(request.getDni());
+        user.setSex(request.getSex());
+        user.setPhone(request.getPhone());
+        user.setAddress(request.getAddress());
+        user.setDateBirth(request.getDateBirth());
+        user.setMaritalStatus(request.getMaritalStatus());
+        user.setChildren(request.getChildren());
+        user.setDateAdmission(request.getDateAdmission());
 
-        if (request.getPhone() != null) {
-            user.setPhone(request.getPhone());
-        }
-
-        if (request.getAddress() != null) {
-            user.setAddress(request.getAddress());
-        }
-
-        if (request.getDateBirth() != null) {
-            user.setDateBirth(request.getDateBirth());
-        }
-
-        if (request.getMaritalStatus() != null) {
-            user.setMaritalStatus(request.getMaritalStatus());
-        }
-
-        if (request.getChildren() != null) {
-            user.setChildren(request.getChildren());
-        }
-
-        if (request.getDateAdmission() != null) {
-            user.setDateAdmission(request.getDateAdmission());
-        }
-
-        Credential credential = user.getCredential();
-
-        if (request.getUsername() != null) {
-
-            boolean existsUsername =
-                    credentialRepository.existsByUsernameAndIdNot(
-                            request.getUsername(),
-                            credential.getId()
-                    );
-
-            if (existsUsername) {
-                throw new Exceptions(
-                        "Username already exists",
-                        HttpStatus.CONFLICT
+        user.getCredential()
+                .setUsername(
+                        request.getUsername()
                 );
-            }
 
-            credential.setUsername(request.getUsername());
-        }
+        access.setBranch(branch);
 
         userRepository.save(user);
 
-        return UserSystemMapper.mapToOrgAdminResponse(user);
+        return OrgAdminMapper.toResponse(user);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public OrgAdminResponse getOrgAdmin(UUID orgId) {
+    public OrgAdminResponse getOrgAdmin(UUID organizationId){
 
-        Credential credential = credentialRepository
-                .findByUser_Organization_IdAndRole_Value(
-                        orgId,
-                        "ORG_ADMIN"
-                )
-                .orElseThrow(() ->
-                        new Exceptions(
-                                "ORG_ADMIN not found",
-                                HttpStatus.NOT_FOUND
+        UserAccess access =
+                userAccessRepository
+                        .findByOrganizationIdAndRoleValue(
+                                organizationId,
+                                RoleType.ORG_ADMIN
                         )
-                );
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "No existe administrador para la organización.",
+                                        HttpStatus.NOT_FOUND
+                                ));
 
-        return UserSystemMapper.mapToOrgAdminResponse(
-                credential.getUser()
-        );
+        return OrgAdminMapper.toResponse(access.setPerson(););
     }
 
-    // =========================================================
-    // GET USER
-    // =========================================================
-
-    private User getUser(UUID id) {
-
+    private Person getUser(UUID id){
         return userRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "User not found",
+                                "Usuario no encontrado.",
                                 HttpStatus.NOT_FOUND
-                        )
-                );
+                        ));
+    }
+
+    private Organization getOrganization(UUID id){
+        return organizationRepository.findById(id)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Organización no encontrada.",
+                                HttpStatus.NOT_FOUND
+                        ));
+    }
+
+    private Branch getBranch(UUID id){
+        return branchRepository.findById(id)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Sede no encontrada.",
+                                HttpStatus.NOT_FOUND
+                        ));
+    }
+
+    private Role getOrgAdminRole(){
+        return roleRepository.findByValue(RoleType.ORG_ADMIN)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Rol ORG_ADMIN no encontrado.",
+                                HttpStatus.NOT_FOUND
+                        ));
+    }
+
+    private UserAccess getActiveAccess(Person user){
+
+        return user.getAccesses()
+                .stream()
+                .filter(UserAccess::getActive)
+                .findFirst()
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "El usuario no posee un acceso activo.",
+                                HttpStatus.NOT_FOUND
+                        ));
+    }
+
+    //VALIDACIONES
+
+    private void validateOrganizationActive(Organization organization) {
+        if (organization.getStatus() == StatusType.INACTIVE) {
+            new Exceptions(
+                    "La organización se encuentra deshabilitada.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateBranchActive(Branch branch) {
+        if (branch.getStatus() == StatusType.INACTIVE) {
+            new Exceptions(
+                    "La sede se encuentra deshabilitada.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateBranchBelongsOrganization(Branch branch, Organization organization) {
+        if (!branch.getOrganization().getId().equals(organization.getId())) {
+            new Exceptions(
+                    "La sede no pertenece a la organización seleccionada.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateOrgAdminNotExists(UUID organizationId) {
+
+        boolean exists =
+                userAccessRepository
+                        .existsByOrganizationIdAndRoleValue(
+                                organizationId,
+                                "ORG_ADMIN"
+                        );
+
+        if (exists) {
+            new Exceptions(
+                    "La organización ya posee un administrador.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateDniCreate(String dni) {
+        if (userRepository.existsByDni(dni)) {
+            new Exceptions(
+                    "El DNI ya se encuentra registrado.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateDniUpdate(String dni, UUID userId) {
+        if (userRepository.existsByDniAndIdNot(dni, userId)) {
+            new Exceptions(
+                    "El DNI ya se encuentra registrado.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateUsernameCreate(String username) {
+        if (credentialRepository.existsByUsername(username)) {
+            new Exceptions(
+                    "El nombre de usuario ya existe.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateUsernameUpdate(String username, UUID credentialId) {
+        if (credentialRepository.existsByUsernameAndIdNot(username, credentialId)) {
+            new Exceptions(
+                    "El nombre de usuario ya existe.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateBranchHasOrganization(Branch branch) {
+        if (branch.getOrganization() == null) {
+            new Exceptions(
+                    "La sede no pertenece a ninguna organización.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void validateBranchEnabled(Branch branch) {
+        if (branch.getStatus() != StatusType.ACTIVE) {
+            new Exceptions(
+                    "Solo es posible asignar sedes activas.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private void assignBranch(Person user, UserAccess access, Branch branch){
+        user.setBranch(branch);
+        access.setBranch(branch);
     }*/
+
 
 }

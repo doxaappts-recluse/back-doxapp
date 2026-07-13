@@ -2,7 +2,7 @@ package pe.dcs.app.features.event.mapper;
 
 import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.EventFinance;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.event.response.finance.EventFinanceResponse;
 
 @Component
@@ -97,7 +97,7 @@ public class EventFinanceMapper {
     }
 
     private String buildFullName(
-            User user
+            Person user
     ) {
 
         return String.format(

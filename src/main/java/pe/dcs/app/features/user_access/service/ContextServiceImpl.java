@@ -25,7 +25,7 @@ public class ContextServiceImpl implements ContextService {
 
         List<UserAccess> accesses =
                 userAccessRepository
-                        .findActiveAccessesByUser(userId);
+                        .findActiveAccessesByPerson(userId);
 
         List<ContextBranchResponse> contexts =
                 new ArrayList<>();

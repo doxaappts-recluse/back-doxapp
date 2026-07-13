@@ -1,30 +1,8 @@
 package pe.dcs.app.features.user.org_user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import pe.dcs.app.entity.Organization;
-import pe.dcs.app.entity.User;
-import pe.dcs.app.features.user.org_user.mapper.OrgUserCreateMapper;
-import pe.dcs.app.features.user.org_user.mapper.OrgUserMapper;
-import pe.dcs.app.features.user.org_user.request.OrgUserCreateRequest;
-import pe.dcs.app.features.user.org_user.request.OrgUserListRequest;
-import pe.dcs.app.features.user.org_user.request.OrgUserUpdateRequest;
-import pe.dcs.app.features.user.org_user.response.OrgUserCreateResponse;
-import pe.dcs.app.features.user.org_user.response.OrgUserResponse;
 import pe.dcs.app.features.user.org_user.service.OrgUserService;
-import pe.dcs.app.repository.UserRepository;
-import pe.dcs.app.util.Exceptions;
-import pe.dcs.app.util.pagination.PageResponse;
-import pe.dcs.app.util.pagination.PaginationResponse;
-import pe.dcs.app.security.service.AuthContext;
-import pe.dcs.app.util.pagination.PageableUtil;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

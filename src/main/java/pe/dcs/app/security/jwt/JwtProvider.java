@@ -23,7 +23,7 @@ public class JwtProvider {
 
     private static final Logger logger = LogManager.getLogger(JwtProvider.class);
 
-    @Value("#{${app.jwt.time-in-minutes} * 180000}")
+    @Value("#{${app.jwt.time-in-minutes} * 1800000}")
     private long expiracionToken;
 
     @Value("${app.jwt.secret}")

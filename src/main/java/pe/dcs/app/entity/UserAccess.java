@@ -13,9 +13,9 @@ import java.util.UUID;
         name = "user_accesses",
         uniqueConstraints = {
                 @UniqueConstraint(
-                        name = "uk_user_org_branch_role",
+                        name = "uk_person_org_branch_role",
                         columnNames = {
-                                "user_id",
+                                "person_id",
                                 "organization_id",
                                 "branch_id",
                                 "role_id"
@@ -25,8 +25,8 @@ import java.util.UUID;
         indexes = {
 
                 @Index(
-                        name = "idx_access_user",
-                        columnList = "user_id"
+                        name = "idx_access_person",
+                        columnList = "person_id"
                 ),
 
                 @Index(
@@ -45,8 +45,8 @@ import java.util.UUID;
                 ),
 
                 @Index(
-                        name = "idx_access_user_org_branch",
-                        columnList = "user_id,organization_id,branch_id"
+                        name = "idx_access_person_org_branch",
+                        columnList = "person_id,organization_id,branch_id"
                 )
         }
 )
@@ -63,8 +63,8 @@ public class UserAccess extends Auditable {
      * Persona que tiene acceso al sistema.
      */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name="person_id")
+    private Person person;
 
     /**
      * Organización donde aplica el permiso.

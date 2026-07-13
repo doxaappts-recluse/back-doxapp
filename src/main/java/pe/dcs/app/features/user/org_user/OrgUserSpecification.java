@@ -2,14 +2,14 @@ package pe.dcs.app.features.user.org_user;
 
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.user.shared.BaseUserSpecification;
 
 import java.util.UUID;
 
 public class OrgUserSpecification extends BaseUserSpecification {
 
-    public static Specification<User> filter(
+    public static Specification<Person> filter(
             UUID organizationId,
             String name,
             String lastname,

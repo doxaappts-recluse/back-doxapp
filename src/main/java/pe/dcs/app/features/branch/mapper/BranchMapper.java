@@ -19,6 +19,7 @@ public class BranchMapper {
                 .phone(branch.getPhone())
                 .email(branch.getEmail())
                 .main(branch.getMain())
+                .openingDate(branch.getOpeningDate())
                 .status(branch.getStatus() == StatusType.ACTIVE)
                 .build();
     }

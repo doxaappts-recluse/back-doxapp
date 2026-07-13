@@ -1,13 +1,12 @@
 package pe.dcs.app.features.user.org_user.mapper;
 
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.user.org_user.response.OrgUserCreateResponse;
-import pe.dcs.app.features.user.org_user.response.OrgUserResponse;
 import pe.dcs.app.features.user.shared.BaseUserMapper;
 
 public class OrgUserCreateMapper {
 
-    public static OrgUserCreateResponse toResponse(User user) {
+    public static OrgUserCreateResponse toResponse(Person user) {
 
         OrgUserCreateResponse res = new OrgUserCreateResponse();
 

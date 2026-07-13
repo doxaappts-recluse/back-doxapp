@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Credential;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.repository.CredentialRepository;
 import pe.dcs.app.security.service.UserAccessContext;
@@ -68,8 +68,8 @@ public class CredentialDetailsService implements UserDetailsService {
                                         )
                         );
 
-        User user =
-                credential.getUser();
+        Person user =
+                credential.getPerson();
 
         List<UserAccessContext> accesses =
                 user.getAccesses()

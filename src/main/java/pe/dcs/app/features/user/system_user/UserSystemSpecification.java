@@ -5,7 +5,7 @@ import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import pe.dcs.app.entity.Credential;
 import pe.dcs.app.entity.Role;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.user.system_user.request.UserSystemFilter;
 import pe.dcs.app.features.user.system_user.request.UserSystemListRequest;
 
@@ -16,7 +16,7 @@ public class UserSystemSpecification {
 
     private UserSystemSpecification() {}
 
-    public static Specification<User> filter(
+    public static Specification<Person> filter(
             UserSystemListRequest request, String typeOrg
     ) {
 
@@ -40,8 +40,8 @@ public class UserSystemSpecification {
                 return cb.and(predicates.toArray(new Predicate[0]));
             }
 
-            Join<User, Credential> credentialJoin = null;
-            Join<User, Role> roleJoin = null;
+            Join<Person, Credential> credentialJoin = null;
+            Join<Person, Role> roleJoin = null;
 
             // NAME
             if (filters.getName() != null && !filters.getName().isBlank()) {

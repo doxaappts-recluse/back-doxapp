@@ -12,7 +12,7 @@ import pe.dcs.app.features.module.mapper.SidebarMapper;
 import pe.dcs.app.features.module.response.MeAccessResponse;
 import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ModuleRepository;
-import pe.dcs.app.repository.UserModuleRepository;
+import pe.dcs.app.repository.UserAccessModuleRepository;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 import pe.dcs.app.util.enums.SystemRoleType;
 
@@ -27,7 +27,7 @@ public class SidebarService {
 
     private final ContractResolver contractResolver;
     private final ContractModuleRepository contractModuleRepository;
-    private final UserModuleRepository userModuleRepository;
+    private final UserAccessModuleRepository userModuleRepository;
     private final ModuleRepository moduleRepository;
     private final SidebarMapper sidebarMapper;
 
@@ -150,7 +150,7 @@ public class SidebarService {
             Set<UUID> userModules =
                     new HashSet<>(
                             userModuleRepository
-                                    .findActiveModuleIdsByUserId(
+                                    .findActiveModuleIdsByPersonId(
                                             user.getUserId()
                                     )
                     );

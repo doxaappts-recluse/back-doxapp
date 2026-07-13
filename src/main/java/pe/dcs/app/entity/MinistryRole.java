@@ -9,19 +9,7 @@ import pe.dcs.app.util.auditable.Auditable;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "ministry_roles",
-        indexes = {
-                @Index(
-                        name = "idx_ministry_role_name",
-                        columnList = "name"
-                ),
-                @Index(
-                        name = "idx_ministry_role_ministry",
-                        columnList = "ministry_id"
-                )
-        }
-)
+@Table(name = "ministry_roles")
 @Getter
 @Setter
 public class MinistryRole extends Auditable {
@@ -31,19 +19,23 @@ public class MinistryRole extends Auditable {
     @UuidGenerator
     private UUID id;
 
+
     @Column(nullable = false)
     private String name;
 
+
     private String description;
+
 
     @Column(nullable = false)
     private Boolean active = true;
 
-    /* null = rol global */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ministry_id")
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "ministry_id", nullable = false)
     private Ministry ministry;
 
-    @Column(name = "requires_active_membership")
+
     private Boolean requiresActiveMembership = true;
+
 }

@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -54,6 +55,9 @@ public class Organization extends Auditable {
 
     private String address;
 
+    @Column(nullable = false)
+    private LocalDate foundedDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StatusType status;
@@ -72,20 +76,6 @@ public class Organization extends Auditable {
             orphanRemoval = true
     )
     private List<Branch> branches =
-            new ArrayList<>();
-
-    // =========================
-    // USERS
-    // =========================
-
-    /**
-     * Usuarios registrados
-     * dentro de la organización.
-     */
-    @OneToMany(
-            mappedBy = "organization"
-    )
-    private List<User> users =
             new ArrayList<>();
 
     // =========================

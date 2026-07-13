@@ -20,7 +20,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventDashboardServiceImpl implements EventDashboardService {
 
-    private final EventFinanceRepository financeRepository;
+    /*private final EventFinanceRepository financeRepository;
     private final EventRegistrationRepository registrationRepository;
     private final EventRepository eventRepository;
 
@@ -132,5 +132,5 @@ public class EventDashboardServiceImpl implements EventDashboardService {
 
     private BigDecimal safe(BigDecimal value) {
         return value != null ? value : BigDecimal.ZERO;
-    }
+    }*/
 }

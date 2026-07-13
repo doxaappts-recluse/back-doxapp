@@ -11,7 +11,6 @@ import pe.dcs.app.util.enums.events.EventFinanceType;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -58,11 +57,11 @@ public class EventFinance extends Auditable {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_user_id")
-    private User createdByUser;
+    private Person createdByUser;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "approved_by_user_id")
-    private User approvedByUser;
+    private Person approvedByUser;
 
     private Instant approvedAt;
 

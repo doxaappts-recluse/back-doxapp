@@ -15,7 +15,7 @@ import java.util.UUID;
 @Table(
         name = "memberships",
         indexes = {
-                @Index(name = "idx_membership_user", columnList = "user_id"),
+                @Index(name = "idx_membership_person", columnList = "person_id"),
                 @Index(name = "idx_membership_status", columnList = "status")
         }
 )
@@ -29,8 +29,8 @@ public class Membership extends Auditable {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    @JoinColumn(name="person_id")
+    private Person person;
 
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
@@ -43,7 +43,6 @@ public class Membership extends Auditable {
     private MembershipStatus status;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private MembershipExitReason exitReason;
 
     private String reason;

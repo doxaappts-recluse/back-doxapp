@@ -1,35 +1,8 @@
 package pe.dcs.app.features.user.system_user;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import pe.dcs.app.entity.Credential;
-import pe.dcs.app.entity.Role;
-import pe.dcs.app.entity.User;
-import pe.dcs.app.entity.UserAccess;
-import pe.dcs.app.repository.*;
-import pe.dcs.app.features.user.system_user.mapper.UserSystemMapper;
-import pe.dcs.app.features.user.system_user.request.UserSystemCreateRequest;
-import pe.dcs.app.features.user.system_user.request.UserSystemListRequest;
-import pe.dcs.app.features.user.system_user.request.UserSystemUpdateRequest;
-import pe.dcs.app.features.user.system_user.response.UserSystemResponse;
 import pe.dcs.app.features.user.system_user.service.UserSystemService;
-import pe.dcs.app.features.user.shared.UserChangePasswordRequest;
-import pe.dcs.app.util.pagination.PageResponse;
-import pe.dcs.app.util.pagination.PaginationResponse;
-import pe.dcs.app.security.service.AuthContext;
-import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
-import pe.dcs.app.service.AuthorizationService;
-import pe.dcs.app.util.Exceptions;
-import pe.dcs.app.util.pagination.PageableUtil;
-import pe.dcs.app.util.enums.StatusType;
-
-import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor

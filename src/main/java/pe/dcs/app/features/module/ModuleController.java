@@ -108,10 +108,4 @@ public class ModuleController {
         );
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> delete(@PathVariable UUID id) {
-        return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulo eliminado", moduleService.delete(id))
-        );
-    }
 }

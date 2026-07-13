@@ -3,7 +3,7 @@ package pe.dcs.app.features.user.shared;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 
 import java.util.UUID;
 
@@ -13,7 +13,7 @@ public abstract class BaseUserSpecification {
     }
 
     public  static Predicate baseFilters(
-            Root<User> root,
+            Root<Person> root,
             CriteriaBuilder cb,
             UUID organizationId,
             String name,

@@ -45,21 +45,6 @@ public class Contract extends Auditable {
     @UuidGenerator
     private UUID id;
 
-    /**
-     * Contrato perteneciente a una sede.
-     *
-     * La sede determina:
-     * - módulos disponibles
-     * - permisos
-     * - capacidad contratada
-     */
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(
-            name = "branch_id",
-            nullable = false
-    )
-    private Branch branch;
-
     // =========================
     // PLAN
     // =========================

@@ -6,15 +6,12 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(
-        name = "ministries",
-        indexes = {
-                @Index(name = "idx_ministry_name", columnList = "name")
-        }
-)
+@Table(name = "ministries")
 @Getter
 @Setter
 public class Ministry extends Auditable {
@@ -24,12 +21,20 @@ public class Ministry extends Auditable {
     @UuidGenerator
     private UUID id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String name;
 
     private String description;
 
     @Column(nullable = false)
     private Boolean active = true;
+
+
+    @OneToMany(
+            mappedBy = "ministry",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<MinistryRole> roles = new ArrayList<>();
 
 }

@@ -86,12 +86,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setAddress(request.getAddress());
         organization.setRuc(request.getRuc());
         organization.setStatus(StatusType.ACTIVE);
+        organization.setFoundedDate(request.getFoundedDate());
 
         Branch branch = new Branch();
 
         branch.setName(request.getName() + " Principal");
         branch.setCode("MAIN");
         branch.setMain(true);
+        branch.setOpeningDate(request.getFoundedDate());
         branch.setStatus(StatusType.ACTIVE);
         branch.setOrganization(organization);
         organization.getBranches().add(branch);
@@ -111,6 +113,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setName(request.getName());
         organization.setAddress(request.getAddress());
         organization.setRuc(request.getRuc());
+        organization.setFoundedDate(request.getFoundedDate());
 
         repository.save(organization);
 
@@ -164,11 +167,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             String ruc
     ) {
 
-        boolean exists =
-                repository.existsByRuc(ruc);
+        boolean exists = repository.existsByRuc(ruc);
 
         if (exists) {
-            new Exceptions(
+            throw new Exceptions(
                     "Ya existe una organización con el RUC ingresado",
                     HttpStatus.CONFLICT
             );
@@ -187,7 +189,7 @@ public class OrganizationServiceImpl implements OrganizationService {
                 );
 
         if (exists) {
-            new Exceptions(
+            throw new Exceptions(
                     "Ya existe una organización con el RUC ingresado",
                     HttpStatus.CONFLICT
             );

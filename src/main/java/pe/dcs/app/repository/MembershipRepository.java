@@ -14,21 +14,21 @@ import java.util.UUID;
 @Repository
 public interface MembershipRepository extends JpaRepository<Membership, UUID> {
 
-    Optional<Membership> findByUserIdAndCurrentTrue(
-            UUID userId
+    Optional<Membership> findByPersonIdAndCurrentTrue(
+            UUID personId
     );
 
-    List<Membership> findByUserIdOrderByStartDateDesc(
-            UUID userId
+    List<Membership> findByPersonIdOrderByStartDateDesc(
+            UUID personId
     );
 
-    Page<Membership> findByUserId(
-            UUID userId,
+    Page<Membership> findByPersonId(
+            UUID personId,
             Pageable pageable
     );
 
-    boolean existsByUserIdAndCurrentTrueAndStatus(
-            UUID userId,
+    boolean existsByPersonIdAndCurrentTrueAndStatus(
+            UUID personId,
             MembershipStatus status
     );
 

@@ -2,6 +2,7 @@ package pe.dcs.app.features.branch.response;
 
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Getter
@@ -18,4 +19,5 @@ public class BranchResponse {
     private String email;
     private Boolean main;
     private Boolean status;
+    private LocalDate openingDate;
 }

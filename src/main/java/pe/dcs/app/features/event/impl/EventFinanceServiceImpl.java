@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Event;
 import pe.dcs.app.entity.EventFinance;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.event.mapper.EventFinanceMapper;
 import pe.dcs.app.features.event.request.finance.*;
 import pe.dcs.app.features.event.response.finance.EventFinanceResponse;
@@ -17,7 +17,7 @@ import pe.dcs.app.features.event.service.EventFinanceService;
 import pe.dcs.app.features.event.specification.EventFinanceSpecification;
 import pe.dcs.app.repository.EventFinanceRepository;
 import pe.dcs.app.repository.EventRepository;
-import pe.dcs.app.repository.UserRepository;
+import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.events.EventFinanceStatus;
@@ -26,7 +26,6 @@ import pe.dcs.app.util.pagination.PageableUtil;
 import pe.dcs.app.util.pagination.PaginationResponse;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -34,11 +33,11 @@ import java.util.UUID;
 public class EventFinanceServiceImpl
         implements EventFinanceService {
 
-    private final EventFinanceRepository eventFinanceRepository;
+    /*private final EventFinanceRepository eventFinanceRepository;
     private final EventRepository eventRepository;
     private final EventFinanceMapper eventFinanceMapper;
     private final AuthContext authContext;
-    private final UserRepository userRepository;
+    private final PersonRepository userRepository;
 
     @Override
     @Transactional
@@ -57,7 +56,7 @@ public class EventFinanceServiceImpl
                                 )
                         );
 
-        User user =
+        Person user =
                 userRepository.findById(
                                 authContext.getUserId()
                         )
@@ -145,9 +144,7 @@ public class EventFinanceServiceImpl
                                 )
                         );
 
-        /*
-         * Los movimientos aprobados son inmutables.
-         */
+
         if (finance.getStatus() ==
                 EventFinanceStatus.APPROVED) {
 
@@ -157,10 +154,7 @@ public class EventFinanceServiceImpl
             );
         }
 
-        /*
-         * ORG_USER solamente puede editar
-         * movimientos creados por él mismo.
-         */
+
         if (
                 !authContext.isSystem()
                 &&
@@ -217,10 +211,7 @@ public class EventFinanceServiceImpl
                 request.getObservations()
         );
 
-        /*
-         * Si estaba rechazado vuelve
-         * al flujo de aprobación.
-         */
+
         if (finance.getStatus() ==
                 EventFinanceStatus.REJECTED) {
 
@@ -285,7 +276,7 @@ public class EventFinanceServiceImpl
             );
         }
 
-        User admin =
+        Person admin =
                 userRepository.findById(
                                 authContext.getUserId()
                         )
@@ -448,5 +439,5 @@ public class EventFinanceServiceImpl
                         page.getNumber()
                 )
         );
-    }
+    }*/
 }

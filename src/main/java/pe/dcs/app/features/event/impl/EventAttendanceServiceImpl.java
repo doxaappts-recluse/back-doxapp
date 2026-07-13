@@ -23,7 +23,7 @@ import java.time.Instant;
 @Transactional
 public class EventAttendanceServiceImpl implements EventAttendanceService {
 
-    private final EventRegistrationRepository registrationRepository;
+    /*private final EventRegistrationRepository registrationRepository;
     private final EventAttendanceRepository attendanceRepository;
 
     @Transactional
@@ -102,5 +102,5 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         }
 
         return input.trim();
-    }
+    }*/
 }

@@ -35,11 +35,9 @@ public class Credential extends Auditable {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(
-            name="user_id",
-            nullable=false,
-            unique=true
+            name="person_id"
     )
-    private User user;
+    private Person person;
 
     public boolean canLogin(){
         return status == StatusType.ACTIVE;

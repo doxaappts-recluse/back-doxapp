@@ -27,5 +27,4 @@ public interface ModuleService {
 
     ModuleResponse disable(UUID id);
 
-    ModuleResponse delete(UUID id);
 }

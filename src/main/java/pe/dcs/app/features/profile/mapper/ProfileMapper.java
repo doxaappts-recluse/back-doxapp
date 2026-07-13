@@ -2,7 +2,7 @@ package pe.dcs.app.features.profile.mapper;
 
 import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.Credential;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.profile.response.ProfileAccessResponse;
 import pe.dcs.app.features.profile.response.ProfileResponse;
@@ -12,7 +12,7 @@ import java.util.List;
 @Component
 public class ProfileMapper {
 
-    public ProfileResponse toResponse(User user) {
+    public ProfileResponse toResponse(Person user) {
 
         Credential credential = user.getCredential();
 

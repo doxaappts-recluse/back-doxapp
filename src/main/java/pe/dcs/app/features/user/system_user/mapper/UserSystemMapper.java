@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import pe.dcs.app.entity.Credential;
 import pe.dcs.app.entity.Role;
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.user.org_user.response.OrgAdminResponse;
 import pe.dcs.app.features.user.system_user.response.UserSystemResponse;
@@ -14,7 +14,7 @@ import pe.dcs.app.util.enums.StatusType;
 public class UserSystemMapper {
 
 
-    public static UserSystemResponse toResponse(User user) {
+    public static UserSystemResponse toResponse(Person user) {
 
         UserAccess access = getActiveAccess(user);
 
@@ -71,7 +71,7 @@ public class UserSystemMapper {
 
 
 
-    public static OrgAdminResponse mapToOrgAdminResponse(User user) {
+    public static OrgAdminResponse mapToOrgAdminResponse(Person user) {
 
         Credential credential = user.getCredential();
 
@@ -110,7 +110,7 @@ public class UserSystemMapper {
                 .build();
     }
 
-    private static UserAccess getActiveAccess(User user) {
+    private static UserAccess getActiveAccess(Person user) {
 
         if(user.getAccesses() == null)
             return null;

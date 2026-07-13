@@ -1,18 +1,16 @@
 package pe.dcs.app.features.user.org_user.response;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Getter
 @Setter
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class OrgAdminResponse {
-
     private UUID id;
-
     private String name;
     private String lastname;
     private String dni;
@@ -23,10 +21,17 @@ public class OrgAdminResponse {
     private String maritalStatus;
     private String children;
     private String dateAdmission;
-
     private String username;
-    private String password;
+    private Boolean status;
 
+    // Organización
     private UUID organizationId;
+    private String organizationName;
+
+    // Sede
+
+    private UUID branchId;
+    private String branchName;
+    private Boolean branchMain;
 
 }

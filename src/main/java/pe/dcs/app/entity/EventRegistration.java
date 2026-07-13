@@ -72,7 +72,7 @@ public class EventRegistration extends Auditable {
      */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private User user;
+    private Person user;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

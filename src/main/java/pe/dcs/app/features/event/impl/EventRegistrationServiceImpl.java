@@ -1,54 +1,27 @@
 package pe.dcs.app.features.event.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.dcs.app.entity.Event;
-import pe.dcs.app.entity.EventRegistration;
-import pe.dcs.app.entity.User;
 import pe.dcs.app.features.event.mapper.EventRegistrationMapper;
-import pe.dcs.app.features.event.request.registration.EventRegistrationBulkRequest;
-import pe.dcs.app.features.event.request.registration.EventRegistrationFilter;
-import pe.dcs.app.features.event.request.registration.EventRegistrationRequest;
-import pe.dcs.app.features.event.request.registration.EventRegistrationSearchRequest;
-import pe.dcs.app.features.event.response.registration.EventRegistrationBulkResponse;
-import pe.dcs.app.features.event.response.registration.EventRegistrationDetailResponse;
-import pe.dcs.app.features.event.response.registration.EventRegistrationResponse;
 import pe.dcs.app.features.event.service.EventRegistrationService;
-import pe.dcs.app.features.event.specification.EventRegistrationSpecification;
 import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
 import pe.dcs.app.repository.EventRepository;
-import pe.dcs.app.repository.UserRepository;
+import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.AuthContext;
-import pe.dcs.app.util.Exceptions;
-import pe.dcs.app.util.enums.events.EventStatus;
-import pe.dcs.app.util.enums.events.RegistrationCategory;
-import pe.dcs.app.util.enums.events.RegistrationStatus;
-import pe.dcs.app.util.pagination.PageResponse;
-import pe.dcs.app.util.pagination.PageableUtil;
-import pe.dcs.app.util.pagination.PaginationResponse;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
 public class EventRegistrationServiceImpl implements EventRegistrationService {
 
-    private final EventRegistrationRepository eventRegistrationRepository;
+    /*private final EventRegistrationRepository eventRegistrationRepository;
     private final EventRepository eventRepository;
-    private final UserRepository userRepository;
+    private final PersonRepository userRepository;
     private final EventAttendanceRepository attendanceRepository;
     private final EventRegistrationMapper eventRegistrationMapper;
-    private final AuthContext authContext;
+    private final AuthContext authContext;*/
 
     /*@Override
     @Transactional(readOnly = true)

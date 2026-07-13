@@ -3,6 +3,7 @@ package pe.dcs.app.features.organization.response;
 import lombok.*;
 import pe.dcs.app.util.enums.StatusType;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 
@@ -16,5 +17,6 @@ public class OrganizationResponse {
     private String name;
     private String address;
     private String ruc;
+    private LocalDate foundedDate;
     private Boolean status;
 }

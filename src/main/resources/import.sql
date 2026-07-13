@@ -10,12 +10,12 @@ INSERT INTO roles (id,name,value,status,created_at) VALUES ('55555555-5555-5555-
 -- =========================================================
 -- ORGANIZATION
 -- =========================================================
-INSERT INTO organizations (id,name,ruc,status,created_at) VALUES ('99999999-9999-9999-9999-999999999999','Iglesia Central','99999999999','ACTIVE',CURRENT_TIMESTAMP);
+INSERT INTO organizations (id,name,ruc,founded_date,status,created_at) VALUES ('99999999-9999-9999-9999-999999999999','Iglesia Central','99999999999',CURRENT_DATE,'ACTIVE',CURRENT_TIMESTAMP);
 
 -- =========================================================
 -- BRANCH
 -- =========================================================
-INSERT INTO branches (id,name,code,is_main,status,organization_id,created_at) VALUES ('88888888-8888-8888-8888-888888888888','Sede Norte','NORTE',true,'ACTIVE','99999999-9999-9999-9999-999999999999',CURRENT_TIMESTAMP);
+INSERT INTO branches (id,name,code,opening_date,is_main,status,organization_id,created_at) VALUES ('88888888-8888-8888-8888-888888888888','Sede Norte','NORTE',CURRENT_DATE,true,'ACTIVE','99999999-9999-9999-9999-999999999999',CURRENT_TIMESTAMP);
 
 -- =========================================================
 -- MODULES
@@ -39,30 +39,38 @@ INSERT INTO modules (id,name,code,icon,route,order_num,status,parent_id,created_
 INSERT INTO contracts (id,branch_id,plan_name,price,currency,start_date,end_date,number_users,status,created_at) VALUES ('77777777-aaaa-aaaa-7777-777777777777','88888888-8888-8888-8888-888888888888','PLAN PREMIUM',199.90,'PEN','2026-01-01','2026-12-31',100,'ACTIVE',CURRENT_TIMESTAMP);
 
 -- =========================================================
--- USERS
+-- PERSON
 -- =========================================================
-INSERT INTO users (id,name,lastname,created_at) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','Master','Admin',CURRENT_TIMESTAMP);
-INSERT INTO users (id,name,lastname,organization_id,branch_id,created_at) VALUES ('11111111-aaaa-bbbb-cccc-111111111111','Carlos','Administrador','99999999-9999-9999-9999-999999999999',NULL,CURRENT_TIMESTAMP);
-INSERT INTO users (id,name,lastname,organization_id,branch_id,created_at) VALUES ('22222222-aaaa-bbbb-cccc-111111111111','Pedro','Encargado Norte','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888',CURRENT_TIMESTAMP);
-INSERT INTO users (id,name,lastname,organization_id,branch_id,created_at) VALUES ('33333333-aaaa-bbbb-cccc-111111111111','Juan','Usuario','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888',CURRENT_TIMESTAMP);
-INSERT INTO users (id,name,lastname,organization_id,branch_id,created_at) VALUES ('77777777-7777-7777-7777-777777777777','Pedro','Gomez','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888',CURRENT_TIMESTAMP);
+INSERT INTO persons (id,name,lastname,created_at) VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','Master','Admin',CURRENT_TIMESTAMP);
+INSERT INTO persons (id,name,lastname,created_at) VALUES ('11111111-aaaa-bbbb-cccc-111111111111','Carlos','Administrador',CURRENT_TIMESTAMP);
+INSERT INTO persons (id,name,lastname,created_at) VALUES ('22222222-aaaa-bbbb-cccc-111111111111','Pedro','Encargado Norte',CURRENT_TIMESTAMP);
+INSERT INTO persons (id,name,lastname,created_at) VALUES ('33333333-aaaa-bbbb-cccc-111111111111','Juan','Usuario',CURRENT_TIMESTAMP);
+INSERT INTO persons (id,name,lastname,created_at) VALUES ('77777777-7777-7777-7777-777777777777','Pedro','Gomez',CURRENT_TIMESTAMP);
+
+-- =========================================================
+-- PERSON BRANCH
+-- =========================================================
+INSERT INTO person_branches (id,person_id,branch_id,active,start_date,created_at) VALUES ('b1111111-1111-1111-1111-111111111111','11111111-aaaa-bbbb-cccc-111111111111','88888888-8888-8888-8888-888888888888',true,CURRENT_DATE,CURRENT_TIMESTAMP);
+INSERT INTO person_branches (id,person_id,branch_id,active,start_date,created_at) VALUES ('b2222222-2222-2222-2222-222222222222','22222222-aaaa-bbbb-cccc-111111111111','88888888-8888-8888-8888-888888888888',true,CURRENT_DATE,CURRENT_TIMESTAMP);
+INSERT INTO person_branches (id,person_id,branch_id,active,start_date,created_at) VALUES ('b3333333-3333-3333-3333-333333333333','33333333-aaaa-bbbb-cccc-111111111111','88888888-8888-8888-8888-888888888888',true,CURRENT_DATE,CURRENT_TIMESTAMP);
+INSERT INTO person_branches (id,person_id,branch_id,active,start_date,created_at) VALUES ('b7777777-7777-7777-7777-777777777777','77777777-7777-7777-7777-777777777777','88888888-8888-8888-8888-888888888888',true,CURRENT_DATE,CURRENT_TIMESTAMP);
 
 -- =========================================================
 -- USER ACCESS (SEDE)
 -- =========================================================
-INSERT INTO user_accesses (id,user_id,organization_id,branch_id,role_id,active,created_at) VALUES ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',NULL,NULL,'11111111-1111-1111-1111-111111111111',true,CURRENT_TIMESTAMP);
-INSERT INTO user_accesses (id,user_id,organization_id,branch_id,role_id,active,created_at) VALUES ('11111111-aaaa-bbbb-cccc-333333333333','11111111-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999',NULL,'33333333-3333-3333-3333-333333333333',true,CURRENT_TIMESTAMP);
-INSERT INTO user_accesses (id,user_id,organization_id,branch_id,role_id,active,created_at) VALUES ('22222222-aaaa-bbbb-cccc-333333333333','22222222-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','55555555-5555-5555-5555-555555555555',true,CURRENT_TIMESTAMP);
-INSERT INTO user_accesses (id,user_id,organization_id,branch_id,role_id,active,created_at) VALUES ('33333333-aaaa-bbbb-cccc-333333333333','33333333-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','44444444-4444-4444-4444-444444444444',true,CURRENT_TIMESTAMP);
-INSERT INTO user_accesses (id,user_id,organization_id,branch_id,role_id,active,created_at) VALUES ('66666666-6666-6666-6666-666666666666','77777777-7777-7777-7777-777777777777','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','44444444-4444-4444-4444-444444444444',true,CURRENT_TIMESTAMP);
+INSERT INTO user_accesses (id,person_id,organization_id,branch_id,role_id,active,created_at) VALUES ('aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',NULL,NULL,'11111111-1111-1111-1111-111111111111',true,CURRENT_TIMESTAMP);
+INSERT INTO user_accesses (id,person_id,organization_id,branch_id,role_id,active,created_at) VALUES ('11111111-aaaa-bbbb-cccc-333333333333','11111111-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','33333333-3333-3333-3333-333333333333',true,CURRENT_TIMESTAMP);
+INSERT INTO user_accesses (id,person_id,organization_id,branch_id,role_id,active,created_at) VALUES ('22222222-aaaa-bbbb-cccc-333333333333','22222222-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','55555555-5555-5555-5555-555555555555',true,CURRENT_TIMESTAMP);
+INSERT INTO user_accesses (id,person_id,organization_id,branch_id,role_id,active,created_at) VALUES ('33333333-aaaa-bbbb-cccc-333333333333','33333333-aaaa-bbbb-cccc-111111111111','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','44444444-4444-4444-4444-444444444444',true,CURRENT_TIMESTAMP);
+INSERT INTO user_accesses (id,person_id,organization_id,branch_id,role_id,active,created_at) VALUES ('66666666-6666-6666-6666-666666666666','77777777-7777-7777-7777-777777777777','99999999-9999-9999-9999-999999999999','88888888-8888-8888-8888-888888888888','44444444-4444-4444-4444-444444444444',true,CURRENT_TIMESTAMP);
 
 -- =========================================================
 -- CREDENTIALS
 -- =========================================================
-INSERT INTO credentials (id,username,password,status,user_id,created_at) VALUES ('c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1','admin','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',CURRENT_TIMESTAMP);
-INSERT INTO credentials (id,username,password,status,user_id,created_at) VALUES ('11111111-aaaa-bbbb-cccc-222222222222','carlos','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','11111111-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
-INSERT INTO credentials (id,username,password,status,user_id,created_at) VALUES ('22222222-aaaa-bbbb-cccc-222222222222','pedro.norte','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','22222222-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
-INSERT INTO credentials (id,username,password,status,user_id,created_at) VALUES ('33333333-aaaa-bbbb-cccc-222222222222','juan.usuario','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','33333333-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
+INSERT INTO credentials (id,username,password,status,person_id,created_at) VALUES ('c1c1c1c1-c1c1-c1c1-c1c1-c1c1c1c1c1c1','admin','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa',CURRENT_TIMESTAMP);
+INSERT INTO credentials (id,username,password,status,person_id,created_at) VALUES ('11111111-aaaa-bbbb-cccc-222222222222','carlos','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','11111111-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
+INSERT INTO credentials (id,username,password,status,person_id,created_at) VALUES ('22222222-aaaa-bbbb-cccc-222222222222','pedro.norte','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','22222222-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
+INSERT INTO credentials (id,username,password,status,person_id,created_at) VALUES ('33333333-aaaa-bbbb-cccc-222222222222','juan.usuario','$2a$12$xSdY4w8oOjT2ppSSgPMsfeHIo0Dm3wo8FQCWX936zsZzoB1133k16','ACTIVE','33333333-aaaa-bbbb-cccc-111111111111',CURRENT_TIMESTAMP);
 
 -- =========================================================
 -- PERMISSIONS
@@ -94,5 +102,5 @@ INSERT INTO contract_module_permissions (id,contract_module_id,permission_id,cre
 -- =========================================================
 -- MODULES BY USER
 -- =========================================================
-INSERT INTO user_modules (id,user_id,module_id,status,enabled,created_at) VALUES ('80000000-0000-0000-0000-000000000002','33333333-aaaa-bbbb-cccc-111111111111','20000000-0000-0000-0000-000000000012','ACTIVE',true,CURRENT_TIMESTAMP);
-INSERT INTO user_modules (id,user_id,module_id,status,enabled,created_at) VALUES ('80000000-0000-0000-0000-000000000003','33333333-aaaa-bbbb-cccc-111111111111','20000000-0000-0000-0000-000000000013','ACTIVE',true,CURRENT_TIMESTAMP);
+INSERT INTO user_access_modules (id,user_access_id,module_id,status,enabled,created_at) VALUES ('80000000-0000-0000-0000-000000000002','33333333-aaaa-bbbb-cccc-333333333333','20000000-0000-0000-0000-000000000012','ACTIVE',true,CURRENT_TIMESTAMP);
+INSERT INTO user_access_modules (id,user_access_id,module_id,status,enabled,created_at) VALUES ('80000000-0000-0000-0000-000000000003','33333333-aaaa-bbbb-cccc-333333333333','20000000-0000-0000-0000-000000000013','ACTIVE',true,CURRENT_TIMESTAMP);

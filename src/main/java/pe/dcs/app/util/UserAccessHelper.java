@@ -1,6 +1,6 @@
 package pe.dcs.app.util;
 
-import pe.dcs.app.entity.User;
+import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 
 public class UserAccessHelper {
@@ -8,7 +8,7 @@ public class UserAccessHelper {
     private UserAccessHelper(){}
 
     public static UserAccess getAccessByRole(
-            User user,
+            Person user,
             String role
     ){
         return user.getAccesses()

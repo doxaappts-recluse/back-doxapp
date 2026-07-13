@@ -7,6 +7,7 @@ import pe.dcs.app.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pe.dcs.app.features.rol.response.RoleResponse;
+import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
@@ -27,6 +28,6 @@ public interface RoleRepository extends JpaRepository<Role, UUID>, JpaSpecificat
             @Param("status") StatusType status
     );
 
-    Optional<Role> findByValue(String value);
+    Optional<Role> findByValue(RoleType value);
 
 }

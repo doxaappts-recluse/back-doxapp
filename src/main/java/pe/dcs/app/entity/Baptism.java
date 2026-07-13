@@ -39,7 +39,7 @@ public class Baptism extends Auditable {
             nullable = false,
             unique = true
     )
-    private User user;
+    private Person user;
 
     @Column(name = "baptism_date")
     private LocalDate baptismDate;
