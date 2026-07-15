@@ -7,6 +7,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import pe.dcs.app.entity.Contract;
 import pe.dcs.app.entity.Module;
+import pe.dcs.app.features.module.ContractModuleResolver;
 import pe.dcs.app.features.module.ContractResolver;
 import pe.dcs.app.features.module.mapper.SidebarMapper;
 import pe.dcs.app.features.module.response.MeAccessResponse;
@@ -20,12 +21,14 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SidebarService {
 
     private final ContractResolver contractResolver;
+    private final ContractModuleResolver contractModuleResolver;
     private final ContractModuleRepository contractModuleRepository;
     private final UserAccessModuleRepository userModuleRepository;
     private final ModuleRepository moduleRepository;
@@ -62,7 +65,7 @@ public class SidebarService {
         }
 
         // =====================================================
-        // CONTEXTO
+        // CONTEXTO ACTUAL
         // =====================================================
 
         UUID organizationId = user.getCurrentOrganizationId();
@@ -76,30 +79,41 @@ public class SidebarService {
         }
 
         // =====================================================
-        // CONTRATO ACTIVO
+        // CONTRATOS APLICABLES
         // =====================================================
 
-        Contract contract = contractResolver.getActiveContract(branchId);
+        List<Contract> contracts = contractResolver.getActiveContractsByBranch(branchId);
 
-        if(contract == null){
+        if(contracts.isEmpty()){
             response.setAccessType(SystemRoleType.NO_CONTRACT);
             response.setModules(List.of());
             return response;
         }
 
         // =====================================================
-        // CARGAR UNA SOLA VEZ
+        // MODULOS DISPONIBLES POR CONTRATO
+        // =====================================================
+
+        Set<UUID> contractModuleIds =
+                contracts.stream()
+                        .flatMap(
+                                contract ->
+                                        contractModuleRepository
+                                                .findModuleIdsByContractId(
+                                                        contract.getId()
+                                                )
+                                                .stream()
+                        )
+                        .collect(
+                                Collectors.toSet()
+                        );
+
+
+        // =====================================================
+        // MODULOS BASE
         // =====================================================
 
         List<Module> modules = moduleRepository.findAllActive();
-
-        Set<UUID> contractModules =
-                new HashSet<>(
-                        contractModuleRepository
-                                .findModuleIdsByContractId(
-                                        contract.getId()
-                                )
-                );
 
         // =====================================================
         // ORGANIZATION ADMIN
@@ -112,8 +126,12 @@ public class SidebarService {
             response.setModules(
                     sidebarMapper.toTree(
                             modules,
-                            contractModules,
-                            contract.getId(),
+                            contractModuleIds,
+                            contracts
+                                    .stream()
+                                    .map(Contract::getId)
+                                    .findFirst()
+                                    .orElse(null),
                             null
                     )
             );
@@ -132,8 +150,8 @@ public class SidebarService {
             response.setModules(
                     sidebarMapper.toTree(
                             modules,
-                            contractModules,
-                            contract.getId(),
+                            contractModuleIds,
+                            null,
                             null
                     )
             );
@@ -156,16 +174,17 @@ public class SidebarService {
                     );
 
             /*
+             *
              * Seguridad:
              *
-             * El usuario solamente podrá
-             * visualizar módulos que:
+             * Usuario solo puede ver:
              *
-             * 1. Están asignados al usuario.
-             * 2. Existen en el contrato activo.
+             * 1. Lo asignado personalmente
+             * 2. Lo permitido por contrato
+             *
              */
 
-            userModules.retainAll(contractModules);
+            userModules.retainAll(contractModuleIds);
 
             response.setAccessType(SystemRoleType.ORG_USER);
 
@@ -173,7 +192,7 @@ public class SidebarService {
                     sidebarMapper.toTree(
                             modules,
                             userModules,
-                            contract.getId(),
+                            null,
                             user.getUserId()
                     )
             );
@@ -187,7 +206,6 @@ public class SidebarService {
 
         response.setAccessType(SystemRoleType.UNKNOWN);
         response.setModules(List.of());
-
         return response;
     }
 

@@ -3,10 +3,11 @@ package pe.dcs.app.features.module;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import pe.dcs.app.entity.Module;
+import pe.dcs.app.util.enums.StatusType;
 
 public class ModuleSpecification {
 
-    public static Specification<Module> filter(String name, String code, Boolean status) {
+    public static Specification<Module> filter(String name, String code, StatusType status) {
 
         return (root, query, cb) -> {
 
@@ -37,7 +38,7 @@ public class ModuleSpecification {
                         p,
                         cb.equal(
                                 root.get("status"),
-                                status ? "ACTIVE" : "INACTIVE"
+                                status
                         )
                 );
             }

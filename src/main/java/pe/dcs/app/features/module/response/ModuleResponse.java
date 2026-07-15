@@ -3,6 +3,7 @@ package pe.dcs.app.features.module.response;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public class ModuleResponse {
     private Integer orderNum;
 
     private Boolean root;
-    private Boolean status;
+    private StatusType status;
 
     // parent
     private UUID parentId;

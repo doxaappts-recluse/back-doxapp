@@ -10,10 +10,6 @@ import java.util.UUID;
 public class MinistryRoleRequest {
     private String name;
     private String description;
-
-    // null = global role
     private UUID ministryId;
-
-    // opcional, pero si no lo envías debería tener default en backend
     private Boolean requiresActiveMembership;
 }

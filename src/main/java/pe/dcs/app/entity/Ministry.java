@@ -5,13 +5,22 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "ministries")
+@Table(
+        name = "ministries",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "uk_ministry_name",
+                        columnNames = "name"
+                )
+        }
+)
 @Getter
 @Setter
 public class Ministry extends Auditable {
@@ -26,9 +35,9 @@ public class Ministry extends Auditable {
 
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Boolean active = true;
-
+    private StatusType status = StatusType.ACTIVE;
 
     @OneToMany(
             mappedBy = "ministry",
@@ -36,5 +45,8 @@ public class Ministry extends Auditable {
             orphanRemoval = true
     )
     private List<MinistryRole> roles = new ArrayList<>();
+
+    @Column(nullable = false)
+    private Boolean requiresActiveMembership = true;
 
 }

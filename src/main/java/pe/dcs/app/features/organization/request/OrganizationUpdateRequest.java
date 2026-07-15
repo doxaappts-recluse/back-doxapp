@@ -12,6 +12,7 @@ public class OrganizationUpdateRequest {
     private String name;
     private String address;
     private String ruc;
+    private String email;
 
     @NotNull(message = "La fecha de fundación es obligatoria")
     private LocalDate foundedDate;

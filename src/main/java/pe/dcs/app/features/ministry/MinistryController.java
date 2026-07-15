@@ -32,10 +32,16 @@ public class MinistryController {
         return new ApiResponse<>(200, "Ministry updated", ministryService.update(id, request));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> delete(@PathVariable UUID id) {
-        ministryService.delete(id);
-        return new ApiResponse<>(200, "Ministry deleted", null);
+    @PostMapping("/enable/{id}")
+    public ApiResponse<Void> enable(@PathVariable UUID id) {
+        ministryService.enable(id);
+        return new ApiResponse<>(200, "Ministry active", null);
+    }
+
+    @PostMapping("/disable/{id}")
+    public ApiResponse<Void> disable(@PathVariable UUID id) {
+        ministryService.disable(id);
+        return new ApiResponse<>(200, "Ministry desactive", null);
     }
 
     @PostMapping("/search")

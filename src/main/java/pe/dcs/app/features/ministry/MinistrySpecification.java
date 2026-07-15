@@ -12,23 +12,38 @@ public class MinistrySpecification {
 
     public static Specification<Ministry> filter(
             String name,
-            Boolean active
-    ) {
+            StatusType status
+    ){
+
         return (root, query, cb) -> {
 
             List<Predicate> predicates = new ArrayList<>();
 
-            if (name != null && !name.isBlank()) {
+            if(name != null && !name.isBlank()){
+
                 predicates.add(
-                        cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%")
+                        cb.like(
+                                cb.lower(root.get("name")),
+                                "%" + name.toLowerCase() + "%"
+                        )
                 );
+
             }
 
-            if (active != null) {
-                predicates.add(cb.equal(root.get("active"), active));
+            if(status != null){
+
+                predicates.add(
+                        cb.equal(
+                                root.get("status"),
+                                status
+                        )
+                );
+
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
+
         };
+
     }
 }

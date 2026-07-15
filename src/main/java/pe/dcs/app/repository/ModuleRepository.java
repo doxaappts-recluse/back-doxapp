@@ -73,4 +73,12 @@ public interface ModuleRepository extends JpaRepository<Module, UUID>,
             UUID id
     );
 
+    boolean existsByParent_Id(UUID parentId);
+
+    boolean existsByParent_IdAndStatus(
+            UUID parentId,
+            StatusType status
+    );
+
+    boolean existsByParentIdAndStatus(UUID parentId, StatusType status);
 }

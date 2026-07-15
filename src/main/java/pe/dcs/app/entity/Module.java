@@ -61,7 +61,6 @@ public class Module extends Auditable {
 
     private Integer orderNum;
 
-
     // =========================
     // STATUS
     // =========================

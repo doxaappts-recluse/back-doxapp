@@ -20,7 +20,9 @@ public class MinistryRoleController {
     private final MinistryRoleService service;
 
     @PostMapping("/create")
-    public ApiResponse<MinistryRoleResponse> create(@RequestBody MinistryRoleRequest request) {
+    public ApiResponse<MinistryRoleResponse> create(
+            @RequestBody MinistryRoleRequest request
+    ) {
         return new ApiResponse<>(200, "Ministry role created", service.create(request));
     }
 
@@ -32,17 +34,24 @@ public class MinistryRoleController {
         return new ApiResponse<>(200, "Ministry role updated", service.update(id, request));
     }
 
-    @DeleteMapping("/delete/{id}")
-    public ApiResponse<Void> delete(@PathVariable UUID id) {
-        service.delete(id);
-        return new ApiResponse<>(200, "Ministry role deleted", null);
+    @PostMapping("/enable/{id}")
+    public ApiResponse<Void> enable(@PathVariable UUID id) {
+        service.enable(id);
+        return new ApiResponse<>(200, "Ministry role active", null);
     }
 
-    @PostMapping("/search")
+    @PostMapping("/disable/{id}")
+    public ApiResponse<Void> disable(@PathVariable UUID id) {
+        service.disable(id);
+        return new ApiResponse<>(200, "Ministry role desactive", null);
+    }
+
+    @PostMapping("/search/{id}")
     public ApiResponse<PageResponse<MinistryRoleResponse>> search(
+            @PathVariable UUID id,
             @RequestBody MinistryRoleSearchRequest request
     ) {
-        return new ApiResponse<>(200, "Ministry roles fetched", service.search(request));
+        return new ApiResponse<>(200, "Ministry roles fetched", service.search(id, request));
     }
 
     @GetMapping("/all")

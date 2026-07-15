@@ -14,9 +14,11 @@ public interface MinistryRoleService {
 
     MinistryRoleResponse update(UUID id, MinistryRoleRequest request);
 
-    void delete(UUID id);
+    void disable(UUID id);
 
-    PageResponse<MinistryRoleResponse> search(MinistryRoleSearchRequest request);
+    void enable(UUID id);
+
+    PageResponse<MinistryRoleResponse> search(UUID id, MinistryRoleSearchRequest request);
 
     List<MinistryRoleResponse> findAll();
 

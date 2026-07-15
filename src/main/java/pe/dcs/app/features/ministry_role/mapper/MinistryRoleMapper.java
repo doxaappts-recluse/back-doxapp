@@ -7,18 +7,24 @@ import pe.dcs.app.features.ministry_role.response.MinistryRoleResponse;
 @Component
 public class MinistryRoleMapper {
 
-    public MinistryRoleResponse simple(MinistryRole entity) {
+    public MinistryRoleResponse simple(MinistryRole entity){
 
         MinistryRoleResponse dto = new MinistryRoleResponse();
 
         dto.setId(entity.getId());
         dto.setName(entity.getName());
         dto.setDescription(entity.getDescription());
-        dto.setActive(entity.getActive());
+        dto.setStatus(entity.getStatus());
+
         dto.setMinistryId(
-                entity.getMinistry() != null ? entity.getMinistry().getId() : null
+                entity.getMinistry().getId()
         );
-        dto.setRequiresActiveMembership(entity.getRequiresActiveMembership());
+
+        dto.setRequiresActiveMembership(
+                entity.getRequiresActiveMembership()
+        );
+
         return dto;
     }
+
 }

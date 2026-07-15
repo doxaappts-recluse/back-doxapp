@@ -6,8 +6,11 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.contract.ContractRenewalType;
+import pe.dcs.app.util.enums.contract.ContractScope;
 import pe.dcs.app.util.enums.contract.ContractStatus;
+import pe.dcs.app.util.enums.contract.LicenseDistributionMode;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,22 +21,12 @@ import java.util.UUID;
 @Table(
         name = "contracts",
         indexes = {
-                @Index(
-                        name = "idx_contract_branch",
-                        columnList = "branch_id"
-                ),
-                @Index(
-                        name = "idx_contract_status",
-                        columnList = "status"
-                ),
-                @Index(
-                        name = "idx_contract_branch_start_date",
-                        columnList = "branch_id,start_date"
-                ),
-                @Index(
-                        name = "idx_contract_branch_status",
-                        columnList = "branch_id,status"
-                )
+                @Index(name = "idx_contract_org", columnList = "organization_id"),
+                @Index(name = "idx_contract_branch", columnList = "branch_id"),
+                @Index(name = "idx_contract_scope", columnList = "scope"),
+                @Index(name = "idx_contract_status", columnList = "status"),
+                @Index(name = "idx_contract_org_status", columnList = "organization_id,status"),
+                @Index(name = "idx_contract_branch_status", columnList = "branch_id,status")
         }
 )
 @Getter
@@ -45,165 +38,273 @@ public class Contract extends Auditable {
     @UuidGenerator
     private UUID id;
 
-    // =========================
+    // =========================================================
     // PLAN
-    // =========================
+    // =========================================================
 
+    @Column(nullable = false)
     private String planName;
 
-    private Double price;
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal price;
 
+    @Column(nullable = false, length = 10)
     private String currency;
 
-    // =========================
-    // VIGENCIA
-    // =========================
+    // =========================================================
+    // VALIDITY
+    // =========================================================
 
+    @Column(nullable = false)
     private LocalDate startDate;
 
+    @Column(nullable = false)
     private LocalDate endDate;
 
-    // =========================
-    // CAPACIDAD
-    // =========================
+    // =========================================================
+    // CAPACITY
+    // =========================================================
 
-    private Integer numberUsers;
+    @Column(nullable = false)
+    private Integer maxLicenses;
 
-    // =========================
-    // ESTADO
-    // =========================
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private LicenseDistributionMode distributionMode = LicenseDistributionMode.SHARED;
+
+    // =========================================================
+    // STATUS
+    // =========================================================
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ContractStatus status;
 
+    private Instant activatedAt;
+
     private Instant suspendedAt;
 
     private Instant cancelledAt;
 
-    private Instant activatedAt;
+    // =========================================================
+    // LIFECYCLE
+    // =========================================================
 
-    // =========================
-    // CICLO DE VIDA
-    // =========================
-
-    private UUID previousContractId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "previous_contract_id")
+    private Contract previousContract;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ContractRenewalType renewalType;
 
-    // =========================
+    // =========================================================
+    // SCOPE
+    // =========================================================
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ContractScope scope;
+
+    /**
+     * Siempre pertenece a una organización.
+     */
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(
+            name = "organization_id",
+            nullable = false
+    )
+    private Organization organization;
+
+    /**
+     * Solo cuando el contrato aplica
+     * a una sede específica.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
+    // =========================================================
     // MODULES
-    // =========================
+    // =========================================================
 
     @OneToMany(
             mappedBy = "contract",
-            fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
     private List<ContractModule> contractModules =
             new ArrayList<>();
 
+    @OneToMany(
+            mappedBy = "contract",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    private List<ContractBranchLicense> branchLicenses =
+            new ArrayList<>();
+
     // =========================================================
-    // DOMAIN BEHAVIOR
+    // HELPERS
     // =========================================================
 
-    public void activate(){
-
-        assertNotTerminalState();
-
-        if(status == ContractStatus.ACTIVE){
-            return;
-        }
-
-        if(status == ContractStatus.CANCELLED){
-            throw new IllegalStateException(
-                    "Cannot reactivate a cancelled contract"
-            );
-        }
-
-        status = ContractStatus.ACTIVE;
-
-        activatedAt =
-                Instant.now();
-    }
-
-    public void suspend(){
-
-        assertNotTerminalState();
-
-        if(status == ContractStatus.SUSPENDED){
-            return;
-        }
-
-        status = ContractStatus.SUSPENDED;
-
-        suspendedAt =
-                Instant.now();
-    }
-
-    public void cancel(){
-
-        if(status == ContractStatus.CANCELLED){
-            return;
-        }
-
-        if(status == ContractStatus.EXPIRED){
-
-            throw new IllegalStateException(
-                    "Cannot cancel expired contract"
-            );
-        }
-
-        status = ContractStatus.CANCELLED;
-
-        cancelledAt =
-                Instant.now();
-    }
-
-    public void expire(){
-
-        if(status == ContractStatus.CANCELLED){
-            return;
-        }
-
-        if(status == ContractStatus.EXPIRED){
-            return;
-        }
-
-        status = ContractStatus.EXPIRED;
-
-        setUpdatedAt(Instant.now());
-    }
-
-    public boolean isActive(){
-
+    public boolean isActive() {
         return status == ContractStatus.ACTIVE;
+    }
+
+    public boolean isOrganizationScope() {
+        return scope == ContractScope.ORGANIZATION;
+    }
+
+    public boolean isBranchScope() {
+        return scope == ContractScope.BRANCH;
     }
 
     public boolean overlapsWith(
             Contract other
-    ){
+    ) {
 
         return !(endDate.isBefore(other.startDate)
                 ||
                 startDate.isAfter(other.endDate));
     }
 
-    private void assertNotTerminalState(){
+    // =========================================================
+    // DOMAIN
+    // =========================================================
 
-        if(status == ContractStatus.CANCELLED){
+    public void activate() {
 
+        assertNotTerminalState();
+
+        if (status == ContractStatus.ACTIVE) {
+            return;
+        }
+
+        status = ContractStatus.ACTIVE;
+        activatedAt = Instant.now();
+    }
+
+    public void suspend() {
+
+        assertNotTerminalState();
+
+        if (status == ContractStatus.SUSPENDED) {
+            return;
+        }
+
+        status = ContractStatus.SUSPENDED;
+        suspendedAt = Instant.now();
+    }
+
+    public void cancel() {
+
+        if (status == ContractStatus.CANCELLED) {
+            return;
+        }
+
+        if (status == ContractStatus.EXPIRED) {
             throw new IllegalStateException(
-                    "Contract is cancelled"
+                    "Cannot cancel expired contract."
             );
         }
 
-        if(status == ContractStatus.EXPIRED){
+        status = ContractStatus.CANCELLED;
+        cancelledAt = Instant.now();
+    }
+
+    public void expire() {
+
+        if (status == ContractStatus.CANCELLED
+                || status == ContractStatus.EXPIRED) {
+            return;
+        }
+
+        status = ContractStatus.EXPIRED;
+        setUpdatedAt(Instant.now());
+    }
+
+    // =========================================================
+    // VALIDATIONS
+    // =========================================================
+
+    @PrePersist
+    @PreUpdate
+    private void validate() {
+
+        validateScope();
+        validateDates();
+        validateCapacity();
+    }
+
+    private void validateScope() {
+
+        if (organization == null) {
+            throw new IllegalStateException(
+                    "Organization is required."
+            );
+        }
+
+        if (isOrganizationScope()) {
+
+            if (branch != null) {
+                throw new IllegalStateException(
+                        "Organization contract cannot have branch."
+                );
+            }
+
+            return;
+        }
+
+        if (branch == null) {
+            throw new IllegalStateException(
+                    "Branch is required."
+            );
+        }
+
+        if (!branch.getOrganization()
+                .getId()
+                .equals(organization.getId())) {
 
             throw new IllegalStateException(
-                    "Contract is expired"
+                    "Branch does not belong to organization."
+            );
+        }
+    }
+
+    private void validateDates() {
+
+        if (endDate.isBefore(startDate)) {
+
+            throw new IllegalStateException(
+                    "End date cannot be before start date."
+            );
+        }
+    }
+
+    private void validateCapacity() {
+
+        if (maxLicenses <= 0) {
+
+            throw new IllegalStateException(
+                    "Max users must be greater than zero."
+            );
+        }
+    }
+
+    private void assertNotTerminalState() {
+
+        if (status == ContractStatus.CANCELLED) {
+
+            throw new IllegalStateException(
+                    "Contract is cancelled."
+            );
+        }
+
+        if (status == ContractStatus.EXPIRED) {
+
+            throw new IllegalStateException(
+                    "Contract is expired."
             );
         }
     }

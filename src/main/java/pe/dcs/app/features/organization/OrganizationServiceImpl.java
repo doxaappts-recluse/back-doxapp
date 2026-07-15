@@ -85,6 +85,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setName(request.getName());
         organization.setAddress(request.getAddress());
         organization.setRuc(request.getRuc());
+        organization.setEmail(request.getEmail());
         organization.setStatus(StatusType.ACTIVE);
         organization.setFoundedDate(request.getFoundedDate());
 
@@ -113,6 +114,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         organization.setName(request.getName());
         organization.setAddress(request.getAddress());
         organization.setRuc(request.getRuc());
+        organization.setEmail(request.getEmail());
         organization.setFoundedDate(request.getFoundedDate());
 
         repository.save(organization);

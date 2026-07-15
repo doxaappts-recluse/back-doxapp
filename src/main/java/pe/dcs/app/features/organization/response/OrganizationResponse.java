@@ -17,6 +17,7 @@ public class OrganizationResponse {
     private String name;
     private String address;
     private String ruc;
+    private String email;
     private LocalDate foundedDate;
     private Boolean status;
 }

@@ -17,7 +17,7 @@ public interface MemberMinistryAssignmentRepository extends JpaRepository<Member
     // FIND BY USER
     // =====================================================
 
-    List<MemberMinistryAssignment>
+    /*List<MemberMinistryAssignment>
     findByUserIdOrderByMinistryNameAscStartDateDesc(
             UUID userId
     );
@@ -117,5 +117,5 @@ public interface MemberMinistryAssignmentRepository extends JpaRepository<Member
     """)
     List<MemberMinistryAssignment> findAllByUserId(
             @Param("userId") UUID userId
-    );
+    );*/
 }

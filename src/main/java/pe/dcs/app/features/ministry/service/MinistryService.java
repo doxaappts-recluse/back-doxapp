@@ -14,7 +14,9 @@ public interface MinistryService {
 
     MinistryResponse update(UUID id, MinistryRequest request);
 
-    void delete(UUID id);
+    void enable(UUID id);
+
+    void disable(UUID id);
 
     PageResponse<MinistryResponse> search(MinistrySearchRequest request);
 

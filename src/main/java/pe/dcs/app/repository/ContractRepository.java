@@ -28,12 +28,57 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
         SELECT c
         FROM Contract c
         WHERE c.branch.id = :branchId
+          AND c.scope = 'BRANCH'
           AND c.status = 'ACTIVE'
           AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
         ORDER BY c.startDate DESC
     """)
-    Optional<Contract> findActiveByBranchId(
+    List<Contract> findActiveByBranchId(
             @Param("branchId") UUID branchId
+    );
+
+    @Query("""
+    SELECT c
+        FROM Contract c
+        WHERE c.status = 'ACTIVE'
+          AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
+          AND
+          (
+              (
+                  c.scope = 'BRANCH'
+                  AND c.branch.id = :branchId
+              )
+              OR
+              (
+                  c.scope = 'ORGANIZATION'
+                  AND c.organization.id =
+                      (
+                          SELECT b.organization.id
+                          FROM Branch b
+                          WHERE b.id = :branchId
+                      )
+              )
+          )
+        ORDER BY c.startDate DESC
+    """)
+    List<Contract> findActiveContractsForBranch(
+            @Param("branchId") UUID branchId
+    );
+
+    // =========================================================
+    // CONTRATO ACTIVO POR ORG
+    // =========================================================
+    @Query("""
+    SELECT c
+        FROM Contract c
+        WHERE c.organization.id = :organizationId
+          AND c.scope = 'ORGANIZATION'
+          AND c.status = 'ACTIVE'
+          AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
+        ORDER BY c.startDate DESC
+    """)
+    List<Contract> findActiveByOrganizationId(
+            @Param("organizationId") UUID organizationId
     );
 
     // =========================================================
@@ -128,11 +173,27 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
     );
 
     @Query("""
-        SELECT COUNT(c) > 0
+    SELECT COUNT(c) > 0
         FROM Contract c
-        WHERE c.branch.id = :branchId
-          AND c.status = 'ACTIVE'
-          AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
+        WHERE c.status = 'ACTIVE'
+        AND CURRENT_DATE BETWEEN c.startDate AND c.endDate
+        AND
+        (
+            (
+                c.scope = 'BRANCH'
+                AND c.branch.id = :branchId
+            )
+            OR
+            (
+                c.scope = 'ORGANIZATION'
+                AND c.organization.id =
+                    (
+                        SELECT b.organization.id
+                        FROM Branch b
+                        WHERE b.id = :branchId
+                    )
+            )
+        )
     """)
     boolean existsActiveByBranchId(
             @Param("branchId") UUID branchId
@@ -150,4 +211,5 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
             LocalDate startDate,
             LocalDate endDate
     );
+
 }

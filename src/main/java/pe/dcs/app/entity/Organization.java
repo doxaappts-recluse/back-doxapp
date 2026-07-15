@@ -54,6 +54,8 @@ public class Organization extends Auditable {
     private String ruc;
 
     private String address;
+    
+    private String email;
 
     @Column(nullable = false)
     private LocalDate foundedDate;

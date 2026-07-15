@@ -12,6 +12,8 @@ import pe.dcs.app.repository.ContractRepository;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Component
@@ -110,14 +112,14 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         // CONTRATO ACTIVO DE LA SEDE
         // =====================================================
 
-        Contract contract =
+        List<Contract> contracts =
                 contractRepository
-                        .findActiveByBranchId(
+                        .findActiveContractsForBranch(
                                 branchId
-                        )
-                        .orElse(null);
+                        );
 
-        if(contract == null){
+
+        if(contracts.isEmpty()){
             return false;
         }
 
@@ -126,15 +128,21 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         // =====================================================
 
         ContractModule contractModule =
-                contractModuleRepository
-                        .findByContractIdAndModuleCode(
-                                contract.getId(),
-                                moduleCode
+                contracts.stream()
+                        .map(
+                                contract ->
+                                        contractModuleRepository
+                                                .findByContractIdAndModuleCode(
+                                                        contract.getId(),
+                                                        moduleCode
+                                                )
+                                                .orElse(null)
                         )
+                        .filter(Objects::nonNull)
+                        .findFirst()
                         .orElse(null);
 
         if(contractModule == null){
-
             return false;
         }
 

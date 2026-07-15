@@ -21,7 +21,7 @@ public class ModuleMapper {
         dto.setRoute(module.getRoute());
         dto.setOrderNum(module.getOrderNum());
 
-        dto.setStatus(module.isActive());
+        dto.setStatus(module.getStatus());
 
         dto.setRoot(module.isRoot());
 

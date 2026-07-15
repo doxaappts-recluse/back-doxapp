@@ -8,6 +8,7 @@ import pe.dcs.app.entity.Contract;
 import pe.dcs.app.repository.ContractRepository;
 import pe.dcs.app.util.Exceptions;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -16,72 +17,19 @@ public class ContractResolver {
 
     private final ContractRepository contractRepository;
 
-    /**
-     * Obtiene el contrato activo
-     * asociado a una sede.
-     */
     @Transactional(readOnly = true)
-    public Contract getActiveContract(
-            UUID branchId
-    ){
+    public List<Contract> getActiveContractsByBranch(UUID branchId){
 
         if(branchId == null){
-            return null;
+            return List.of();
         }
 
-        return contractRepository
-                .findActiveByBranchId(
-                        branchId
-                )
-                .orElse(null);
+        return contractRepository.findActiveContractsForBranch(branchId);
     }
 
-    /**
-     * Valida si una sede
-     * tiene contrato activo.
-     */
     @Transactional(readOnly = true)
-    public boolean hasActiveContract(
-            UUID branchId
-    ){
-
-        if(branchId == null){
-            return false;
-        }
-
-        return contractRepository
-                .existsActiveByBranchId(
-                        branchId
-                );
+    public boolean hasActiveContract(UUID branchId){
+        return !getActiveContractsByBranch(branchId)
+                .isEmpty();
     }
-
-    /**
-     * Obtiene contrato activo
-     * o genera error.
-     */
-    @Transactional(readOnly = true)
-    public Contract requireActiveContract(
-            UUID branchId
-    ){
-
-        if(branchId == null){
-            throw new Exceptions(
-                    "Branch is required",
-                    HttpStatus.FORBIDDEN
-            );
-        }
-
-        return contractRepository
-                .findActiveByBranchId(
-                        branchId
-                )
-                .orElseThrow(
-                        () ->
-                                new Exceptions(
-                                        "Branch has no active contract",
-                                        HttpStatus.FORBIDDEN
-                                )
-                );
-    }
-
 }

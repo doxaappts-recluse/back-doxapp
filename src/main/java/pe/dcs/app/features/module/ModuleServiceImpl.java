@@ -203,7 +203,7 @@ public class ModuleServiceImpl implements ModuleService {
         }
 
         // =====================================================
-        // PARENT IS IMMUTABLE
+        // VALIDATE PARENT CHANGE
         // =====================================================
 
         UUID currentParentId =
@@ -211,11 +211,57 @@ public class ModuleServiceImpl implements ModuleService {
                         ? module.getParent().getId()
                         : null;
 
-        if(!Objects.equals(currentParentId, request.getParentId())){
-            throw new Exceptions(
-                    "Module parent cannot be modified.",
-                    HttpStatus.BAD_REQUEST
-            );
+        UUID newParentId = request.getParentId();
+
+        if (!Objects.equals(currentParentId, newParentId)) {
+
+            // El módulo actualmente es padre
+            if (currentParentId == null) {
+
+                boolean hasActiveChildren =
+                        moduleRepository.existsByParentIdAndStatus(
+                                module.getId(),
+                                StatusType.ACTIVE
+                        );
+
+                if (hasActiveChildren) {
+                    throw new Exceptions(
+                            "No se puede cambiar el módulo padre porque tiene módulos hijos activos.",
+                            HttpStatus.BAD_REQUEST
+                    );
+                }
+
+                // Tampoco permitir convertirlo en hijo si no tiene hijos activos
+                // (si quieres mantener la jerarquía fija)
+                if (newParentId != null) {
+                    throw new Exceptions(
+                            "Un módulo padre no puede convertirse en módulo hijo.",
+                            HttpStatus.BAD_REQUEST
+                    );
+                }
+
+            } else {
+
+                // Era hijo
+
+                if (newParentId == null) {
+                    throw new Exceptions(
+                            "Un módulo hijo no puede convertirse en módulo padre.",
+                            HttpStatus.BAD_REQUEST
+                    );
+                }
+
+                Module newParent =
+                        moduleRepository.findById(newParentId)
+                                .orElseThrow(() ->
+                                        new Exceptions(
+                                                "Módulo padre no encontrado.",
+                                                HttpStatus.NOT_FOUND
+                                        )
+                                );
+
+                module.setParent(newParent);
+            }
         }
 
         // =====================================================
@@ -254,7 +300,7 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     @Transactional
-    public ModuleResponse disable(UUID id){
+    public ModuleResponse disable(UUID id) {
 
         Module module =
                 moduleRepository.findById(id)
@@ -265,11 +311,24 @@ public class ModuleServiceImpl implements ModuleService {
                                 )
                         );
 
-        module.setStatus(StatusType.INACTIVE);
-
-        for(Module child : module.getChildren()){
-            child.setStatus(StatusType.INACTIVE);
+        if (module.getStatus() == StatusType.INACTIVE) {
+            return moduleMapper.simple(module);
         }
+
+        boolean hasActiveChildren =
+                moduleRepository.existsByParent_IdAndStatus(
+                        module.getId(),
+                        StatusType.ACTIVE
+                );
+
+        if (hasActiveChildren) {
+            throw new Exceptions(
+                    "Cannot deactivate a module that has active child modules.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        module.setStatus(StatusType.INACTIVE);
 
         moduleRepository.save(module);
 

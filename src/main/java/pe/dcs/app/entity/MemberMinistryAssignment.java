@@ -13,8 +13,8 @@ import java.util.UUID;
 @Table(
         name = "member_ministry_assignments",
         indexes = {
-                @Index(name = "idx_mma_user", columnList = "user_id"),
-                @Index(name = "idx_mma_ministry", columnList = "ministry_id")
+                @Index(name = "idx_assignment_person", columnList = "person_id"),
+                @Index(name = "idx_assignment_ministry", columnList = "ministry_id")
         }
 )
 @Getter
@@ -27,27 +27,26 @@ public class MemberMinistryAssignment extends Auditable {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private Person user;
+    @JoinColumn(name = "person_id", nullable = false)
+    private Person person;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ministry_id", nullable = false)
     private Ministry ministry;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ministry_role_id")
+    @JoinColumn(name = "ministry_role_id", nullable = false)
     private MinistryRole ministryRole;
 
-    @Column(name = "start_date")
     private LocalDate startDate;
 
-    @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "reason")
-    private String reason   ;
+    private String reason;
 
-    @Column(name = "observation")
     private String observation;
+
+    @Column(nullable = false)
+    private Boolean active = true;
 
 }
