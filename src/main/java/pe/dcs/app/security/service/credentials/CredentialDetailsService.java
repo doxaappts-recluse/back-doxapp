@@ -11,6 +11,7 @@ import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.repository.CredentialRepository;
 import pe.dcs.app.security.service.UserAccessContext;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.Collection;
 import java.util.List;
@@ -76,7 +77,7 @@ public class CredentialDetailsService implements UserDetailsService {
                         .stream()
 
                         .filter(
-                                UserAccess::getActive
+                                a -> a.getActive() == StatusType.ACTIVE
                         )
                         .map(access ->
                                 new UserAccessContext(
@@ -115,16 +116,13 @@ public class CredentialDetailsService implements UserDetailsService {
                         .toList();
 
         Collection<GrantedAuthority> authorities =
-                accesses
-                        .stream()
+                accesses.stream()
                         .map(access ->
                                 new SimpleGrantedAuthority(
-                                        access.roleCode()
+                                        access.roleCode().name()
                                 )
                         )
-                        .collect(
-                                Collectors.toList()
-                        );
+                        .collect(Collectors.toList());
 
         return new CredentialDetailsImpl(
                 credential.getId(),

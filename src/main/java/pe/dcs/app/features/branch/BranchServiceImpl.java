@@ -11,6 +11,7 @@ import pe.dcs.app.features.branch.mapper.BranchMapper;
 import pe.dcs.app.features.branch.request.BranchCreateRequest;
 import pe.dcs.app.features.branch.request.BranchListRequest;
 import pe.dcs.app.features.branch.request.BranchUpdateRequest;
+import pe.dcs.app.features.branch.response.BranchListResponse;
 import pe.dcs.app.features.branch.response.BranchResponse;
 import pe.dcs.app.features.branch.service.BranchService;
 import pe.dcs.app.repository.BranchRepository;
@@ -232,6 +233,34 @@ public class BranchServiceImpl implements BranchService {
         branch.setMain(true);
 
         repository.save(branch);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<BranchListResponse> findByOrganization(UUID organizationId) {
+
+        List<Branch> branches =
+                repository
+                        .findByOrganizationIdAndStatusOrderByNameAsc(
+                                organizationId,
+                                StatusType.ACTIVE
+                        );
+
+        return branches
+                .stream()
+                .map(
+                        branch ->
+                                BranchListResponse
+                                        .builder()
+                                        .id(
+                                                branch.getId()
+                                        )
+                                        .name(
+                                                branch.getName()
+                                        )
+                                        .build()
+                )
+                .toList();
     }
 
     private void validateCodeForCreate(

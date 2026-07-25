@@ -2,13 +2,15 @@ package pe.dcs.app.features.rol.response;
 
 import pe.dcs.app.entity.Role;
 import java.util.UUID;
+
+import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
 public class RoleResponse {
 
     private UUID id;
     private String name;
-    private String value;
+    private RoleType value;
     private StatusType status;
 
     public RoleResponse(Role role) {
@@ -35,11 +37,11 @@ public class RoleResponse {
         this.name = name;
     }
 
-    public String getValue() {
+    public RoleType getValue() {
         return value;
     }
 
-    public void setValue(String value) {
+    public void setValue(RoleType value) {
         this.value = value;
     }
 

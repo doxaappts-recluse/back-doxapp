@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.organization.request.OrganizationCreateRequest;
 import pe.dcs.app.features.organization.request.OrganizationListRequest;
 import pe.dcs.app.features.organization.request.OrganizationUpdateRequest;
+import pe.dcs.app.features.organization.response.OrganizationListResponse;
 import pe.dcs.app.features.organization.response.OrganizationResponse;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.features.organization.service.OrganizationService;
@@ -37,7 +38,7 @@ public class OrganizationController {
     }
 
     @GetMapping("/list")
-    public ApiResponse<List<OrganizationResponse>> list() {
+    public ApiResponse<List<OrganizationListResponse>> list() {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),

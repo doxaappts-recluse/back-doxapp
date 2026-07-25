@@ -3,6 +3,7 @@ package pe.dcs.app.features.organization.service;
 import pe.dcs.app.features.organization.request.OrganizationCreateRequest;
 import pe.dcs.app.features.organization.request.OrganizationListRequest;
 import pe.dcs.app.features.organization.request.OrganizationUpdateRequest;
+import pe.dcs.app.features.organization.response.OrganizationListResponse;
 import pe.dcs.app.features.organization.response.OrganizationResponse;
 import pe.dcs.app.util.pagination.PageResponse;
 
@@ -19,7 +20,7 @@ public interface OrganizationService {
 
     OrganizationResponse update(UUID id, OrganizationUpdateRequest request);
 
-    List<OrganizationResponse> list();
+    List<OrganizationListResponse> list();
 
     void enable(UUID id);
 

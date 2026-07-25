@@ -10,6 +10,7 @@ import pe.dcs.app.features.rol.response.RoleResponse;
 import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -18,16 +19,16 @@ import java.util.UUID;
 public interface RoleRepository extends JpaRepository<Role, UUID>, JpaSpecificationExecutor<Role> {
     List<Role> findByStatus(StatusType status);
 
-    @Query("""
-        SELECT r
-        FROM Role r
-        WHERE r.value LIKE :prefix% AND r.status = :status
-    """)
-    List<RoleResponse> findByPrefixAndStatus(
-            @Param("prefix") String prefix,
-            @Param("status") StatusType status
+    List<Role> findByValueInAndStatus(
+            List<RoleType> values,
+            StatusType status
     );
 
     Optional<Role> findByValue(RoleType value);
+
+    List<Role> findByStatusAndValueNotIn(
+            StatusType status,
+            Collection<RoleType> values
+    );
 
 }

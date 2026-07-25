@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.repository.ContractModulePermissionRepository;
 import pe.dcs.app.repository.UserAccessModulePermissionRepository;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
 import java.util.UUID;
@@ -52,7 +53,8 @@ public class PermissionService {
 
         return userModulePermissionRepository.findPermissions(
                 userId,
-                moduleId
+                moduleId,
+                StatusType.ACTIVE
         );
     }
 

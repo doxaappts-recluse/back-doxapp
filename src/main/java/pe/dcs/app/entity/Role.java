@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
-import pe.dcs.app.util.constant.RoleConstant;
 import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
@@ -15,12 +14,10 @@ import java.util.UUID;
 @Table(
         name = "roles",
         indexes = {
-
                 @Index(
                         name = "idx_role_value",
                         columnList = "value"
                 )
-
         }
 )
 @Getter
@@ -37,16 +34,10 @@ public class Role extends Auditable {
 
     /**
      * Código interno del rol.
-     *
-     * Ejemplo:
-     * SYSTEM_ADMIN
-     * SYSTEM_SUPPORT
-     * ORG_ADMIN
-     * ORG_BRANCH_ADMIN
-     * ORG_USER
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, unique = true)
-    private String value;
+    private RoleType value;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -56,28 +47,25 @@ public class Role extends Auditable {
     // HELPERS
     // ==========================
 
-    public boolean isSystemRole(){
-        return RoleConstant.SYSTEM_ADMIN.equals(value)
-                ||
-                RoleConstant.SYSTEM_SUPPORT.equals(value);
+    public boolean isSystemRole() {
+        return value == RoleType.SYSTEM_ADMIN
+                || value == RoleType.SYSTEM_SUPPORT;
     }
 
-    public boolean isOrganizationAdmin(){
-        return RoleConstant.ORG_ADMIN.equals(value);
+    public boolean isOrganizationAdmin() {
+        return value == RoleType.ORG_ADMIN;
     }
 
-    public boolean isBranchAdmin(){
-        return RoleConstant.ORG_BRANCH_ADMIN.equals(value);
+    public boolean isBranchAdmin() {
+        return value == RoleType.ORG_BRANCH_ADMIN;
     }
 
-    public boolean isOrganizationUser(){
-        return RoleConstant.ORG_USER.equals(value);
+    public boolean isOrganizationUser() {
+        return value == RoleType.ORG_USER;
     }
 
-    public boolean isBranchRole(){
+    public boolean isBranchRole() {
         return isBranchAdmin()
-                ||
-                isOrganizationUser();
+                || isOrganizationUser();
     }
-
 }

@@ -6,11 +6,13 @@ import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.branch.request.BranchCreateRequest;
 import pe.dcs.app.features.branch.request.BranchListRequest;
 import pe.dcs.app.features.branch.request.BranchUpdateRequest;
+import pe.dcs.app.features.branch.response.BranchListResponse;
 import pe.dcs.app.features.branch.response.BranchResponse;
 import pe.dcs.app.features.branch.service.BranchService;
 import pe.dcs.app.util.ApiResponse;
 import pe.dcs.app.util.pagination.PageResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -130,6 +132,22 @@ public class BranchController {
                 "Sede principal cambiada",
                 null
         );
+    }
+
+    // =====================================================
+    // LISTAR CATÁLOGO
+    // =====================================================
+    @GetMapping("/list/{organizationId}")
+    public ApiResponse<List<BranchListResponse>> findByOrganization(
+            @PathVariable UUID organizationId
+    ){
+
+        return new ApiResponse<>(
+                200,
+                "Lista de sedes obtenida",
+                service.findByOrganization(organizationId)
+        );
+
     }
 
 }

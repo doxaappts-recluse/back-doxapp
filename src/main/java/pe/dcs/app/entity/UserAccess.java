@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.UUID;
 
@@ -99,8 +100,9 @@ public class UserAccess extends Auditable {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Boolean active = true;
+    private StatusType active;
 
     // ==========================
     // HELPERS

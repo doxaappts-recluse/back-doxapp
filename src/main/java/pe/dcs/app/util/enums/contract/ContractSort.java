@@ -5,13 +5,17 @@ import java.util.Arrays;
 public enum ContractSort {
 
     ORGANIZATION_NAME("organizationName", "organization.name"),
+    BRANCH_NAME("branchName", "branch.name"),
     PLAN_NAME("planName", "planName"),
     PRICE("price", "price"),
     CURRENCY("currency", "currency"),
     START_DATE("startDate", "startDate"),
     END_DATE("endDate", "endDate"),
-    NUMBER_USERS("numberUsers", "numberUsers"),
-    STATUS("status", "status");
+    MAX_LICENSES("maxLicenses", "maxLicenses"),
+    STATUS("status", "status"),
+    SCOPE("scope", "scope"),
+    DISTRIBUTION_MODE("distributionMode", "distributionMode"),
+    RENEWAL_TYPE("renewalType", "renewalType");
 
     private final String key;
     private final String path;
@@ -22,6 +26,7 @@ public enum ContractSort {
     }
 
     public static String resolvePath(String key) {
+
         return Arrays.stream(values())
                 .filter(e -> e.key.equals(key))
                 .map(e -> e.path)
@@ -30,6 +35,7 @@ public enum ContractSort {
     }
 
     public static ContractSort fromKey(String key) {
+
         return Arrays.stream(values())
                 .filter(e -> e.key.equals(key))
                 .findFirst()

@@ -6,6 +6,7 @@ import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.profile.response.ProfileAccessResponse;
 import pe.dcs.app.features.profile.response.ProfileResponse;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
 
@@ -19,7 +20,9 @@ public class ProfileMapper {
         List<ProfileAccessResponse> accesses =
                 user.getAccesses()
                         .stream()
-                        .filter(UserAccess::getActive)
+                        .filter(
+                                a -> a.getActive() == StatusType.ACTIVE
+                        )
                         .map(access ->
                                 new ProfileAccessResponse(
 

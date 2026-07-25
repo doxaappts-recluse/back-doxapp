@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 import pe.dcs.app.util.Exceptions;
-import pe.dcs.app.util.constant.RoleConstant;
 
 import java.util.UUID;
 
@@ -14,7 +13,7 @@ import java.util.UUID;
 public class AuthorizationService {
 
     public boolean isSystem(CredentialDetailsImpl user){
-        return user.isSystem();
+        return user.isSystemAdmin() || user.isSystemSupport();
     }
 
     public boolean hasRole(
@@ -67,6 +66,29 @@ public class AuthorizationService {
                 organizationId,
                 branchId
         );
+    }
+
+    public void assertCanAccessUser(
+            CredentialDetailsImpl current,
+            CredentialDetailsImpl target
+    ){
+
+
+        if(current.isSystemAdmin()){
+            return;
+        }
+
+
+        if(current.isSystemSupport()){
+            return;
+        }
+
+
+        throw new Exceptions(
+                "Access denied",
+                HttpStatus.FORBIDDEN
+        );
+
     }
 
     public boolean hasOrganizationAccess(

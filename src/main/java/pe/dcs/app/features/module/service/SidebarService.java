@@ -15,7 +15,8 @@ import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ModuleRepository;
 import pe.dcs.app.repository.UserAccessModuleRepository;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
-import pe.dcs.app.util.enums.SystemRoleType;
+import pe.dcs.app.util.enums.RoleType;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +29,6 @@ import java.util.stream.Collectors;
 public class SidebarService {
 
     private final ContractResolver contractResolver;
-    private final ContractModuleResolver contractModuleResolver;
     private final ContractModuleRepository contractModuleRepository;
     private final UserAccessModuleRepository userModuleRepository;
     private final ModuleRepository moduleRepository;
@@ -48,9 +48,13 @@ public class SidebarService {
         // SYSTEM
         // =====================================================
 
-        if(user.isSystem()){
+        if (user.isSystemAdmin() || user.isSystemSupport()) {
 
-            response.setAccessType(SystemRoleType.SYSTEM);
+            response.setAccessType(
+                    user.isSystemAdmin()
+                            ? RoleType.SYSTEM_ADMIN
+                            : RoleType.SYSTEM_SUPPORT
+            );
 
             response.setModules(
                     sidebarMapper.toTree(
@@ -73,7 +77,7 @@ public class SidebarService {
         UUID branchId = user.getCurrentBranchId();
 
         if(organizationId == null || branchId == null){
-            response.setAccessType(SystemRoleType.UNKNOWN);
+            response.setAccessType(RoleType.UNKNOWN);
             response.setModules(List.of());
             return response;
         }
@@ -85,7 +89,7 @@ public class SidebarService {
         List<Contract> contracts = contractResolver.getActiveContractsByBranch(branchId);
 
         if(contracts.isEmpty()){
-            response.setAccessType(SystemRoleType.NO_CONTRACT);
+            response.setAccessType(RoleType.NO_CONTRACT);
             response.setModules(List.of());
             return response;
         }
@@ -121,7 +125,7 @@ public class SidebarService {
 
         if(user.hasOrganizationAdminAccess(organizationId)){
 
-            response.setAccessType(SystemRoleType.ORG_ADMIN);
+            response.setAccessType(RoleType.ORG_ADMIN);
 
             response.setModules(
                     sidebarMapper.toTree(
@@ -145,7 +149,7 @@ public class SidebarService {
 
         if(user.hasBranchAdminAccess(organizationId, branchId)){
 
-            response.setAccessType(SystemRoleType.ORG_BRANCH_ADMIN);
+            response.setAccessType(RoleType.ORG_BRANCH_ADMIN);
 
             response.setModules(
                     sidebarMapper.toTree(
@@ -169,7 +173,8 @@ public class SidebarService {
                     new HashSet<>(
                             userModuleRepository
                                     .findActiveModuleIdsByPersonId(
-                                            user.getUserId()
+                                            user.getUserId(),
+                                            StatusType.ACTIVE
                                     )
                     );
 
@@ -186,7 +191,7 @@ public class SidebarService {
 
             userModules.retainAll(contractModuleIds);
 
-            response.setAccessType(SystemRoleType.ORG_USER);
+            response.setAccessType(RoleType.ORG_USER);
 
             response.setModules(
                     sidebarMapper.toTree(
@@ -204,7 +209,7 @@ public class SidebarService {
         // UNKNOWN
         // =====================================================
 
-        response.setAccessType(SystemRoleType.UNKNOWN);
+        response.setAccessType(RoleType.UNKNOWN);
         response.setModules(List.of());
         return response;
     }

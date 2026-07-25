@@ -4,12 +4,14 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import pe.dcs.app.security.service.UserAccessContext;
-import pe.dcs.app.util.constant.RoleConstant;
+import pe.dcs.app.util.enums.RoleType;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+
+import static pe.dcs.app.util.enums.RoleType.SYSTEM_ADMIN;
 
 @Getter
 public class CredentialDetailsImpl implements UserDetails {
@@ -116,19 +118,27 @@ public class CredentialDetailsImpl implements UserDetails {
                 );
     }
 
-    public boolean isSystem(){
+    public boolean isSystemAdmin(){
 
         return accesses
                 .stream()
                 .anyMatch(
                         a ->
-                                RoleConstant.SYSTEM_ADMIN.equals(
+                                SYSTEM_ADMIN.equals(
                                         a.roleCode()
                                 )
-                                        ||
-                                        RoleConstant.SYSTEM_SUPPORT.equals(
-                                                a.roleCode()
-                                        )
+                );
+    }
+
+    public boolean isSystemSupport(){
+
+        return accesses
+                .stream()
+                .anyMatch(
+                        a ->
+                                RoleType.SYSTEM_SUPPORT.equals(
+                                        a.roleCode()
+                                )
                 );
     }
 
@@ -140,7 +150,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID organizationId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return true;
         }
 
@@ -161,7 +171,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID branchId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return true;
         }
 
@@ -191,7 +201,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID organizationId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return true;
         }
 
@@ -207,7 +217,7 @@ public class CredentialDetailsImpl implements UserDetails {
                                         &&
                                         a.branchId() == null
                                         &&
-                                        RoleConstant.ORG_ADMIN.equals(
+                                        RoleType.ORG_ADMIN.equals(
                                                 a.roleCode()
                                         )
                 );
@@ -218,7 +228,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID branchId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return true;
         }
 
@@ -238,7 +248,7 @@ public class CredentialDetailsImpl implements UserDetails {
                                                 a.branchId()
                                         )
                                         &&
-                                        RoleConstant.ORG_BRANCH_ADMIN.equals(
+                                        RoleType.ORG_BRANCH_ADMIN.equals(
                                                 a.roleCode()
                                         )
                 );
@@ -249,7 +259,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID branchId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return true;
         }
 
@@ -267,7 +277,7 @@ public class CredentialDetailsImpl implements UserDetails {
                                                 a.branchId()
                                         )
                                         &&
-                                        RoleConstant.ORG_USER.equals(
+                                        RoleType.ORG_USER.equals(
                                                 a.roleCode()
                                         )
                 );
@@ -277,7 +287,7 @@ public class CredentialDetailsImpl implements UserDetails {
             UUID organizationId
     ){
 
-        if(isSystem()){
+        if(isSystemAdmin() || isSystemSupport()){
             return accesses;
         }
 

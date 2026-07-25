@@ -7,6 +7,7 @@ import pe.dcs.app.entity.Branch;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.user_access.response.ContextBranchResponse;
 import pe.dcs.app.repository.UserAccessRepository;
+import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.ArrayList;
@@ -25,14 +26,14 @@ public class ContextServiceImpl implements ContextService {
 
         List<UserAccess> accesses =
                 userAccessRepository
-                        .findActiveAccessesByPerson(userId);
+                        .findActiveAccessesByPerson(userId, StatusType.ACTIVE);
 
         List<ContextBranchResponse> contexts =
                 new ArrayList<>();
 
         for(UserAccess access : accesses){
 
-            String role =
+            RoleType role =
                     access.getRole()
                             .getValue();
 
@@ -42,7 +43,7 @@ public class ContextServiceImpl implements ContextService {
              * Acceso completo a la organización
              * Se expanden todas las sedes
              */
-            if(role.equals("ORG_ADMIN")){
+            if(role == RoleType.ORG_ADMIN){
                 access.getOrganization()
                         .getBranches()
                         .stream()

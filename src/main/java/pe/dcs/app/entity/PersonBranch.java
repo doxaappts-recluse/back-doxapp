@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,8 +16,8 @@ import java.util.UUID;
         indexes = {
                 @Index(name = "idx_person_branch_person", columnList = "person_id"),
                 @Index(name = "idx_person_branch_branch", columnList = "branch_id"),
-                @Index(name = "idx_person_branch_person_active", columnList = "person_id,active"),
-                @Index(name = "idx_person_branch_branch_active", columnList = "branch_id,active")
+                @Index(name = "idx_person_branch_person_status", columnList = "person_id,status"),
+                @Index(name = "idx_person_branch_branch_status", columnList = "branch_id,status")
         },
         uniqueConstraints = {
                 @UniqueConstraint(
@@ -56,8 +57,9 @@ public class PersonBranch extends Auditable {
      * Indica la sede actual de la persona.
      * Solo debe existir un registro activo.
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Boolean active = true;
+    private StatusType status;
 
     /**
      * Fecha de inicio en la sede.

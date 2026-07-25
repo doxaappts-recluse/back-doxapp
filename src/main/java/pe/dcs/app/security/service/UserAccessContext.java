@@ -1,21 +1,21 @@
 package pe.dcs.app.security.service;
 
-import pe.dcs.app.util.constant.RoleConstant;
+import pe.dcs.app.util.enums.RoleType;
 
 import java.util.UUID;
 
 public record UserAccessContext(
         UUID organizationId,
         UUID branchId,
-        String roleCode
+        RoleType roleCode
 ) {
 
     public boolean isSystem(){
-        return RoleConstant.isSystem(roleCode);
+        return RoleType.SYSTEM_ADMIN.equals(roleCode) || RoleType.SYSTEM_SUPPORT.equals((roleCode));
     }
 
     public boolean isOrgAdmin(){
-        return RoleConstant.ORG_ADMIN.equals(roleCode);
+        return RoleType.ORG_ADMIN.equals(roleCode);
     }
 
     public boolean isBranchUser(){

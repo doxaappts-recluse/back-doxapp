@@ -40,7 +40,7 @@ public class AuthContext {
     }
 
     public boolean isSystem(){
-        return getPrincipal().isSystem();
+        return getPrincipal().isSystemAdmin() || getPrincipal().isSystemSupport();
     }
 
     public boolean hasRole(String role){

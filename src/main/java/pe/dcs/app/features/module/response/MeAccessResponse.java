@@ -1,8 +1,9 @@
 package pe.dcs.app.features.module.response;
 
+import pe.dcs.app.util.enums.RoleType;
+
 import lombok.Getter;
 import lombok.Setter;
-import pe.dcs.app.util.enums.SystemRoleType;
 
 import java.util.List;
 
@@ -11,6 +12,6 @@ import java.util.List;
 public class MeAccessResponse {
 
     private List<ModuleResponse> modules;
-    private SystemRoleType accessType;
+    private RoleType accessType;
 
 }

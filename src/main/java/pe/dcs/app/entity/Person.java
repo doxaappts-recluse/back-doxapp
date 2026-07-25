@@ -5,7 +5,9 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
+import pe.dcs.app.util.enums.MaritalStatusType;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -45,13 +47,18 @@ public class Person extends Auditable {
 
     private String address;
 
-    private String dateBirth;
+    private LocalDate dateBirth;
 
-    private String maritalStatus;
+    @Enumerated(EnumType.STRING)
+    @Column(
+            name = "marital_status",
+            nullable = false
+    )
+    private MaritalStatusType maritalStatus;
 
-    private String children;
+    private Integer children;
 
-    private String dateAdmission;
+    private LocalDate dateAdmission;
 
     /**
      * Historial de sedes donde ha pertenecido

@@ -23,7 +23,7 @@ public class AuthService {
             UUID branchId
     ) {
 
-        if (user.isSystem()) {
+        if (user.isSystemAdmin() || user.isSystemSupport()) {
 
             return jwtProvider.generateContextToken(
                     user,

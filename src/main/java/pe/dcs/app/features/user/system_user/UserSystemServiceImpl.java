@@ -1,14 +1,50 @@
 package pe.dcs.app.features.user.system_user;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import pe.dcs.app.entity.Credential;
+import pe.dcs.app.entity.Person;
+import pe.dcs.app.entity.Role;
+import pe.dcs.app.entity.UserAccess;
+import pe.dcs.app.features.user.shared.UserChangePasswordRequest;
+import pe.dcs.app.features.user.system_user.mapper.UserSystemMapper;
+import pe.dcs.app.features.user.system_user.request.UserSystemCreateRequest;
+import pe.dcs.app.features.user.system_user.request.UserSystemListRequest;
+import pe.dcs.app.features.user.system_user.request.UserSystemUpdateRequest;
+import pe.dcs.app.features.user.system_user.response.UserSystemResponse;
 import pe.dcs.app.features.user.system_user.service.UserSystemService;
+import pe.dcs.app.repository.CredentialRepository;
+import pe.dcs.app.repository.RoleRepository;
+import pe.dcs.app.security.service.AuthContext;
+import pe.dcs.app.security.service.UserAccessContext;
+import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
+import pe.dcs.app.service.AuthorizationService;
+import pe.dcs.app.util.Exceptions;
+import pe.dcs.app.util.enums.StatusType;
+import pe.dcs.app.util.enums.resolveSort.PersonSort;
+import pe.dcs.app.util.pagination.PageResponse;
+import pe.dcs.app.util.pagination.PageableUtil;
+import pe.dcs.app.util.pagination.PaginationResponse;
+import pe.dcs.app.repository.PersonRepository;
+import pe.dcs.app.repository.UserAccessRepository;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class UserSystemServiceImpl implements UserSystemService {
 
-    /*private final UserRepository repository;
+    private final PersonRepository repository;
     private final CredentialRepository credentialRepository;
     private final RoleRepository roleRepository;
     private final UserAccessRepository userAccessRepository;
@@ -21,23 +57,29 @@ public class UserSystemServiceImpl implements UserSystemService {
     // =========================================================
 
     @Override
+    @Transactional(readOnly = true)
     public PageResponse<UserSystemResponse> findAllSystem(
             UserSystemListRequest request
     ) {
 
         Pageable pageable = PageableUtil.buildPageable(
                 request.getPagination(),
-                request.getSorts()
+                request.getSorts(),
+                PersonSort::resolvePath
         );
 
-        var page = repository.findAll(
-                        UserSystemSpecification.filter(request, "SYSTEM_%"),
-                        pageable
-                )
-                .map(UserSystemMapper::toResponse);
+        Page<Person> page = repository.findAll(
+                UserSystemSpecification.filter(
+                        request
+                ),
+                pageable
+        );
 
         return new PageResponse<>(
-                page.getContent(),
+                page.getContent()
+                        .stream()
+                        .map(UserSystemMapper::toResponse)
+                        .toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),
                         page.getTotalPages(),
@@ -47,7 +89,7 @@ public class UserSystemServiceImpl implements UserSystemService {
         );
     }
 
-    @Override
+    /*@Override
     public PageResponse<UserSystemResponse> findAllOrg(
             UserSystemListRequest request
     ) {
@@ -72,7 +114,7 @@ public class UserSystemServiceImpl implements UserSystemService {
                         page.getNumber()
                 )
         );
-    }
+    }*/
 
     // =========================================================
     // FIND BY ID
@@ -91,183 +133,167 @@ public class UserSystemServiceImpl implements UserSystemService {
     @Transactional
     public UserSystemResponse create(UserSystemCreateRequest request) {
 
-        boolean exists =  repository.existsByDni(request.getDni());
-
-        if (exists) {
+        if (repository.existsByDni(request.getDni())) {
             throw new Exceptions(
-                    "System user with this DNI already exists",
+                    "A user with this DNI already exists.",
                     HttpStatus.CONFLICT
             );
         }
 
         if (credentialRepository.existsByUsername(request.getUsername())) {
-
             throw new Exceptions(
-                    "Username already exists",
+                    "Username already exists.",
                     HttpStatus.CONFLICT
             );
         }
 
-        Role role =
-                roleRepository.findById(request.getRolId())
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "Role not found",
-                                        HttpStatus.NOT_FOUND
-                                )
-                        );
+        Role role = roleRepository.findById(request.getRoleId())
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Role not found.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
 
-        if (!role.getValue().startsWith("SYSTEM_")) {
-
+        if (!role.isSystemRole()) {
             throw new Exceptions(
-                    "Invalid system role",
+                    "The selected role is not a system role.",
                     HttpStatus.BAD_REQUEST
             );
         }
 
-        // =============================
+        // =====================================
         // PERSON
-        // =============================
+        // =====================================
 
-        User user = new User();
+        Person person = new Person();
 
-        user.setName(request.getName());
-        user.setLastname(request.getLastname());
-        user.setDni(request.getDni());
-        user.setSex(request.getSex());
-        user.setPhone(request.getPhone());
-        user.setAddress(request.getAddress());
-        user.setDateBirth(request.getDateBirth());
-        user.setMaritalStatus(request.getMaritalStatus());
-        user.setChildren(request.getChildren());
-        user.setDateAdmission(request.getDateAdmission());
+        person.setName(request.getName());
+        person.setLastname(request.getLastname());
+        person.setDni(request.getDni());
+        person.setSex(request.getSex());
+        person.setPhone(request.getPhone());
+        person.setAddress(request.getAddress());
+        person.setDateBirth(request.getDateBirth());
+        person.setMaritalStatus(request.getMaritalStatus());
+        person.setChildren(request.getChildren());
+        person.setDateAdmission(request.getDateAdmission());
 
-        user = repository.save(user);
+        repository.save(person);
 
-        // =============================
-        // LOGIN
-        // =============================
+        // =====================================
+        // CREDENTIAL
+        // =====================================
 
         Credential credential = new Credential();
 
-        credential.setUser(user);
+        credential.setPerson(person);
         credential.setUsername(request.getUsername());
         credential.setPassword(
                 passwordEncoder.encode("iglesia2025")
         );
-        credential.setStatus(
-                StatusType.ACTIVE
-        );
+        credential.setStatus(StatusType.ACTIVE);
 
         credentialRepository.save(credential);
 
-        user.setCredential(credential);
+        person.setCredential(credential);
 
-        // =============================
-        // SYSTEM ACCESS
-        // =============================
+        // =====================================
+        // ACCESS
+        // =====================================
 
         UserAccess access = new UserAccess();
 
-        access.setUser(user);
+        access.setPerson(person);
         access.setRole(role);
 
-        // SYSTEM NO TIENE ORGANIZACION NI SEDE
         access.setOrganization(null);
         access.setBranch(null);
 
-        access.setActive(true);
+        access.setActive(StatusType.ACTIVE);
 
         userAccessRepository.save(access);
 
-        return UserSystemMapper.toResponse(user);
+        return UserSystemMapper.toResponse(person);
     }
-
     // =========================================================
     // UPDATE
     // =========================================================
 
     @Override
     @Transactional
-    public UserSystemResponse update(
-            UUID id,
-            UserSystemUpdateRequest request
-    ) {
+    public UserSystemResponse update(UUID id, UserSystemUpdateRequest request) {
 
-        User user = getUser(id);
+        Person person = getUser(id);
 
-        boolean exists =
-                repository.existsByDniAndOrganizationIsNullAndIdNot(
-                        request.getDni(),
-                        id
-                );
-
-        if (exists) {
+        if (repository.existsByDniAndIdNot(request.getDni(), id)) {
             throw new Exceptions(
-                    "System user with this DNI already exists",
+                    "A user with this DNI already exists.",
                     HttpStatus.CONFLICT
             );
         }
 
-        Role role = roleRepository.findById(request.getRolId())
+        Role role = roleRepository.findById(request.getRoleId())
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Role not found",
+                                "Role not found.",
                                 HttpStatus.NOT_FOUND
                         )
                 );
 
-        if (!role.getValue().startsWith("SYSTEM_")) {
+        if (!role.isSystemRole()) {
             throw new Exceptions(
-                    "Invalid system role",
+                    "The selected role is not a system role.",
                     HttpStatus.BAD_REQUEST
             );
         }
 
-        user.setName(request.getName());
-        user.setLastname(request.getLastname());
-        user.setDni(request.getDni());
-        user.setSex(request.getSex());
-        user.setPhone(request.getPhone());
-        user.setAddress(request.getAddress());
-        user.setDateBirth(request.getDateBirth());
-        user.setMaritalStatus(request.getMaritalStatus());
-        user.setChildren(request.getChildren());
-        user.setDateAdmission(request.getDateAdmission());
+        person.setName(request.getName());
+        person.setLastname(request.getLastname());
+        person.setDni(request.getDni());
+        person.setSex(request.getSex());
+        person.setPhone(request.getPhone());
+        person.setAddress(request.getAddress());
+        person.setDateBirth(request.getDateBirth());
+        person.setMaritalStatus(request.getMaritalStatus());
+        person.setChildren(request.getChildren());
+        person.setDateAdmission(request.getDateAdmission());
 
-        Credential credential = user.getCredential();
+        UserAccess access = person.getAccesses()
+                .stream()
+                .filter(a -> a.getActive() == StatusType.ACTIVE)
+                .findFirst()
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Active access not found.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
 
-        if (credential == null) {
-            throw new Exceptions(
-                    "Credential not found",
-                    HttpStatus.NOT_FOUND
-            );
-        }
+        access.setRole(role);
 
-        credential.setRole(role);
+        repository.save(person);
 
-        repository.save(user);
-
-        return UserSystemMapper.toResponse(user);
+        return UserSystemMapper.toResponse(person);
     }
 
     // =========================================================
     // ENABLE
     // =========================================================
-
     @Override
-    public void enable(UUID userId) {
+    @Transactional
+    public void enable(UUID id) {
 
-        User target = getUser(userId);
+        Person person = getUser(id);
 
         authorizationService.assertCanAccessUser(
                 authContext.getPrincipal(),
-                toCredentialDetails(target)
+                toCredentialDetails(person)
         );
 
-        target.getCredential().setStatus(StatusType.ACTIVE);
+        person.getCredential().setStatus(StatusType.ACTIVE);
 
-        credentialRepository.save(target.getCredential());
+        credentialRepository.save(person.getCredential());
     }
 
     // =========================================================
@@ -275,18 +301,19 @@ public class UserSystemServiceImpl implements UserSystemService {
     // =========================================================
 
     @Override
-    public void disable(UUID userId) {
+    @Transactional
+    public void disable(UUID id) {
 
-        User target = getUser(userId);
+        Person person = getUser(id);
 
         authorizationService.assertCanAccessUser(
                 authContext.getPrincipal(),
-                toCredentialDetails(target)
+                toCredentialDetails(person)
         );
 
-        target.getCredential().setStatus(StatusType.INACTIVE);
+        person.getCredential().setStatus(StatusType.INACTIVE);
 
-        credentialRepository.save(target.getCredential());
+        credentialRepository.save(person.getCredential());
     }
 
     // =========================================================
@@ -294,17 +321,19 @@ public class UserSystemServiceImpl implements UserSystemService {
     // =========================================================
 
     @Override
+    @Transactional
     public void delete(UUID id) {
 
-        User target = getUser(id);
+        Person person = getUser(id);
 
         authorizationService.assertCanAccessUser(
                 authContext.getPrincipal(),
-                toCredentialDetails(target)
+                toCredentialDetails(person)
         );
 
-        credentialRepository.delete(target.getCredential());
-        repository.delete(target);
+        credentialRepository.delete(person.getCredential());
+
+        repository.delete(person);
     }
 
     // =========================================================
@@ -312,35 +341,36 @@ public class UserSystemServiceImpl implements UserSystemService {
     // =========================================================
 
     @Override
+    @Transactional
     public void changePassword(
             UUID id,
             UserChangePasswordRequest request
     ) {
 
-        User target = getUser(id);
+        Person person = getUser(id);
 
         authorizationService.assertCanAccessUser(
                 authContext.getPrincipal(),
-                toCredentialDetails(target)
+                toCredentialDetails(person)
         );
 
-        target.getCredential().setPassword(
+        person.getCredential().setPassword(
                 passwordEncoder.encode(request.getPassword())
         );
 
-        credentialRepository.save(target.getCredential());
+        credentialRepository.save(person.getCredential());
     }
 
     // =========================================================
     // GET USER
     // =========================================================
 
-    private User getUser(UUID id) {
+    private Person getUser(UUID id) {
 
         return repository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "User not found",
+                                "User not found.",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -350,35 +380,50 @@ public class UserSystemServiceImpl implements UserSystemService {
     // TARGET USER -> SECURITY MODEL
     // =========================================================
 
-    private CredentialDetailsImpl toCredentialDetails(User user) {
+    private CredentialDetailsImpl toCredentialDetails(Person user) {
 
         Credential credential = user.getCredential();
+
+        List<UserAccessContext> accesses =
+                user.getAccesses()
+                        .stream()
+                        .map(access ->
+                                new UserAccessContext(
+                                        access.getOrganization() != null
+                                                ? access.getOrganization().getId()
+                                                : null,
+                                        access.getBranch() != null
+                                                ? access.getBranch().getId()
+                                                : null,
+                                        access.getRole().getValue()
+                                        )
+                        )
+                        .toList();
+
+
+        Collection<GrantedAuthority> authorities =
+                accesses
+                        .stream()
+                        .map(access ->
+                                new SimpleGrantedAuthority(
+                                        access.roleCode().name()
+                                )
+                        )
+                        .collect(Collectors.toList());
+
 
         return new CredentialDetailsImpl(
                 credential.getId(),
                 user.getId(),
-
-                user.getOrganization() != null
-                        ? user.getOrganization().getId()
-                        : null,
-
-                user.getBranch() != null
-                        ? user.getBranch().getId()
-                        : null,
-
                 credential.getUsername(),
                 credential.getPassword(),
-
                 user.getName(),
                 user.getLastname(),
-
-                credential.isActive(),
-
-                List.of(
-                        new SimpleGrantedAuthority(
-                                credential.getRole().getValue()
-                        )
-                )
+                credential.getStatus() == StatusType.ACTIVE,
+                accesses,
+                authorities,
+                null,
+                null
         );
-    }*/
+    }
 }

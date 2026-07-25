@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import pe.dcs.app.entity.Permission;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,22 +26,22 @@ public interface PermissionRepository extends JpaRepository<Permission, UUID> {
             @Param("moduleIds") List<UUID> moduleIds
     );
 
-
     @Query("""
         SELECT cm.module.id
         FROM ContractModule cm
-        JOIN UserAccessModule uam 
+        JOIN UserAccessModule uam
              ON uam.module.id = cm.module.id
         WHERE cm.contract.id = :contractId
           AND uam.userAccess.person.id = :personId
-          AND cm.status = 'ACTIVE'
-          AND uam.status = 'ACTIVE'
+          AND cm.status = :status
+          AND uam.status = :status
           AND uam.enabled = true
-          AND uam.userAccess.active = true
+          AND uam.userAccess.active = :status
     """)
     List<UUID> findAllowedModuleIds(
             @Param("contractId") UUID contractId,
-            @Param("personId") UUID personId
+            @Param("personId") UUID personId,
+            @Param("status") StatusType status
     );
 
 }

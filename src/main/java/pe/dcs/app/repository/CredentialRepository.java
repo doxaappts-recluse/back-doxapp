@@ -33,4 +33,8 @@ public interface CredentialRepository extends JpaRepository<Credential, UUID> {
             UUID id
     );
 
+    Optional<Credential> findByUsername(
+            String username
+    );
+
 }

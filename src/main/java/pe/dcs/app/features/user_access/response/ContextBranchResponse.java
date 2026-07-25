@@ -1,5 +1,7 @@
 package pe.dcs.app.features.user_access.response;
 
+import pe.dcs.app.util.enums.RoleType;
+
 import java.util.UUID;
 
 public record ContextBranchResponse(
@@ -8,7 +10,7 @@ public record ContextBranchResponse(
         UUID branchId,
         String branchName,
         String branchCode,
-        String role
+        RoleType role
 ) {
 
 }

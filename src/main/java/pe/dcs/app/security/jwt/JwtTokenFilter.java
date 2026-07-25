@@ -97,7 +97,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
              */
             if(!loginFlow){
 
-                boolean isSystem = principal.isSystem();
+                boolean isSystem = principal.isSystemAdmin() || principal.isSystemSupport();
 
                 if(!isSystem && !JwtConstant.CONTEXT_TOKEN.equals(tokenType)){
                     sendUnauthorizedResponse(

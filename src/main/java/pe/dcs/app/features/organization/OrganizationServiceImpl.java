@@ -11,6 +11,7 @@ import pe.dcs.app.features.organization.mapper.OrganizationMapper;
 import pe.dcs.app.features.organization.request.OrganizationCreateRequest;
 import pe.dcs.app.features.organization.request.OrganizationListRequest;
 import pe.dcs.app.features.organization.request.OrganizationUpdateRequest;
+import pe.dcs.app.features.organization.response.OrganizationListResponse;
 import pe.dcs.app.features.organization.response.OrganizationResponse;
 import pe.dcs.app.features.organization.service.OrganizationService;
 import pe.dcs.app.repository.ContractRepository;
@@ -60,11 +61,24 @@ public class OrganizationServiceImpl implements OrganizationService {
     }
 
     @Override
-    public List<OrganizationResponse> list() {
+    public List<OrganizationListResponse> list() {
 
-        return repository.findAll()
+        List<Organization> organizations = repository.findByStatusOrderByNameAsc(StatusType.ACTIVE);
+
+        return organizations
                 .stream()
-                .map(OrganizationMapper::toResponse)
+                .map(
+                        organization ->
+                                OrganizationListResponse
+                                        .builder()
+                                        .id(
+                                                organization.getId()
+                                        )
+                                        .name(
+                                                organization.getName()
+                                        )
+                                        .build()
+                )
                 .toList();
     }
 

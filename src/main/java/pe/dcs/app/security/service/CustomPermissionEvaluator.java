@@ -57,7 +57,7 @@ public class CustomPermissionEvaluator implements PermissionEvaluator {
         // SYSTEM
         // =====================================================
 
-        if(user.isSystem()){
+        if(user.isSystemAdmin() || user.isSystemSupport()){
             return true;
         }
 
