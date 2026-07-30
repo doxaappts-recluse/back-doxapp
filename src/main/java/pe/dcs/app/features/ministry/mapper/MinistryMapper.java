@@ -4,13 +4,16 @@ import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.Ministry;
 import pe.dcs.app.features.ministry.request.MinistryRequest;
 import pe.dcs.app.features.ministry.response.MinistryResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 
 @Component
 public class MinistryMapper {
 
-    public MinistryResponse simple(Ministry entity){
+    public MinistryResponse simple(Ministry entity, boolean showAudit){
 
         MinistryResponse dto = new MinistryResponse();
+
+        BaseMapper.mapAudit(entity, dto, showAudit);
 
         dto.setId(entity.getId());
         dto.setName(entity.getName());

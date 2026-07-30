@@ -3,6 +3,7 @@ package pe.dcs.app.features.module.response;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.auditable.AuditableResponse;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.UUID;
 @Getter
 @Setter
 @Data
-public class ModuleResponse {
+public class ModuleResponse extends AuditableResponse {
 
     private UUID id;
 
@@ -24,6 +25,12 @@ public class ModuleResponse {
 
     private Boolean root;
     private StatusType status;
+
+    // visibilidad por rol
+    private Boolean visibleSystem;
+    private Boolean visibleOrgAdmin;
+    private Boolean visibleBranchAdmin;
+    private Boolean visibleUser;
 
     // parent
     private UUID parentId;

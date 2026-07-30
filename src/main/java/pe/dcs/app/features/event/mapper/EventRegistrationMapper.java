@@ -10,12 +10,12 @@ import pe.dcs.app.util.auditable.BaseMapper;
 @Component
 public class EventRegistrationMapper extends BaseMapper {
 
-    public EventRegistrationResponse simple(EventRegistration entity) {
+    public EventRegistrationResponse simple(EventRegistration entity, boolean showAudit) {
 
         EventRegistrationResponse response =
                 new EventRegistrationResponse();
 
-        mapAudit(entity, response);
+        mapAudit(entity, response, showAudit);
 
         response.setId(entity.getId());
 

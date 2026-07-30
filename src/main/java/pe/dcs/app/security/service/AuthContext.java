@@ -130,4 +130,51 @@ public class AuthContext {
                         branchId
                 );
     }
+
+    public boolean isBranchAdmin(UUID organizationId, UUID branchId){
+        return getPrincipal()
+                .hasBranchAdminAccess(
+                        organizationId,
+                        branchId
+                );
+    }
+
+    /**
+     * Igual que {@link #isOrganizationAdmin(UUID)}, pero excluyendo
+     * explícitamente a SYSTEM (que a nivel de credencial siempre
+     * cuenta como admin). Útil quiere restringirse
+     * exclusivamente a ORG_ADMIN/ORG_BRANCH_ADMIN, dejando fuera
+     * incluso a SYSTEM.
+     */
+    public boolean isOrganizationAdminOnly(UUID organizationId){
+        return !isSystem() && isOrganizationAdmin(organizationId);
+    }
+
+    /**
+     * Igual que {@link #isBranchAdmin(UUID, UUID)}, pero excluyendo
+     * explícitamente a SYSTEM.
+     */
+    public boolean isBranchAdminOnly(UUID organizationId, UUID branchId){
+        return !isSystem() && isBranchAdmin(organizationId, branchId);
+    }
+
+    /**
+     * Acceso exclusivo de ORG_ADMIN/ORG_BRANCH_ADMIN sobre un
+     * org/sede puntual: SYSTEM queda explícitamente fuera.
+     */
+    public boolean canManageOrgOrBranchOnly(UUID organizationId, UUID branchId){
+        return isOrganizationAdminOnly(organizationId)
+                || isBranchAdminOnly(organizationId, branchId);
+    }
+
+    /**
+     * Info de auditoría (quién/cuándo creó o actualizó un
+     * registro) solo se muestra a SYSTEM, ORG_ADMIN y
+     * ORG_BRANCH_ADMIN. Un ORG_USER normal no la ve.
+     */
+    public boolean canViewAudit(){
+        return isSystem()
+                || isCurrentOrganizationAdmin()
+                || isCurrentBranchAdmin();
+    }
 }

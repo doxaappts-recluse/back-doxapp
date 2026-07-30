@@ -13,7 +13,7 @@ import java.util.UUID;
 
 public interface EventService {
 
-    /*EventDetailResponse create(
+    EventDetailResponse create(
             EventRequest request,
             MultipartFile file
     );
@@ -40,6 +40,6 @@ public interface EventService {
             UUID id
     );
 
-    Event findById(UUID id);*/
+    Event findById(UUID id);
 
 }

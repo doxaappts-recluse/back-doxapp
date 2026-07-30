@@ -13,6 +13,10 @@ import java.util.UUID;
 @Repository
 public interface PermissionRepository extends JpaRepository<Permission, UUID> {
 
+    List<Permission> findByStatusOrderByNameAsc(
+            StatusType status
+    );
+
     @Query("""
         SELECT p.code
         FROM ContractModulePermission cmp

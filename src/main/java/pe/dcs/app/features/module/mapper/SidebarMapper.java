@@ -18,8 +18,92 @@ public class SidebarMapper {
     public List<ModuleResponse> toTree(
             List<Module> modules,
             Set<UUID> allowedModuleIds,
-            UUID contractId,
+            List<UUID> contractIds,
             UUID userId
+    ){
+        return toTree(modules, allowedModuleIds, contractIds, userId, null, null);
+    }
+
+    /**
+     * Árbol de sidebar para SYSTEM (SYSTEM_ADMIN/SYSTEM_SUPPORT).
+     * No administra bajo un contrato (no hay contractId), así que
+     * no tiene sentido acotar sus permisos a
+     * contract_module_permissions: siempre ve el catálogo completo
+     * de permisos activos en cada módulo visible para su rol.
+     */
+    public List<ModuleResponse> toTreeForSystem(
+            List<Module> modules
+    ){
+
+        List<String> allPermissions = permissionService.getAllPermissionCodes();
+
+        Map<UUID, List<Module>> grouped =
+                modules.stream()
+                        .filter(m -> m.getParent() != null)
+                        .collect(
+                                Collectors.groupingBy(
+                                        m -> m.getParent().getId()
+                                )
+                        );
+
+        return modules.stream()
+                .filter(m -> m.getParent() == null)
+                .map(m -> mapSystem(m, grouped, allPermissions))
+                .sorted(
+                        Comparator.comparing(
+                                ModuleResponse::getOrderNum
+                        )
+                )
+                .toList();
+    }
+
+    private ModuleResponse mapSystem(
+            Module node,
+            Map<UUID, List<Module>> grouped,
+            List<String> allPermissions
+    ){
+
+        List<ModuleResponse> children =
+                grouped.getOrDefault(
+                                node.getId(),
+                                List.of()
+                        )
+                        .stream()
+                        .map(child -> mapSystem(child, grouped, allPermissions))
+                        .sorted(
+                                Comparator.comparing(
+                                        ModuleResponse::getOrderNum
+                                )
+                        )
+                        .toList();
+
+        ModuleResponse dto = new ModuleResponse();
+
+        dto.setId(node.getId());
+        dto.setName(node.getName());
+        dto.setCode(node.getCode());
+        dto.setIcon(node.getIcon());
+        dto.setRoute(node.getRoute());
+        dto.setOrderNum(node.getOrderNum());
+        dto.setPermissions(allPermissions);
+        dto.setChildren(children);
+
+        return dto;
+    }
+
+    /**
+     * Overload usado por ORG_USER: además del userId, necesita
+     * organizationId/branchId para acotar los permisos delegados
+     * al acceso puntual actualmente activo (una persona puede
+     * tener otros accesos, en otras sedes, con otros permisos).
+     */
+    public List<ModuleResponse> toTree(
+            List<Module> modules,
+            Set<UUID> allowedModuleIds,
+            List<UUID> contractIds,
+            UUID userId,
+            UUID organizationId,
+            UUID branchId
     ){
 
         Map<UUID, List<Module>> grouped =
@@ -38,8 +122,10 @@ public class SidebarMapper {
                                 m,
                                 grouped,
                                 allowedModuleIds,
-                                contractId,
-                                userId
+                                contractIds,
+                                userId,
+                                organizationId,
+                                branchId
                         )
                 )
                 .filter(Objects::nonNull)
@@ -55,8 +141,10 @@ public class SidebarMapper {
             Module node,
             Map<UUID, List<Module>> grouped,
             Set<UUID> allowedModuleIds,
-            UUID contractId,
-            UUID userId
+            List<UUID> contractIds,
+            UUID userId,
+            UUID organizationId,
+            UUID branchId
     ){
 
         List<ModuleResponse> children =
@@ -70,8 +158,10 @@ public class SidebarMapper {
                                         child,
                                         grouped,
                                         allowedModuleIds,
-                                        contractId,
-                                        userId
+                                        contractIds,
+                                        userId,
+                                        organizationId,
+                                        branchId
                                 )
                         )
                         .filter(Objects::nonNull)
@@ -105,18 +195,18 @@ public class SidebarMapper {
         dto.setOrderNum(node.getOrderNum());
 
         /*
-         * ADMIN -> permisos del contrato
+         * ADMIN -> permisos del contrato (unión de todos los
+         *          contratos activos de la sede: puede haber uno
+         *          de ORGANIZATION y otro de BRANCH a la vez)
          * USER  -> permisos asignados al usuario
          */
         if(userId == null){
 
             dto.setPermissions(
-                    contractId != null
-                            ? permissionService.getPermissions(
-                            contractId,
+                    permissionService.getPermissions(
+                            contractIds,
                             node.getId()
                     )
-                            : List.of()
             );
 
         }else{
@@ -124,6 +214,8 @@ public class SidebarMapper {
             dto.setPermissions(
                     permissionService.getUserPermissions(
                             userId,
+                            organizationId,
+                            branchId,
                             node.getId()
                     )
             );

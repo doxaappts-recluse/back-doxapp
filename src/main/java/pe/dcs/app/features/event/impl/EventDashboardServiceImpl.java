@@ -1,6 +1,7 @@
 package pe.dcs.app.features.event.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Event;
@@ -8,7 +9,8 @@ import pe.dcs.app.features.event.response.dashboard.*;
 import pe.dcs.app.features.event.service.EventDashboardService;
 import pe.dcs.app.repository.EventFinanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
-import pe.dcs.app.repository.EventRepository;
+import pe.dcs.app.security.service.AuthContext;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.events.EventFinanceStatus;
 import pe.dcs.app.util.enums.events.EventFinanceType;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
@@ -20,16 +22,37 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventDashboardServiceImpl implements EventDashboardService {
 
-    /*private final EventFinanceRepository financeRepository;
+    private final EventFinanceRepository financeRepository;
     private final EventRegistrationRepository registrationRepository;
-    private final EventRepository eventRepository;
+    private final AuthContext authContext;
+    private final EventAccessGuard eventAccessGuard;
+
+    /**
+     * Dashboard es de gestión exclusiva de ORG_ADMIN/ORG_BRANCH_ADMIN
+     * de la organización del contexto actual. SYSTEM queda
+     * explícitamente fuera (igual que el resto de Eventos).
+     */
+    private void assertCallerCanManage() {
+
+        if (!authContext.canManageOrgOrBranchOnly(
+                authContext.getCurrentOrganizationId(),
+                authContext.getCurrentBranchId()
+        )) {
+
+            throw new Exceptions(
+                    "Solo un administrador de organización o de sede puede ver el dashboard.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
     @Override
     @Transactional(readOnly = true)
     public EventDashboardResponse getDashboard(UUID eventId) {
 
-        Event event = eventRepository.findById(eventId)
-                .orElseThrow(() -> new RuntimeException("Event not found"));
+        assertCallerCanManage();
+
+        Event event = eventAccessGuard.assertCanManage(eventId);
 
         EventDashboardResponse res = new EventDashboardResponse();
 
@@ -132,5 +155,5 @@ public class EventDashboardServiceImpl implements EventDashboardService {
 
     private BigDecimal safe(BigDecimal value) {
         return value != null ? value : BigDecimal.ZERO;
-    }*/
+    }
 }

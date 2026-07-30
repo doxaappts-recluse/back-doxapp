@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventFinanceController {
 
-    /*private final EventFinanceService eventFinanceService;
+    private final EventFinanceService eventFinanceService;
 
     @PostMapping("/create")
     public ApiResponse<EventFinanceResponse> create(
@@ -94,5 +94,5 @@ public class EventFinanceController {
                 "Movimiento financiero obtenido correctamente",
                 eventFinanceService.getById(id)
         );
-    }*/
+    }
 }

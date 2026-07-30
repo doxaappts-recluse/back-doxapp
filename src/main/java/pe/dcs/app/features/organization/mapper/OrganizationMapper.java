@@ -3,6 +3,7 @@ package pe.dcs.app.features.organization.mapper;
 import pe.dcs.app.entity.Organization;
 
 import pe.dcs.app.features.organization.response.OrganizationResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 import pe.dcs.app.util.enums.StatusType;
 
 public class OrganizationMapper {
@@ -11,17 +12,23 @@ public class OrganizationMapper {
     }
 
     public static OrganizationResponse toResponse(
-            Organization organization
+            Organization organization,
+            boolean showAudit
     ) {
 
-        return OrganizationResponse.builder()
-                .id(organization.getId())
-                .name(organization.getName())
-                .address(organization.getAddress())
-                .ruc(organization.getRuc())
-                .email(organization.getEmail())
-                .foundedDate(organization.getFoundedDate())
-                .status(organization.getStatus() == StatusType.ACTIVE)
-                .build();
+        OrganizationResponse response =
+                OrganizationResponse.builder()
+                        .id(organization.getId())
+                        .name(organization.getName())
+                        .address(organization.getAddress())
+                        .ruc(organization.getRuc())
+                        .email(organization.getEmail())
+                        .foundedDate(organization.getFoundedDate())
+                        .status(organization.getStatus() == StatusType.ACTIVE)
+                        .build();
+
+        BaseMapper.mapAudit(organization, response, showAudit);
+
+        return response;
     }
 }

@@ -22,6 +22,7 @@ import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.pagination.PageableUtil;
 
 import pe.dcs.app.util.enums.StatusType;
+import pe.dcs.app.security.service.AuthContext;
 
 import java.util.*;
 
@@ -31,13 +32,30 @@ public class ModuleServiceImpl implements ModuleService {
 
     private final ModuleRepository moduleRepository;
     private final ModuleMapper moduleMapper;
+    private final AuthContext authContext;
 
-    // =====================================================
-    // RESTO SIN CAMBIOS
-    // =====================================================
+    /**
+     * El catálogo de módulos es de gestión exclusiva de SYSTEM
+     * (define qué módulos existen para armar contratos). Los
+     * módulos que sí ve un org/branch admin (según su contrato
+     * activo) se resuelven aparte, en ContractModuleAccessService.
+     */
+    private void assertSystem() {
+
+        if (!authContext.isSystem()) {
+
+            throw new Exceptions(
+                    "Solo un administrador del sistema puede gestionar el catálogo de módulos.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
     @Override
     public PageResponse<ModuleResponse> search(ModuleSearchRequest request) {
+
+        assertSystem();
+
         Pageable pageable =
                 PageableUtil.buildPageable(request.getPagination(), request.getSorts());
 
@@ -52,8 +70,10 @@ public class ModuleServiceImpl implements ModuleService {
 
         Page<Module> page = moduleRepository.findAll(spec, pageable);
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
-                page.getContent().stream().map(moduleMapper::simple).toList(),
+                page.getContent().stream().map(m -> moduleMapper.simple(m, showAudit)).toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),
                         page.getTotalPages(),
@@ -65,14 +85,19 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     public ModuleResponse getById(UUID id) {
+
+        assertSystem();
+
         Module module = moduleRepository.findById(id)
                 .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
 
-        return moduleMapper.simple(module);
+        return moduleMapper.simple(module, authContext.canViewAudit());
     }
 
     @Override
     public List<ModuleOptionResponse> getParentModules(UUID currentId){
+
+        assertSystem();
 
         List<Module> modules =
                 currentId != null
@@ -96,6 +121,8 @@ public class ModuleServiceImpl implements ModuleService {
 
     @Override
     public List<ModuleOptionResponse> getChildModules(UUID currentId){
+
+        assertSystem();
 
         List<Module> modules =
                 currentId != null
@@ -121,6 +148,8 @@ public class ModuleServiceImpl implements ModuleService {
     @Transactional
     public ModuleResponse create(ModuleRequest request){
 
+        assertSystem();
+
         if(moduleRepository.existsByCodeIgnoreCase(request.getCode())){
             throw new Exceptions(
                     "Module code already exists",
@@ -136,6 +165,11 @@ public class ModuleServiceImpl implements ModuleService {
         module.setRoute(request.getRoute());
         module.setOrderNum(request.getOrderNum());
         module.setStatus(StatusType.ACTIVE);
+
+        module.setVisibleSystem(defaultTrue(request.getVisibleSystem()));
+        module.setVisibleOrgAdmin(defaultTrue(request.getVisibleOrgAdmin()));
+        module.setVisibleBranchAdmin(defaultTrue(request.getVisibleBranchAdmin()));
+        module.setVisibleUser(defaultTrue(request.getVisibleUser()));
 
         if(request.getParentId() != null){
 
@@ -172,7 +206,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         moduleRepository.save(module);
 
-        return moduleMapper.simple(module);
+        return moduleMapper.simple(module, authContext.canViewAudit());
     }
 
     @Override
@@ -181,6 +215,8 @@ public class ModuleServiceImpl implements ModuleService {
             UUID id,
             ModuleRequest request
     ){
+
+        assertSystem();
 
         Module module =
                 moduleRepository.findById(id)
@@ -273,14 +309,30 @@ public class ModuleServiceImpl implements ModuleService {
         module.setRoute(request.getRoute());
         module.setOrderNum(request.getOrderNum());
 
+        module.setVisibleSystem(defaultTrue(request.getVisibleSystem()));
+        module.setVisibleOrgAdmin(defaultTrue(request.getVisibleOrgAdmin()));
+        module.setVisibleBranchAdmin(defaultTrue(request.getVisibleBranchAdmin()));
+        module.setVisibleUser(defaultTrue(request.getVisibleUser()));
+
         moduleRepository.save(module);
 
-        return moduleMapper.simple(module);
+        return moduleMapper.simple(module, authContext.canViewAudit());
+    }
+
+    /**
+     * Un frontend viejo (o un request incompleto) que no
+     * mande el campo de visibilidad no debería ocultar el
+     * módulo por accidente: se trata null como "visible".
+     */
+    private boolean defaultTrue(Boolean value){
+        return value == null || value;
     }
 
     @Override
     @Transactional
     public ModuleResponse enable(UUID id){
+
+        assertSystem();
 
         Module module =
                 moduleRepository.findById(id)
@@ -295,12 +347,14 @@ public class ModuleServiceImpl implements ModuleService {
 
         moduleRepository.save(module);
 
-        return moduleMapper.simple(module);
+        return moduleMapper.simple(module, authContext.canViewAudit());
     }
 
     @Override
     @Transactional
     public ModuleResponse disable(UUID id) {
+
+        assertSystem();
 
         Module module =
                 moduleRepository.findById(id)
@@ -312,7 +366,7 @@ public class ModuleServiceImpl implements ModuleService {
                         );
 
         if (module.getStatus() == StatusType.INACTIVE) {
-            return moduleMapper.simple(module);
+            return moduleMapper.simple(module, authContext.canViewAudit());
         }
 
         boolean hasActiveChildren =
@@ -332,7 +386,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         moduleRepository.save(module);
 
-        return moduleMapper.simple(module);
+        return moduleMapper.simple(module, authContext.canViewAudit());
     }
 
 }

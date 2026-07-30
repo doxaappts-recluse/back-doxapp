@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.*;
 import pe.dcs.app.features.user.org_admin_branch.mapper.OrgAdminBranchMapper;
+import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchAddAccessRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchCreateRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchListRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchUpdateRequest;
@@ -19,13 +20,13 @@ import pe.dcs.app.repository.*;
 import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.UserAccessHelper;
-import pe.dcs.app.util.enums.RoleType;
 import pe.dcs.app.util.enums.StatusType;
 import pe.dcs.app.util.enums.resolveSort.OrgAdminBranchSort;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PageableUtil;
 import pe.dcs.app.util.pagination.PaginationResponse;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -66,11 +67,13 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                         pageable
                 );
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
                 page.getContent()
                         .stream()
                         .map(
-                                mapper::toResponse
+                                person -> mapper.toResponse(person, showAudit)
                         )
                         .toList(),
 
@@ -359,28 +362,43 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
 
     }
 
+    /**
+     * Autoriza si el llamante puede administrar AL MENOS UNO de
+     * los accesos de la persona (una persona puede tener varios,
+     * uno por sede).
+     *
+     * Se evalúan TODOS los accesos (activos e inactivos), no solo
+     * los activos: una persona con todos sus accesos deshabilitados
+     * (p.ej. un ORG_ADMIN al que se le deshabilitó su único acceso
+     * global) sigue debiendo poder verse/editarse, para poder
+     * reactivar ese acceso o asignarle uno nuevo. Si se exigiera un
+     * acceso ACTIVO acá, deshabilitar el último acceso dejaría a la
+     * persona inaccesible ("no tiene un acceso activo") y sin forma
+     * de revertirlo desde la UI.
+     */
     private void validatePersonAccess(Person person) {
 
-        UserAccess access =
-                UserAccessHelper.getActiveAccess(
-                        person
-                );
+        List<UserAccess> accesses = person.getAccesses();
 
-        if (access == null) {
-            throw new Exceptions("El usuario no tiene un acceso activo.", HttpStatus.CONFLICT);
+        if (accesses.isEmpty()) {
+            throw new Exceptions("El usuario no tiene ningún acceso registrado.", HttpStatus.CONFLICT);
         }
 
-        UUID organizationId = access.getOrganization().getId();
+        boolean canManage =
+                accesses.stream()
+                        .anyMatch(access ->
+                                authContext.canAccess(
+                                        access.getOrganization() != null
+                                                ? access.getOrganization().getId()
+                                                : null,
+                                        access.getBranch() != null
+                                                ? access.getBranch().getId()
+                                                : null
+                                )
+                        );
 
-        if (!authContext.canAccess(
-                organizationId,
-                access.getBranch() != null
-                        ? access.getBranch().getId()
-                        : null
-        )) {
-
+        if (!canManage) {
             throw new Exceptions("No tiene permisos para administrar este usuario.", HttpStatus.UNAUTHORIZED);
-
         }
 
     }
@@ -413,8 +431,14 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         }
     }
 
+    /**
+     * Este módulo solo crea/gestiona accesos a nivel de
+     * organización: ORG_ADMIN (global), ORG_BRANCH_ADMIN y
+     * ORG_USER (ambos por sede). Los roles de SISTEMA se crean
+     * desde el módulo de Usuarios del Sistema.
+     */
     private void validateRole(Role role){
-        if(role.getValue() != RoleType.ORG_ADMIN && role.getValue() != RoleType.ORG_BRANCH_ADMIN){
+        if(role.isSystemRole()){
             throw new Exceptions(
                     "Rol no permitido", HttpStatus.CONFLICT
             );
@@ -429,11 +453,185 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         }
     }
 
+    /**
+     * ORG_BRANCH_ADMIN y ORG_USER aplican a una sede puntual;
+     * solo ORG_ADMIN es global (sin sede).
+     */
     private void validateBranchRequired(Role role, Branch branch){
-        if(role.getValue() == RoleType.ORG_BRANCH_ADMIN && branch == null){
+        if(role.isBranchRole() && branch == null){
             throw new Exceptions(
-                    "El rol administrador de la organización requiere una sede", HttpStatus.BAD_REQUEST
+                    "Este rol requiere una sede", HttpStatus.BAD_REQUEST
             );
         }
+    }
+
+    // =========================================================
+    // ACCESOS ADICIONALES (múltiples sedes/roles por persona)
+    // =========================================================
+
+    @Override
+    @Transactional
+    public void addAccess(
+            UUID personId,
+            OrgAdminBranchAddAccessRequest request
+    ) {
+
+        Person person =
+                personRepository.findById(personId)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Usuario no encontrado",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        validatePersonAccess(person);
+
+        if (UserAccessHelper.hasActiveOrganizationAdminAccess(person)) {
+
+            throw new Exceptions(
+                    "El usuario ya es administrador de organización (acceso global); no se le pueden asignar accesos adicionales.",
+                    HttpStatus.CONFLICT
+            );
+        }
+
+        Branch branch =
+                branchRepository.findById(request.getBranchId())
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Sede no encontrada",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        Role role =
+                roleRepository.findById(request.getRoleId())
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Rol no encontrado",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        if (!role.isBranchRole()) {
+
+            throw new Exceptions(
+                    "Solo se pueden agregar accesos con rol administrador de sede o usuario de organización.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        Organization organization = branch.getOrganization();
+
+        UUID personOrganizationId = resolvePersonOrganizationId(person);
+
+        if (personOrganizationId != null
+                && !personOrganizationId.equals(organization.getId())) {
+
+            throw new Exceptions(
+                    "La sede debe pertenecer a la misma organización de los accesos existentes del usuario.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (!authContext.canAccess(organization.getId(), branch.getId())) {
+
+            throw new Exceptions(
+                    "No tiene permisos para administrar accesos en esta sede.",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        UserAccess existing =
+                userAccessRepository.findByPersonIdAndOrganizationIdAndBranchIdAndRoleId(
+                                person.getId(),
+                                organization.getId(),
+                                branch.getId(),
+                                role.getId()
+                        )
+                        .orElse(null);
+
+        if (existing != null) {
+
+            if (existing.getActive() == StatusType.ACTIVE) {
+
+                throw new Exceptions(
+                        "El usuario ya tiene ese acceso.",
+                        HttpStatus.CONFLICT
+                );
+            }
+
+            existing.setActive(StatusType.ACTIVE);
+
+            userAccessRepository.save(existing);
+
+            return;
+        }
+
+        UserAccess access = new UserAccess();
+
+        access.setPerson(person);
+        access.setOrganization(organization);
+        access.setBranch(branch);
+        access.setRole(role);
+        access.setActive(StatusType.ACTIVE);
+
+        userAccessRepository.save(access);
+
+        person.getAccesses().add(access);
+    }
+
+    @Override
+    @Transactional
+    public void enableAccess(UUID accessId) {
+        setAccessStatus(accessId, StatusType.ACTIVE);
+    }
+
+    @Override
+    @Transactional
+    public void disableAccess(UUID accessId) {
+        setAccessStatus(accessId, StatusType.INACTIVE);
+    }
+
+    private void setAccessStatus(UUID accessId, StatusType status) {
+
+        UserAccess access =
+                userAccessRepository.findById(accessId)
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Acceso no encontrado",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        if (!authContext.canAccess(
+                access.getOrganization() != null
+                        ? access.getOrganization().getId()
+                        : null,
+                access.getBranch() != null
+                        ? access.getBranch().getId()
+                        : null
+        )) {
+
+            throw new Exceptions(
+                    "No tiene permisos para administrar este acceso.",
+                    HttpStatus.UNAUTHORIZED
+            );
+        }
+
+        access.setActive(status);
+
+        userAccessRepository.save(access);
+    }
+
+    /**
+     * Organización de los accesos ya existentes de la persona
+     * (todos comparten la misma organización). Null si aún no
+     * tiene ningún acceso.
+     */
+    private UUID resolvePersonOrganizationId(Person person) {
+
+        return person.getAccesses()
+                .stream()
+                .filter(a -> a.getOrganization() != null)
+                .map(a -> a.getOrganization().getId())
+                .findFirst()
+                .orElse(null);
     }
 }

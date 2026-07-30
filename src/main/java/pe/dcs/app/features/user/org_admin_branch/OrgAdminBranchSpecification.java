@@ -129,14 +129,34 @@ public class OrgAdminBranchSpecification {
              * =====================================
              * SEDE
              * =====================================
+             *
+             * SYSTEM / ORG_ADMIN:
+             * - si mandan sede filtra, sino todas (las de la org)
+             *
+             * ORG_BRANCH_ADMIN (admin de sede, no de organización):
+             * - si el frontend no manda sede, se acota por
+             *   defecto a su propia sede (no ve otras sedes).
+             *
              */
 
-            if(filter.getBranchId() != null) {
+            UUID effectiveBranchId = filter.getBranchId();
+
+            if(effectiveBranchId == null
+                    && !authContext.isSystem()
+                    && !authContext.isCurrentOrganizationAdmin()
+                    && authContext.isCurrentBranchAdmin()) {
+
+                effectiveBranchId =
+                        authContext.getCurrentBranchId();
+
+            }
+
+            if(effectiveBranchId != null) {
 
                 predicates.add(
                         cb.equal(
                                 branch.get("id"),
-                                filter.getBranchId()
+                                effectiveBranchId
                         )
                 );
 

@@ -4,8 +4,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.module.request.ModuleRequest;
 import pe.dcs.app.features.module.request.ModuleSearchRequest;
+import pe.dcs.app.features.module.response.ContractModuleAccessResponse;
 import pe.dcs.app.features.module.response.ModuleOptionResponse;
 import pe.dcs.app.features.module.response.ModuleResponse;
+import pe.dcs.app.features.module.service.ContractModuleAccessService;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.features.module.service.ModuleService;
 import pe.dcs.app.util.ApiResponse;
@@ -18,9 +20,14 @@ import java.util.UUID;
 public class ModuleController {
 
     private final ModuleService moduleService;
+    private final ContractModuleAccessService contractModuleAccessService;
 
-    public ModuleController(ModuleService moduleService) {
+    public ModuleController(
+            ModuleService moduleService,
+            ContractModuleAccessService contractModuleAccessService
+    ) {
         this.moduleService = moduleService;
+        this.contractModuleAccessService = contractModuleAccessService;
     }
 
     @PostMapping("/search")
@@ -71,6 +78,24 @@ public class ModuleController {
                 200,
                 "Módulos hijos",
                 moduleService.getChildModules(currentId)
+        );
+    }
+
+    /**
+     * Módulos hijos + permisos habilitados por el contrato
+     * ACTIVO de la sede (o de la sede en contexto, para
+     * ORG_BRANCH_ADMIN). Ya viene filtrado: listo para
+     * pintar el formulario de asignación de accesos.
+     */
+    @GetMapping("/contract-access")
+    public ApiResponse<List<ContractModuleAccessResponse>> getContractAccess(
+            @RequestParam(required = false) UUID branchId
+    ) {
+
+        return new ApiResponse<>(
+                200,
+                "Módulos disponibles del contrato activo",
+                contractModuleAccessService.getAvailableModules(branchId)
         );
     }
 

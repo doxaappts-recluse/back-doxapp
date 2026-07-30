@@ -15,7 +15,7 @@ import pe.dcs.app.util.ApiResponse;
 @RequiredArgsConstructor
 public class EventAttendanceController {
 
-    /*private final EventAttendanceService attendanceService;
+    private final EventAttendanceService attendanceService;
 
     @PostMapping("/check-in")
     public ApiResponse<CheckInResponse> checkIn(
@@ -26,5 +26,5 @@ public class EventAttendanceController {
                 "Asistencia registrada correctamente",
                 attendanceService.checkIn(request)
         );
-    }*/
+    }
 }

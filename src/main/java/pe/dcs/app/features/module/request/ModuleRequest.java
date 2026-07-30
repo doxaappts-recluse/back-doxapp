@@ -16,4 +16,14 @@ public class ModuleRequest {
     private Integer orderNum;
     private UUID parentId;
 
+    /*
+     * Visibilidad por rol. Si vienen null (frontend viejo
+     * que todavía no manda el campo), el service los trata
+     * como true para no ocultar módulos por accidente.
+     */
+    private Boolean visibleSystem;
+    private Boolean visibleOrgAdmin;
+    private Boolean visibleBranchAdmin;
+    private Boolean visibleUser;
+
 }

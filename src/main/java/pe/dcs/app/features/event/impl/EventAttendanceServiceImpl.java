@@ -12,6 +12,7 @@ import pe.dcs.app.features.event.response.attendance.CheckInResponse;
 import pe.dcs.app.features.event.service.EventAttendanceService;
 import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
+import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.events.EventStatus;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
@@ -23,11 +24,34 @@ import java.time.Instant;
 @Transactional
 public class EventAttendanceServiceImpl implements EventAttendanceService {
 
-    /*private final EventRegistrationRepository registrationRepository;
+    private final EventRegistrationRepository registrationRepository;
     private final EventAttendanceRepository attendanceRepository;
+    private final AuthContext authContext;
+    private final EventAccessGuard eventAccessGuard;
+
+    /**
+     * Check-in es de gestión exclusiva de ORG_ADMIN/ORG_BRANCH_ADMIN
+     * de la organización del contexto actual. SYSTEM queda
+     * explícitamente fuera (igual que el resto de Eventos).
+     */
+    private void assertCallerCanManage() {
+
+        if (!authContext.canManageOrgOrBranchOnly(
+                authContext.getCurrentOrganizationId(),
+                authContext.getCurrentBranchId()
+        )) {
+
+            throw new Exceptions(
+                    "Solo un administrador de organización o de sede puede registrar asistencia.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
     @Transactional
     public CheckInResponse checkIn(CheckInRequest request) {
+
+        assertCallerCanManage();
 
         String token = extractToken(request.getToken());
 
@@ -40,6 +64,8 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
 
         // 2. Validar evento activo
         Event event = registration.getEvent();
+
+        eventAccessGuard.assertCanManage(event);
 
         if (event.getStatus() != EventStatus.PUBLISHED) {
             throw new Exceptions("Evento no activo", HttpStatus.BAD_REQUEST);
@@ -102,5 +128,5 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         }
 
         return input.trim();
-    }*/
+    }
 }

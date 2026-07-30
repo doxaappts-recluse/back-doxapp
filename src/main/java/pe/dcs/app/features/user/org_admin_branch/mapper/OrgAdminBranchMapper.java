@@ -7,13 +7,17 @@ import pe.dcs.app.entity.PersonBranch;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.user.org_admin_branch.response.OrgAdminBranchDetailResponse;
 import pe.dcs.app.features.user.org_admin_branch.response.OrgAdminBranchResponse;
+import pe.dcs.app.features.user.org_admin_branch.response.UserAccessResponse;
 import pe.dcs.app.util.UserAccessHelper;
+import pe.dcs.app.util.auditable.BaseMapper;
 import pe.dcs.app.util.enums.StatusType;
+
+import java.util.Comparator;
 
 @Component
 public class OrgAdminBranchMapper {
 
-    public OrgAdminBranchResponse toResponse(Person person){
+    public OrgAdminBranchResponse toResponse(Person person, boolean showAudit){
 
         UserAccess access =
                 UserAccessHelper.getActiveAccess(person);
@@ -30,7 +34,7 @@ public class OrgAdminBranchMapper {
                         .orElse(null);
 
 
-        return OrgAdminBranchResponse
+        OrgAdminBranchResponse response = OrgAdminBranchResponse
                 .builder()
                 .id(person.getId())
                 .name(person.getName())
@@ -83,6 +87,10 @@ public class OrgAdminBranchMapper {
                 )
 
                 .build();
+
+        BaseMapper.mapAudit(person, response, showAudit);
+
+        return response;
     }
 
     public OrgAdminBranchDetailResponse toDetailResponse(Person person) {
@@ -107,8 +115,74 @@ public class OrgAdminBranchMapper {
                         : null
         );
 
+        response.setAccesses(
+                person.getAccesses()
+                        .stream()
+                        .sorted(
+                                Comparator.comparing(
+                                        (UserAccess a) ->
+                                                a.getActive() == StatusType.ACTIVE ? 0 : 1
+                                )
+                        )
+                        .map(this::toAccessResponse)
+                        .toList()
+        );
+
         return response;
 
+    }
+
+    public UserAccessResponse toAccessResponse(UserAccess access) {
+
+        UserAccessResponse response = new UserAccessResponse();
+
+        response.setId(access.getId());
+
+        response.setOrganizationId(
+                access.getOrganization() != null
+                        ? access.getOrganization().getId()
+                        : null
+        );
+
+        response.setOrganizationName(
+                access.getOrganization() != null
+                        ? access.getOrganization().getName()
+                        : null
+        );
+
+        response.setBranchId(
+                access.getBranch() != null
+                        ? access.getBranch().getId()
+                        : null
+        );
+
+        response.setBranchName(
+                access.getBranch() != null
+                        ? access.getBranch().getName()
+                        : null
+        );
+
+        response.setRoleId(
+                access.getRole() != null
+                        ? access.getRole().getId()
+                        : null
+        );
+
+        response.setRoleName(
+                access.getRole() != null
+                        ? access.getRole().getName()
+                        : null
+        );
+
+        response.setRoleCode(
+                access.getRole() != null && access.getRole().getValue() != null
+                        ? access.getRole().getValue().name()
+                        : null
+        );
+
+        response.setActive(access.getActive() == StatusType.ACTIVE);
+
+        return response;
     }
 
 }

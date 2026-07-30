@@ -83,7 +83,26 @@ public class AuthController {
                         times.expiration()
                 );
 
-        return ResponseEntity.ok(
+        ResponseEntity.BodyBuilder responseBuilder =
+                ResponseEntity.ok();
+
+        /*
+         * Login válido (credenciales correctas), pero la persona no
+         * tiene NINGÚN UserAccess activo (p.ej. a un ORG_ADMIN o
+         * ORG_BRANCH_ADMIN se le deshabilitó su único acceso). El
+         * front no debe navegar como si todo estuviera normal: este
+         * header le avisa para mostrar una notificación en vez de
+         * quedar en un estado vacío/roto en silencio.
+         */
+        if (principal.getAccesses().isEmpty()) {
+
+            responseBuilder.header(
+                    "X-No-Access",
+                    "true"
+            );
+        }
+
+        return responseBuilder.body(
                 new ApiResponse<>(
                         200,
                         "Login exitoso",

@@ -70,6 +70,38 @@ public class Module extends Auditable {
     private StatusType status;
 
     // =========================
+    // VISIBILIDAD POR ROL
+    // =========================
+
+    /**
+     * Controla, por rol, si este módulo puede llegar a
+     * aparecer alguna vez para ese rol (en el sidebar y en
+     * el catálogo de módulos asignables a un contrato).
+     *
+     * Es un filtro ESTRUCTURAL, independiente del contrato:
+     * un módulo puede ser visibleOrgAdmin=true y aun así no
+     * mostrarse si el contrato de esa organización no lo
+     * incluye.
+     */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visibleSystem = true;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visibleOrgAdmin = true;
+
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visibleBranchAdmin = true;
+
+    /**
+     * Controla si este módulo puede llegar a asignarse a un
+     * ORG_USER (usuario normal, sin rol de admin) mediante
+     * Usuarios de Acceso. Igual que los otros: es un filtro
+     * estructural, independiente de si el contrato lo habilita.
+     */
+    @Column(nullable = false, columnDefinition = "boolean default true")
+    private Boolean visibleUser = true;
+
+    // =========================
     // TREE STRUCTURE
     // =========================
 

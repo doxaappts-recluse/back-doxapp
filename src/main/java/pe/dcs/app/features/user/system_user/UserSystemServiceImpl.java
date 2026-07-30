@@ -75,10 +75,12 @@ public class UserSystemServiceImpl implements UserSystemService {
                 pageable
         );
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(UserSystemMapper::toResponse)
+                        .map(person -> UserSystemMapper.toResponse(person, showAudit))
                         .toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),
@@ -122,7 +124,7 @@ public class UserSystemServiceImpl implements UserSystemService {
 
     @Override
     public UserSystemResponse findById(UUID id) {
-        return UserSystemMapper.toResponse(getUser(id));
+        return UserSystemMapper.toResponse(getUser(id), authContext.canViewAudit());
     }
 
     // =========================================================
@@ -214,7 +216,7 @@ public class UserSystemServiceImpl implements UserSystemService {
 
         userAccessRepository.save(access);
 
-        return UserSystemMapper.toResponse(person);
+        return UserSystemMapper.toResponse(person, authContext.canViewAudit());
     }
     // =========================================================
     // UPDATE
@@ -274,7 +276,7 @@ public class UserSystemServiceImpl implements UserSystemService {
 
         repository.save(person);
 
-        return UserSystemMapper.toResponse(person);
+        return UserSystemMapper.toResponse(person, authContext.canViewAudit());
     }
 
     // =========================================================

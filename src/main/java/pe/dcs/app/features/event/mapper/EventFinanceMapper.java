@@ -4,16 +4,20 @@ import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.EventFinance;
 import pe.dcs.app.entity.Person;
 import pe.dcs.app.features.event.response.finance.EventFinanceResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 
 @Component
 public class EventFinanceMapper {
 
     public EventFinanceResponse simple(
-            EventFinance finance
+            EventFinance finance,
+            boolean showAudit
     ) {
 
         EventFinanceResponse response =
                 new EventFinanceResponse();
+
+        BaseMapper.mapAudit(finance, response, showAudit);
 
         response.setId(
                 finance.getId()
@@ -57,14 +61,6 @@ public class EventFinanceMapper {
 
         response.setApprovedAt(
                 finance.getApprovedAt()
-        );
-
-        response.setCreatedAt(
-                finance.getCreatedAt()
-        );
-
-        response.setUpdatedAt(
-                finance.getUpdatedAt()
         );
 
         if (finance.getCreatedByUser() != null) {

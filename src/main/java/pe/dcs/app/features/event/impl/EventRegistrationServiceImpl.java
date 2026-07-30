@@ -1,33 +1,65 @@
 package pe.dcs.app.features.event.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.dcs.app.entity.Event;
+import pe.dcs.app.entity.EventRegistration;
+import pe.dcs.app.entity.Person;
+import pe.dcs.app.entity.PersonBranch;
 import pe.dcs.app.features.event.mapper.EventRegistrationMapper;
+import pe.dcs.app.features.event.request.registration.EventRegistrationBulkRequest;
+import pe.dcs.app.features.event.request.registration.EventRegistrationFilter;
+import pe.dcs.app.features.event.request.registration.EventRegistrationRequest;
+import pe.dcs.app.features.event.request.registration.EventRegistrationSearchRequest;
+import pe.dcs.app.features.event.response.registration.EventRegistrationBulkResponse;
+import pe.dcs.app.features.event.response.registration.EventRegistrationDetailResponse;
+import pe.dcs.app.features.event.response.registration.EventRegistrationResponse;
 import pe.dcs.app.features.event.service.EventRegistrationService;
+import pe.dcs.app.features.event.specification.EventRegistrationSpecification;
 import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
 import pe.dcs.app.repository.EventRepository;
 import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.AuthContext;
+import pe.dcs.app.util.Exceptions;
+import pe.dcs.app.util.enums.StatusType;
+import pe.dcs.app.util.enums.events.EventStatus;
+import pe.dcs.app.util.enums.events.RegistrationCategory;
+import pe.dcs.app.util.enums.events.RegistrationStatus;
+import pe.dcs.app.util.pagination.PageResponse;
+import pe.dcs.app.util.pagination.PageableUtil;
+import pe.dcs.app.util.pagination.PaginationResponse;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
 @Transactional
 public class EventRegistrationServiceImpl implements EventRegistrationService {
 
-    /*private final EventRegistrationRepository eventRegistrationRepository;
+    private final EventRegistrationRepository eventRegistrationRepository;
     private final EventRepository eventRepository;
     private final PersonRepository userRepository;
     private final EventAttendanceRepository attendanceRepository;
     private final EventRegistrationMapper eventRegistrationMapper;
-    private final AuthContext authContext;*/
+    private final AuthContext authContext;
+    private final EventAccessGuard eventAccessGuard;
 
-    /*@Override
+    @Override
     @Transactional(readOnly = true)
     public PageResponse<EventRegistrationResponse> search(
             EventRegistrationSearchRequest request
     ) {
+
+        eventAccessGuard.assertCanUse();
 
         Pageable pageable =
                 PageableUtil.buildPageable(
@@ -45,10 +77,22 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             );
         }
 
+        Event event =
+                eventRepository.findById(
+                        filter.getEventId()
+                ).orElseThrow(() ->
+                        new Exceptions(
+                                "Evento no encontrado",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
+
+        eventAccessGuard.assertCanAccess(event);
+
         Specification<EventRegistration> spec =
                 EventRegistrationSpecification.filter(
                         filter,
-                        authContext.getOrganizationId()
+                        authContext.getCurrentOrganizationId()
                 );
 
         Page<EventRegistration> page =
@@ -57,10 +101,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                         pageable
                 );
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(eventRegistrationMapper::simple)
+                        .map(reg -> eventRegistrationMapper.simple(reg, showAudit))
                         .toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),
@@ -75,6 +121,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
     public EventRegistrationResponse create(
             EventRegistrationRequest request
     ) {
+
+        eventAccessGuard.assertCanUse();
 
         Event event = eventRepository.findById(
                 request.getEventId()
@@ -128,7 +176,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         );
 
         return eventRegistrationMapper.simple(
-                eventRegistrationRepository.save(registration)
+                eventRegistrationRepository.save(registration),
+                authContext.canViewAudit()
         );
     }
 
@@ -209,8 +258,12 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             EventRegistrationBulkRequest request
     ) {
 
+        eventAccessGuard.assertCanUse();
+
         List<EventRegistrationResponse> responses =
                 new ArrayList<>();
+
+        boolean showAudit = authContext.canViewAudit();
 
         for (EventRegistrationRequest item :
                 request.getRegistrations()) {
@@ -218,7 +271,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             EventRegistration registration =
                     createRegistration(item);
 
-            responses.add(eventRegistrationMapper.simple(registration));
+            responses.add(eventRegistrationMapper.simple(registration, showAudit));
         }
 
         return new EventRegistrationBulkResponse(
@@ -232,6 +285,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             UUID id,
             EventRegistrationRequest request
     ) {
+
+        eventAccessGuard.assertCanUse();
 
         EventRegistration registration =
                 findRegistration(id);
@@ -280,12 +335,15 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         );
 
         return eventRegistrationMapper.simple(
-                eventRegistrationRepository.save(registration)
+                eventRegistrationRepository.save(registration),
+                authContext.canViewAudit()
         );
     }
 
     @Override
     public void cancel(UUID id) {
+
+        eventAccessGuard.assertCanUse();
 
         EventRegistration registration =
                 findRegistration(id);
@@ -316,6 +374,8 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             UUID id
     ) {
 
+        eventAccessGuard.assertCanUse();
+
         return eventRegistrationMapper.detail(
                 findRegistration(id)
         );
@@ -334,16 +394,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                                 )
                         );
 
-        if (!registration.getEvent()
-                .getOrganization()
-                .getId()
-                .equals(authContext.getOrganizationId())) {
-
-            throw new Exceptions(
-                    "No tiene acceso a esta inscripción",
-                    HttpStatus.FORBIDDEN
-            );
-        }
+        eventAccessGuard.assertCanAccess(registration.getEvent());
 
         return registration;
     }
@@ -356,15 +407,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             Event event
     ) {
 
-        if (!event.getOrganization()
-                .getId()
-                .equals(authContext.getOrganizationId())) {
-
-            throw new Exceptions(
-                    "El evento no pertenece a la organización",
-                    HttpStatus.FORBIDDEN
-            );
-        }
+        eventAccessGuard.assertCanAccess(event);
 
         if (event.getStatus()
                 == EventStatus.CANCELLED) {
@@ -466,7 +509,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
             );
         }
 
-        User user = userRepository.findById(userId)
+        Person user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new Exceptions(
                                 "Usuario no encontrado",
@@ -474,9 +517,22 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                         )
                 );
 
-        if (!user.getOrganization()
+        PersonBranch activeBranch =
+                user.getBranchHistory()
+                        .stream()
+                        .filter(pb -> pb.getStatus() == StatusType.ACTIVE)
+                        .findFirst()
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "El usuario no tiene una sede activa",
+                                        HttpStatus.CONFLICT
+                                )
+                        );
+
+        if (!activeBranch.getBranch()
+                .getOrganization()
                 .getId()
-                .equals(authContext.getOrganizationId())) {
+                .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
                     "El usuario no pertenece a la organización",
@@ -602,5 +658,5 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                     HttpStatus.BAD_REQUEST
             );
         }
-    }*/
+    }
 }

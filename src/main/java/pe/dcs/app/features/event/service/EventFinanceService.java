@@ -11,7 +11,7 @@ import java.util.UUID;
 
 public interface EventFinanceService {
 
-   /* EventFinanceResponse create(
+    EventFinanceResponse create(
             EventFinanceRequest request
     );
 
@@ -36,5 +36,5 @@ public interface EventFinanceService {
 
     PageResponse<EventFinanceResponse> search(
             EventFinanceSearchRequest request
-    );*/
+    );
 }

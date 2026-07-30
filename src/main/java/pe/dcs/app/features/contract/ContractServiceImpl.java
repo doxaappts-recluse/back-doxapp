@@ -2,196 +2,100 @@ package pe.dcs.app.features.contract;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import pe.dcs.app.features.contract.service.ContractModuleService;
-import pe.dcs.app.features.contract.service.ContractService;
+import pe.dcs.app.entity.Branch;
 import pe.dcs.app.entity.Contract;
+import pe.dcs.app.entity.ContractBranchLicense;
 import pe.dcs.app.entity.Organization;
+import pe.dcs.app.features.contract.mapper.ContractMapper;
+import pe.dcs.app.features.contract.request.ContractBranchLicenseRequest;
 import pe.dcs.app.features.contract.request.ContractCreateRequest;
 import pe.dcs.app.features.contract.request.ContractFilterRequest;
 import pe.dcs.app.features.contract.request.ContractListRequest;
-import pe.dcs.app.features.contract.response.ContractModuleResponse;
+import pe.dcs.app.features.contract.request.ContractModuleRequest;
+import pe.dcs.app.features.contract.request.ContractUpdateRequest;
+import pe.dcs.app.features.contract.response.ContractBranchLicenseResponse;
+import pe.dcs.app.features.contract.response.ContractModuleConfigResponse;
+import pe.dcs.app.features.contract.response.ContractPermissionConfigResponse;
 import pe.dcs.app.features.contract.response.ContractResponse;
 import pe.dcs.app.features.contract.response.ContractResponseSearch;
-import pe.dcs.app.util.pagination.PageResponse;
-import pe.dcs.app.util.pagination.PaginationResponse;
+import pe.dcs.app.features.contract.service.ContractModuleService;
+import pe.dcs.app.features.contract.service.ContractService;
+import pe.dcs.app.repository.BranchRepository;
+import pe.dcs.app.repository.ContractBranchLicenseRepository;
 import pe.dcs.app.repository.ContractRepository;
 import pe.dcs.app.repository.OrganizationRepository;
-import pe.dcs.app.features.contract.mapper.ContractMapper;
+import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.Exceptions;
-import pe.dcs.app.util.pagination.PageableUtil;
 import pe.dcs.app.util.enums.contract.ContractRenewalType;
+import pe.dcs.app.util.enums.contract.ContractScope;
+import pe.dcs.app.util.enums.contract.ContractSort;
 import pe.dcs.app.util.enums.contract.ContractStatus;
+import pe.dcs.app.util.enums.contract.LicenseDistributionMode;
+import pe.dcs.app.util.pagination.PageResponse;
+import pe.dcs.app.util.pagination.PageableUtil;
+import pe.dcs.app.util.pagination.PaginationResponse;
 
+import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ContractServiceImpl implements ContractService {
 
-    /*private final ContractRepository contractRepository;
+    private final ContractRepository contractRepository;
     private final OrganizationRepository organizationRepository;
+    private final BranchRepository branchRepository;
+    private final ContractBranchLicenseRepository contractBranchLicenseRepository;
     private final ContractModuleService contractModuleService;
+    private final AuthContext authContext;
+
+    // =====================================================
+    // SEARCH / HISTORIAL
+    // =====================================================
 
     @Override
-    @Transactional
-    public void process(ContractCreateRequest request) {
-
-        // 1. LOCK POR ORGANIZACIÓN (CLAVE CONCURRENCIA)
-        contractRepository.lockByOrganization(request.getOrganizationId());
-
-        // 2. ORGANIZACIÓN
-        Organization organization =
-                organizationRepository.findById(request.getOrganizationId())
-                        .orElseThrow(() -> new Exceptions(
-                                "Organization not found",
-                                HttpStatus.NOT_FOUND
-                        ));
-
-        // =========================================================
-        // 3. CONTRATOS EXISTENTES
-        // =========================================================
-
-        List<Contract> existing =
-                getActiveAndPendingContracts(
-                        request.getOrganizationId()
-                );
-
-        Contract activeContract =
-                getActiveContract(existing);
-
-        // =========================================================
-        // 4. DETERMINAR SI REEMPLAZA ACTIVE
-        // =========================================================
-
-        boolean replaceActive =
-                request.getRenewalType() == ContractRenewalType.UPGRADE
-                        || request.getRenewalType() == ContractRenewalType.DOWNGRADE;
-
-        if (replaceActive && activeContract == null) {
-            throw new Exceptions(
-                    "No active contract found for upgrade/downgrade",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        // =========================================================
-        // 5. VALIDAR OVERLAP
-        // =========================================================
-
-        Contract candidate = new Contract();
-        candidate.setStartDate(request.getStartDate());
-        candidate.setEndDate(request.getEndDate());
-
-        validateNoContractOverlap(
-                request.getOrganizationId(),
-                candidate,
-                replaceActive
-                        ? activeContract.getId()
-                        : null
-        );
-
-        // =========================================================
-        // 6. EXPIRAR ACTIVE
-        // =========================================================
-
-        if (replaceActive) {
-
-            activeContract.expireManually();
-
-            contractRepository.save(activeContract);
-        }
-
-        // =========================================================
-        // 7. EXPIRAR ACTIVE (UPGRADE/DOWNGRADE)
-        // =========================================================
-
-        if (replaceActive) {
-
-            activeContract.expireManually();
-
-            contractRepository.save(activeContract);
-        }
-
-        // =========================================================
-        // 8. CREAR CONTRATO
-        // =========================================================
-
-        Contract contract = new Contract();
-
-        contract.setOrganization(organization);
-        contract.setPlanName(request.getPlanName());
-        contract.setPrice(request.getPrice());
-        contract.setCurrency(request.getCurrency());
-        contract.setStartDate(request.getStartDate());
-        contract.setEndDate(request.getEndDate());
-        contract.setNumberUsers(request.getNumberUsers());
-        contract.setRenewalType(request.getRenewalType());
-        contract.setCreatedAt(LocalDateTime.now());
-
-        if (replaceActive) {
-            contract.setPreviousContractId(activeContract.getId());
-        }
-
-        contract.setStatus(
-                request.getStartDate().isAfter(LocalDate.now())
-                        ? ContractStatus.PENDING
-                        : ContractStatus.ACTIVE
-        );
-
-        contractRepository.save(contract);
-
-        // =========================================================
-        // 9. MODULES
-        // =========================================================
-
-        contractModuleService.saveModules(contract, request.getModules());
-    }
-
-    @Override
+    @Transactional(readOnly = true)
     public PageResponse<ContractResponseSearch> search(
             ContractListRequest request
     ) {
 
+        assertSystemUser();
+
         Pageable pageable =
                 PageableUtil.buildPageable(
                         request.getPagination(),
-                        request.getSorts()
+                        request.getSorts(),
+                        ContractSort::resolvePath
                 );
 
-        Page<Contract> page;
+        Page<Contract> page =
+                contractRepository.findAll(
+                        ContractSpecification.filter(
+                                request.getFilters()
+                        ),
+                        pageable
+                );
 
-        boolean hasOrganizationFilter =
-                request.getFilters() != null
-                        && request.getFilters().getOrganizationId() != null;
-
-        if (hasOrganizationFilter) {
-
-            page =
-                    contractRepository.findAll(
-                            ContractSpecification.filter(
-                                    request.getFilters()
-                            ),
-                            pageable
-                    );
-
-        } else {
-
-            page = contractRepository.findRepresentativeContracts(buildRepresentativePageable(pageable));
-        }
+        boolean showAudit = authContext.canViewAudit();
 
         List<ContractResponseSearch> content =
                 page.getContent()
                         .stream()
-                        .map(ContractMapper::toResponseSearch)
+                        .map(contract -> ContractMapper.toResponseSearch(contract, showAudit))
                         .toList();
 
         return new PageResponse<>(
@@ -205,282 +109,827 @@ public class ContractServiceImpl implements ContractService {
         );
     }
 
-    private Pageable buildRepresentativePageable(Pageable pageable) {
-
-        // whitelist de campos permitidos en representative query
-        Map<String, String> SORT_MAPPING = Map.of(
-                "organizationName", "organization_name",
-                "planName", "plan_name",
-                "currency", "currency",
-                "status", "status",
-                "startDate", "start_date",
-                "endDate", "end_date",
-                "createdAt", "created_at",
-                "price", "price"
-        );
-
-        List<Sort.Order> mapped =
-                pageable.getSort()
-                        .stream()
-                        .map(o -> {
-
-                            String mappeds = SORT_MAPPING.get(o.getProperty());
-
-                            if (mappeds == null) {
-                                return null;
-                            }
-
-                            return new Sort.Order(
-                                    o.getDirection(),
-                                    mappeds
-                            );
-                        })
-                        .filter(Objects::nonNull)
-                        .toList();
-
-        if (mapped.isEmpty()) {
-            // default stable sort
-            return PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize()
-            );
-        }
-
-        return PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(mapped)
-        );
-    }
-
     @Override
-    public PageResponse<ContractResponseSearch> history(
+    @Transactional(readOnly = true)
+    public PageResponse<ContractResponseSearch> historyByOrganization(
             UUID organizationId,
             ContractListRequest request
     ) {
 
         if (request.getFilters() == null) {
-            request.setFilters(
-                    new ContractFilterRequest()
-            );
+            request.setFilters(new ContractFilterRequest());
         }
 
-        request.getFilters()
-                .setOrganizationId(organizationId);
+        request.getFilters().setOrganizationId(organizationId);
+        request.getFilters().setBranchId(null);
 
         return search(request);
     }
 
     @Override
-    public void suspend(UUID id) {
-        Contract contract = getContract(id);
-        contract.suspend();
-        contractRepository.save(contract);
+    @Transactional(readOnly = true)
+    public PageResponse<ContractResponseSearch> historyByBranch(
+            UUID branchId,
+            ContractListRequest request
+    ) {
+
+        if (request.getFilters() == null) {
+            request.setFilters(new ContractFilterRequest());
+        }
+
+        request.getFilters().setBranchId(branchId);
+        request.getFilters().setOrganizationId(null);
+
+        return search(request);
     }
+
+    // =====================================================
+    // GET BY ID
+    // =====================================================
+
+    @Override
+    @Transactional(readOnly = true)
+    public ContractResponse getById(UUID id) {
+
+        assertSystemUser();
+
+        Contract contract = getContract(id);
+
+        return buildDetailResponse(contract);
+    }
+
+    // =====================================================
+    // CREATE
+    // =====================================================
 
     @Override
     @Transactional
-    public void reactivate(UUID id) {
+    public ContractResponse create(ContractCreateRequest request) {
 
-        Contract contract =
-                contractRepository.findByIdForUpdate(id)
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "Contract not found",
-                                        HttpStatus.NOT_FOUND
+        assertSystemUser();
+
+        Organization organization = getOrganization(
+                request.getOrganizationId()
+        );
+
+        if (request.getScope() == null) {
+            throw new Exceptions(
+                    "Debe indicar el alcance del contrato (organización o sede).",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        Contract contract = new Contract();
+
+        contract.setOrganization(organization);
+        contract.setScope(request.getScope());
+
+        applyScope(contract, organization, request.getScope(), request.getBranchId());
+
+        applyPlanFields(
+                contract,
+                request.getPlanName(),
+                request.getPrice(),
+                request.getCurrency(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getMaxLicenses(),
+                request.getDistributionMode(),
+                request.getRenewalType()
+        );
+
+        if (request.getPreviousContractId() != null) {
+
+            Contract previous = getContract(
+                    request.getPreviousContractId()
+            );
+
+            contract.setPreviousContract(previous);
+        }
+
+        contract.setStatus(
+                request.getStartDate().isAfter(LocalDate.now())
+                        ? ContractStatus.PENDING
+                        : ContractStatus.ACTIVE
+        );
+
+        if (contract.getStatus() == ContractStatus.ACTIVE) {
+            contract.setActivatedAt(Instant.now());
+        }
+
+        validateNoOverlap(contract, null);
+
+        contract = contractRepository.save(contract);
+
+        replaceBranchLicenses(
+                contract,
+                request.getBranchLicenses()
+        );
+
+        contractModuleService.replaceModules(
+                contract,
+                request.getModules()
+        );
+
+        return buildDetailResponse(contract);
+    }
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
+    @Override
+    @Transactional
+    public ContractResponse update(UUID id, ContractUpdateRequest request) {
+
+        assertSystemUser();
+
+        Contract contract = getContract(id);
+
+        assertEditable(contract);
+
+        /*
+         * PENDING (todavía no arrancó): edición 100% libre, sin
+         * restricciones ni versionado. No hay ni un día de historial
+         * real que proteger, así que hasta un cambio de plan/precio/
+         * módulos se guarda en el mismo registro. Acá SÍ se respeta
+         * el renewalType que venga en el request tal cual (incluso
+         * si el admin lo corrige antes de que el contrato arranque).
+         */
+        if (contract.getStatus() == ContractStatus.PENDING) {
+            return applyInPlaceUpdate(contract, request, request.getRenewalType());
+        }
+
+        /*
+         * ACTIVE / SUSPENDED (los únicos que llegan hasta acá:
+         * CANCELLED/EXPIRED/REPLACED ya los bloqueó assertEditable).
+         *
+         * El versionado NO se infiere comparando campos: lo decide
+         * explícitamente el admin al elegir "Renovación", "Upgrade"
+         * o "Downgrade" en renewalType, y solo cuando de verdad lo
+         * está CAMBIANDO a uno de esos valores en este guardado (no
+         * cuando ya venía así de antes). En ese caso no se edita
+         * in-place: se crea un contrato nuevo con los términos
+         * nuevos, enlazado via previousContract, para que lo que ya
+         * estuvo vigente (y pudo haberse facturado/reportado con
+         * esos términos) quede intacto en el historial. Ver
+         * contract-status-rules.config en el front y el comentario
+         * de ContractStatus.REPLACED.
+         */
+        boolean isVersioningTransition =
+                request.getRenewalType() != null
+                        && request.getRenewalType() != contract.getRenewalType()
+                        && (request.getRenewalType() == ContractRenewalType.RENEWAL
+                                || request.getRenewalType() == ContractRenewalType.UPGRADE
+                                || request.getRenewalType() == ContractRenewalType.DOWNGRADE);
+
+        if (isVersioningTransition) {
+
+            Optional<ContractResponse> versioned =
+                    tryReplaceWithNewVersion(contract, request);
+
+            if (versioned.isPresent()) {
+                return versioned.get();
+            }
+
+            /*
+             * El contrato todavía no vivió ni un día bajo sus
+             * términos actuales (recién arrancó hoy): no hay nada
+             * real que preservar como historial, así que en este
+             * caso puntual se sigue como corrección normal abajo.
+             */
+        }
+
+        /*
+         * Corrección normal sobre un contrato YA vigente: el
+         * renewalType es el "origen" de este contrato (cómo llegó a
+         * existir) y no se pisa con lo que venga en el request salvo
+         * que arriba se haya detectado una transición real; se
+         * preserva tal cual. Y no se permite cambiar plan/precio/
+         * moneda/licencias/módulos calladamente: si el contrato ya
+         * está vigente, eso es un cambio comercial y tiene que
+         * declararse como Renovación/Upgrade/Downgrade.
+         */
+        if (isCommercialChange(contract, request)) {
+            throw new Exceptions(
+                    "Este contrato ya está vigente: para cambiar plan, precio, módulos o licencias hay que declararlo como Renovación, Upgrade o Downgrade.",
+                    HttpStatus.CONFLICT
+            );
+        }
+
+        return applyInPlaceUpdate(contract, request, contract.getRenewalType());
+    }
+
+    /**
+     * Edición in-place compartida: PENDING (sin restricciones) y
+     * correcciones no comerciales sobre contratos ya vigentes.
+     */
+    private ContractResponse applyInPlaceUpdate(
+            Contract contract,
+            ContractUpdateRequest request,
+            ContractRenewalType renewalType
+    ) {
+
+        applyPlanFields(
+                contract,
+                request.getPlanName(),
+                request.getPrice(),
+                request.getCurrency(),
+                request.getStartDate(),
+                request.getEndDate(),
+                request.getMaxLicenses(),
+                request.getDistributionMode(),
+                renewalType
+        );
+
+        validateNoOverlap(contract, contract.getId());
+
+        contract = contractRepository.save(contract);
+
+        replaceBranchLicenses(
+                contract,
+                request.getBranchLicenses()
+        );
+
+        contractModuleService.replaceModules(
+                contract,
+                request.getModules()
+        );
+
+        return buildDetailResponse(contract);
+    }
+
+    /**
+     * Compara lo YA asignado (vía el mismo catálogo que arma el
+     * formulario) contra lo que llega en el request. Cualquier
+     * cambio de plan/precio/moneda/licencias, o módulo/permiso
+     * agregado o quitado, cuenta como cambio comercial. Solo se usa
+     * para VALIDAR (rechazar corrección silenciosa sobre un contrato
+     * vigente); el disparador real del versionado es renewalType.
+     */
+    private boolean isCommercialChange(
+            Contract contract,
+            ContractUpdateRequest request
+    ) {
+
+        if (!Objects.equals(contract.getPlanName(), request.getPlanName())) {
+            return true;
+        }
+
+        if (contract.getPrice().compareTo(
+                request.getPrice() != null ? request.getPrice() : contract.getPrice()
+        ) != 0) {
+            return true;
+        }
+
+        if (!Objects.equals(contract.getCurrency(), request.getCurrency())) {
+            return true;
+        }
+
+        if (!Objects.equals(contract.getMaxLicenses(), request.getMaxLicenses())) {
+            return true;
+        }
+
+        LicenseDistributionMode requestedDistribution =
+                contract.isOrganizationScope() && request.getDistributionMode() != null
+                        ? request.getDistributionMode()
+                        : LicenseDistributionMode.SHARED;
+
+        if (contract.getDistributionMode() != requestedDistribution) {
+            return true;
+        }
+
+        return modulesChanged(contract, request.getModules());
+    }
+
+    private boolean modulesChanged(
+            Contract contract,
+            List<ContractModuleRequest> requestedModules
+    ) {
+
+        Map<UUID, Set<UUID>> current =
+                contractModuleService.getCatalog(contract.getId())
+                        .stream()
+                        .filter(ContractModuleConfigResponse::isAssigned)
+                        .collect(
+                                Collectors.toMap(
+                                        ContractModuleConfigResponse::getModuleId,
+                                        m -> m.getPermissions()
+                                                .stream()
+                                                .filter(ContractPermissionConfigResponse::isAssigned)
+                                                .map(ContractPermissionConfigResponse::getId)
+                                                .collect(Collectors.toSet())
                                 )
                         );
 
-        UUID organizationId =
-                contract.getOrganization().getId();
+        Map<UUID, Set<UUID>> requested =
+                (requestedModules == null ? List.<ContractModuleRequest>of() : requestedModules)
+                        .stream()
+                        .collect(
+                                Collectors.toMap(
+                                        ContractModuleRequest::getModuleId,
+                                        r -> r.getPermissionIds() == null
+                                                ? Set.<UUID>of()
+                                                : new HashSet<>(r.getPermissionIds())
+                                )
+                        );
 
-        contractRepository.lockByOrganization(
-                organizationId
-        );
+        return !current.equals(requested);
+    }
+
+    // =====================================================
+    // VERSIONADO (renovación / upgrade / downgrade)
+    // =====================================================
+
+    private Optional<ContractResponse> tryReplaceWithNewVersion(
+            Contract oldContract,
+            ContractUpdateRequest request
+    ) {
+
+        if (request.getEndDate() == null) {
+            throw new Exceptions(
+                    "La fecha de fin es obligatoria.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
 
         LocalDate today = LocalDate.now();
+        boolean isRenewal = request.getRenewalType() == ContractRenewalType.RENEWAL;
 
-        if (today.isAfter(contract.getEndDate())) {
-            throw new Exceptions(
-                    "Contract is expired",
-                    HttpStatus.CONFLICT
-            );
+        /*
+         * ¿A partir de cuándo rige el contrato nuevo? request.
+         * getStartDate() NO se usa acá a propósito: el front no
+         * deja editar la fecha de inicio cuando se está
+         * renovando/subiendo/bajando de plan, se calcula sola:
+         *
+         * - RENEWAL: sigue justo donde termina el contrato actual
+         *   (oldContract.endDate + 1), sin importar qué día es hoy.
+         *   Así una renovación hecha unos días ANTES de que venza
+         *   no le corta vigencia a lo que ya está pagado/vigente.
+         * - UPGRADE / DOWNGRADE: rige desde HOY (el cambio de plan
+         *   es inmediato), salvo que el contrato ni siquiera haya
+         *   empezado todavía (no debería pasar en la práctica, pero
+         *   por las dudas no se ancla antes de su propio inicio).
+         */
+        LocalDate newStart =
+                isRenewal
+                        ? oldContract.getEndDate().plusDays(1)
+                        : (today.isAfter(oldContract.getStartDate())
+                                ? today
+                                : oldContract.getStartDate());
+
+        LocalDate closingDate = newStart.minusDays(1);
+
+        if (closingDate.isBefore(oldContract.getStartDate())) {
+
+            /*
+             * El nuevo arranque cae el mismo día (o antes) de que
+             * empezó el contrato viejo: no hubo ni un día de
+             * historial real bajo los términos actuales. No tiene
+             * sentido versionar sobre la nada; que se maneje como
+             * edición in-place normal.
+             */
+            return Optional.empty();
         }
 
-        if (today.isBefore(contract.getStartDate())) {
-            throw new Exceptions(
-                    "Contract has not started yet",
-                    HttpStatus.CONFLICT
-            );
+        /*
+         * ¿Ya rige HOY, o es una renovación programada a futuro?
+         *
+         * - Upgrade/Downgrade: newStart siempre es hoy (o antes),
+         *   así que esto es siempre true para ellos.
+         * - Renewal: normalmente newStart es futuro (oldContract.
+         *   endDate todavía no llegó) -> el contrato viejo NO se
+         *   toca para nada, sigue ACTIVE/SUSPENDED y 100% editable
+         *   hasta que de verdad le toque terminar; el cierre real
+         *   (REPLACED) lo hace el scheduler el día que el nuevo se
+         *   activa (ver ContractScheduler). Si la renovación se
+         *   hace tarde (oldContract.endDate ya pasó), newStart cae
+         *   hoy o antes: ahí sí hay que cerrar el viejo ya mismo.
+         */
+        boolean takesEffectNow = !newStart.isAfter(today);
+
+        if (takesEffectNow) {
+
+            oldContract.setEndDate(closingDate);
+            oldContract.markReplaced();
+
+            /*
+             * Flush explícito: el contrato nuevo se valida contra
+             * solapamiento (validateNoOverlap) justo después, y esa
+             * consulta lee directo de la BD. No queremos depender
+             * del auto-flush de Hibernate para que el cierre de
+             * este contrato ya sea visible en ese SELECT (misma
+             * lección que el fix de
+             * ContractModuleServiceImpl.replaceModules).
+             */
+            contractRepository.saveAndFlush(oldContract);
         }
 
-        validateNoContractOverlap(
-                organizationId,
-                contract,
-                contract.getId()
+        Contract newContract = new Contract();
+
+        newContract.setOrganization(oldContract.getOrganization());
+        newContract.setScope(oldContract.getScope());
+        newContract.setBranch(oldContract.getBranch());
+        newContract.setPreviousContract(oldContract);
+
+        applyPlanFields(
+                newContract,
+                request.getPlanName(),
+                request.getPrice(),
+                request.getCurrency(),
+                newStart,
+                request.getEndDate(),
+                request.getMaxLicenses(),
+                request.getDistributionMode(),
+                request.getRenewalType()
         );
 
-        contract.activate();
+        newContract.setStatus(
+                takesEffectNow
+                        ? ContractStatus.ACTIVE
+                        : ContractStatus.PENDING
+        );
 
-        contractRepository.save(contract);
+        if (newContract.getStatus() == ContractStatus.ACTIVE) {
+            newContract.setActivatedAt(Instant.now());
+        }
+
+        validateNoOverlap(newContract, null);
+
+        newContract = contractRepository.save(newContract);
+
+        replaceBranchLicenses(
+                newContract,
+                request.getBranchLicenses()
+        );
+
+        contractModuleService.replaceModules(
+                newContract,
+                request.getModules()
+        );
+
+        return Optional.of(buildDetailResponse(newContract));
     }
 
-    @Override
-    public void cancel(UUID id) {
-        Contract contract = getContract(id);
-        contract.cancel();
-        contractRepository.save(contract);
-    }
+    // =====================================================
+    // TRANSICIONES DE ESTADO
+    // =====================================================
 
     @Override
     @Transactional
     public void activate(UUID id) {
 
+        assertSystemUser();
+
         Contract contract =
                 contractRepository.findByIdForUpdate(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Contract not found",
+                                        "Contrato no encontrado.",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
-        UUID organizationId =
-                contract.getOrganization().getId();
+        validateNoOverlap(contract, contract.getId());
 
-        contractRepository.lockByOrganization(
-                organizationId
-        );
-
-        LocalDate today = LocalDate.now();
-
-        if (!today.equals(contract.getStartDate())) {
-            throw new Exceptions(
-                    "Contract can only be activated on its start date",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        if (today.isAfter(contract.getEndDate())) {
-            throw new Exceptions(
-                    "Contract is expired",
-                    HttpStatus.CONFLICT
-            );
-        }
-
-        validateNoContractOverlap(
-                organizationId,
-                contract,
-                contract.getId()
-        );
-
-        contract.activateManually();
-
-        contractRepository.save(contract);
+        applyTransition(contract::activate);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public ContractResponse getBaseContract(UUID organizationId) {
-
-        LocalDate now = LocalDate.now();
-
-        // =========================================================
-        // 1. ACTIVE ACTUAL
-        // =========================================================
-
-        Optional<Contract> active =
-                contractRepository
-                        .findTopByOrganizationIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqualOrderByEndDateDesc(
-                                organizationId,
-                                ContractStatus.ACTIVE,
-                                now,
-                                now
-                        );
-
-        Contract contract;
-
-        if (active.isPresent()) {
-
-            contract = active.get();
-
-        } else {
-
-            // =========================================================
-            // 2. FALLBACK: ÚLTIMO CONTRATO HISTÓRICO
-            // =========================================================
-
-            contract =
-                    contractRepository
-                            .findTopByOrganizationIdOrderByEndDateDesc(organizationId)
-                            .orElseThrow(() ->
-                                    new Exceptions(
-                                            "No contracts found for organization",
-                                            HttpStatus.NOT_FOUND
-                                    )
-                            );
-        }
-
-        // =========================================================
-        // 3. MODULES
-        // =========================================================
-
-        List<ContractModuleResponse> modules =
-                contractModuleService.getModules(contract.getId());
-
-        return ContractMapper.toResponse(contract, modules);
+    @Transactional
+    public void reactivate(UUID id) {
+        activate(id);
     }
 
-    private Contract getContract(UUID id) {
-        return contractRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Contract not found", HttpStatus.NOT_FOUND));
+    @Override
+    @Transactional
+    public void suspend(UUID id) {
+
+        assertSystemUser();
+
+        Contract contract = getContract(id);
+
+        applyTransition(contract::suspend);
     }
 
-    private List<Contract> getActiveAndPendingContracts(
-            UUID organizationId
-    ) {
+    @Override
+    @Transactional
+    public void cancel(UUID id) {
 
-        return contractRepository.findByOrganizationIdAndStatusIn(
-                organizationId,
-                List.of(
-                        ContractStatus.ACTIVE,
-                        ContractStatus.PENDING
-                )
-        );
+        assertSystemUser();
+
+        Contract contract = getContract(id);
+
+        applyTransition(contract::cancel);
     }
 
-    private Contract getActiveContract(
-            List<Contract> contracts
-    ) {
+    private void applyTransition(Runnable transition) {
 
-        return contracts.stream()
-                .filter(c -> c.getStatus() == ContractStatus.ACTIVE)
-                .findFirst()
-                .orElse(null);
-    }
+        try {
 
-    private void validateNoContractOverlap(
-            UUID organizationId,
-            Contract targetContract,
-            UUID excludedContractId
-    ) {
+            transition.run();
 
-        List<Contract> existing =
-                getActiveAndPendingContracts(organizationId);
+        } catch (IllegalStateException ex) {
 
-        boolean hasConflict =
-                existing.stream()
-                        .filter(c ->
-                                excludedContractId == null
-                                        || !c.getId().equals(excludedContractId)
-                        )
-                        .anyMatch(targetContract::overlapsWith);
-
-        if (hasConflict) {
             throw new Exceptions(
-                    "Contract overlaps with active or pending contract",
+                    ex.getMessage(),
                     HttpStatus.CONFLICT
             );
         }
-    }*/
+    }
+
+    // =====================================================
+    // HELPERS - SCOPE / PLAN
+    // =====================================================
+
+    private void applyScope(
+            Contract contract,
+            Organization organization,
+            ContractScope scope,
+            UUID branchId
+    ) {
+
+        if (scope == ContractScope.ORGANIZATION) {
+
+            contract.setBranch(null);
+            return;
+        }
+
+        if (branchId == null) {
+            throw new Exceptions(
+                    "Debe indicar la sede para un contrato de sede.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        Branch branch = branchRepository.findById(branchId)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Sede no encontrada.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
+
+        if (!branch.getOrganization().getId().equals(organization.getId())) {
+
+            throw new Exceptions(
+                    "La sede no pertenece a la organización indicada.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        contract.setBranch(branch);
+    }
+
+    private void applyPlanFields(
+            Contract contract,
+            String planName,
+            BigDecimal price,
+            String currency,
+            LocalDate startDate,
+            LocalDate endDate,
+            Integer maxLicenses,
+            LicenseDistributionMode distributionMode,
+            ContractRenewalType renewalType
+    ) {
+
+        if (planName == null || planName.isBlank()) {
+            throw new Exceptions(
+                    "El plan es obligatorio.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (startDate == null || endDate == null) {
+            throw new Exceptions(
+                    "Las fechas de vigencia son obligatorias.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (renewalType == null) {
+            throw new Exceptions(
+                    "El tipo de renovación es obligatorio.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        contract.setPlanName(planName);
+        contract.setPrice(price);
+        contract.setCurrency(currency);
+        contract.setStartDate(startDate);
+        contract.setEndDate(endDate);
+        contract.setMaxLicenses(maxLicenses);
+        contract.setRenewalType(renewalType);
+
+        contract.setDistributionMode(
+                contract.isOrganizationScope() && distributionMode != null
+                        ? distributionMode
+                        : LicenseDistributionMode.SHARED
+        );
+    }
+
+    // =====================================================
+    // HELPERS - OVERLAP
+    // =====================================================
+
+    private static final Set<ContractStatus> OCCUPYING_STATUSES = Set.of(
+            ContractStatus.ACTIVE,
+            ContractStatus.PENDING,
+            ContractStatus.SUSPENDED
+    );
+
+    private void validateNoOverlap(Contract contract, UUID excludedContractId) {
+
+        List<Contract> candidates =
+                contract.isBranchScope()
+                        ? contractRepository.findOverlappingContracts(
+                        contract.getBranch().getId(),
+                        contract.getStartDate(),
+                        contract.getEndDate()
+                )
+                        : contractRepository.findOverlappingOrganizationContracts(
+                        contract.getOrganization().getId(),
+                        contract.getStartDate(),
+                        contract.getEndDate()
+                );
+
+        boolean hasConflict =
+                candidates.stream()
+                        .filter(c -> excludedContractId == null || !c.getId().equals(excludedContractId))
+                        .filter(c -> OCCUPYING_STATUSES.contains(c.getStatus()))
+                        .anyMatch(contract::overlapsWith);
+
+        if (hasConflict) {
+            throw new Exceptions(
+                    "Ya existe un contrato activo, suspendido o pendiente que se solapa con estas fechas.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    // =====================================================
+    // HELPERS - LICENCIAS POR SEDE
+    // =====================================================
+
+    private void replaceBranchLicenses(
+            Contract contract,
+            List<ContractBranchLicenseRequest> requests
+    ) {
+
+        contractBranchLicenseRepository.deleteByContractId(
+                contract.getId()
+        );
+
+        if (contract.getDistributionMode() != LicenseDistributionMode.ALLOCATED
+                || !contract.isOrganizationScope()) {
+            return;
+        }
+
+        if (requests == null || requests.isEmpty()) {
+            return;
+        }
+
+        Set<UUID> seenBranches = new HashSet<>();
+        int total = 0;
+
+        for (ContractBranchLicenseRequest req : requests) {
+
+            if (req.getBranchId() == null) {
+                throw new Exceptions(
+                        "Sede inválida en el reparto de licencias.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            if (!seenBranches.add(req.getBranchId())) {
+                throw new Exceptions(
+                        "No se puede repartir licencias dos veces a la misma sede.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            if (req.getAllocatedLicenses() == null || req.getAllocatedLicenses() < 0) {
+                throw new Exceptions(
+                        "La cantidad de licencias debe ser mayor o igual a cero.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            Branch branch = branchRepository.findById(req.getBranchId())
+                    .orElseThrow(() ->
+                            new Exceptions(
+                                    "Sede no encontrada.",
+                                    HttpStatus.NOT_FOUND
+                            )
+                    );
+
+            if (!branch.getOrganization().getId().equals(contract.getOrganization().getId())) {
+
+                throw new Exceptions(
+                        "La sede " + branch.getName() + " no pertenece a la organización del contrato.",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            total += req.getAllocatedLicenses();
+
+            ContractBranchLicense license = new ContractBranchLicense();
+
+            license.setContract(contract);
+            license.setBranch(branch);
+            license.setAllocatedLicenses(req.getAllocatedLicenses());
+
+            contractBranchLicenseRepository.save(license);
+        }
+
+        if (contract.getMaxLicenses() != null && total > contract.getMaxLicenses()) {
+
+            throw new Exceptions(
+                    "El reparto de licencias por sede (" + total
+                            + ") supera el máximo del contrato (" + contract.getMaxLicenses() + ").",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    // =====================================================
+    // HELPERS - RESPUESTA DETALLE
+    // =====================================================
+
+    private ContractResponse buildDetailResponse(Contract contract) {
+
+        List<ContractBranchLicenseResponse> branchLicenses =
+                contract.isOrganizationScope()
+                        ? contractBranchLicenseRepository
+                        .findByContractId(contract.getId())
+                        .stream()
+                        .map(ContractMapper::toBranchLicenseResponse)
+                        .toList()
+                        : List.of();
+
+        return ContractMapper.toResponse(
+                contract,
+                contractModuleService.getCatalog(contract.getId()),
+                branchLicenses
+        );
+    }
+
+    // =====================================================
+    // HELPERS - CARGA / VALIDACIONES GENERALES
+    // =====================================================
+
+    private void assertSystemUser() {
+
+        if (!authContext.isSystem()) {
+
+            throw new Exceptions(
+                    "Solo un administrador del sistema puede gestionar contratos.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
+
+    private void assertEditable(Contract contract) {
+
+        if (contract.getStatus() == ContractStatus.CANCELLED
+                || contract.getStatus() == ContractStatus.EXPIRED
+                || contract.getStatus() == ContractStatus.REPLACED) {
+
+            throw new Exceptions(
+                    "No se puede editar un contrato cancelado, vencido o reemplazado.",
+                    HttpStatus.CONFLICT
+            );
+        }
+    }
+
+    private Contract getContract(UUID id) {
+
+        return contractRepository.findById(id)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Contrato no encontrado.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
+    }
+
+    private Organization getOrganization(UUID id) {
+
+        if (id == null) {
+            throw new Exceptions(
+                    "La organización es obligatoria.",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        return organizationRepository.findById(id)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "Organización no encontrada.",
+                                HttpStatus.NOT_FOUND
+                        )
+                );
+    }
+
 }

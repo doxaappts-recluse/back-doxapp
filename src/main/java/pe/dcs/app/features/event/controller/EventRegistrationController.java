@@ -19,7 +19,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventRegistrationController {
 
-    /*private final EventRegistrationService service;
+    private final EventRegistrationService service;
 
     @PostMapping("/create")
     public ApiResponse<EventRegistrationResponse> create(
@@ -94,5 +94,5 @@ public class EventRegistrationController {
                 "Inscripciones registradas correctamente",
                 null
         );
-    }*/
+    }
 }

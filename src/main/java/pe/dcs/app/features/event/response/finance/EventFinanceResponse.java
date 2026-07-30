@@ -2,6 +2,7 @@ package pe.dcs.app.features.event.response.finance;
 
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.auditable.AuditableResponse;
 import pe.dcs.app.util.enums.events.EventFinanceStatus;
 import pe.dcs.app.util.enums.events.EventFinanceType;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
-public class EventFinanceResponse {
+public class EventFinanceResponse extends AuditableResponse {
 
     private UUID id;
 
@@ -37,7 +38,4 @@ public class EventFinanceResponse {
     private Instant approvedAt;
 
     private String rejectionReason;
-
-    private Instant createdAt;
-    private Instant updatedAt;
 }

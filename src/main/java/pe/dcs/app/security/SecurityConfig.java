@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import pe.dcs.app.security.jwt.JwtEntryPoint;
 import pe.dcs.app.security.jwt.JwtProvider;
 import pe.dcs.app.security.jwt.JwtTokenFilter;
+import pe.dcs.app.security.service.OrganizationContext;
 import pe.dcs.app.security.service.credentials.CredentialDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,16 +33,18 @@ public class SecurityConfig {
     private final JwtEntryPoint unauthorizedHandler;
     private final JwtProvider jwtProvider;
     private final CredentialDetailsService userDetailsService;
+    private final OrganizationContext organizationContext;
 
-    public SecurityConfig(JwtEntryPoint unauthorizedHandler, JwtProvider jwtProvider, CredentialDetailsService userDetailsService) {
+    public SecurityConfig(JwtEntryPoint unauthorizedHandler, JwtProvider jwtProvider, CredentialDetailsService userDetailsService, OrganizationContext organizationContext) {
         this.unauthorizedHandler = unauthorizedHandler;
         this.jwtProvider = jwtProvider;
         this.userDetailsService = userDetailsService;
+        this.organizationContext = organizationContext;
     }
 
     @Bean
     public JwtTokenFilter jwtTokenFilter() {
-        return new JwtTokenFilter(jwtProvider, userDetailsService);
+        return new JwtTokenFilter(jwtProvider, userDetailsService, organizationContext);
     }
 
     @Bean
@@ -104,6 +107,15 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")); // Métodos HTTP permitidos
         config.setAllowedHeaders(List.of("*")); // Permite todos los encabezados
         config.setAllowCredentials(true); // Permite credenciales (como cookies y encabezados de autorización)
+
+        /*
+         * Headers custom de respuesta que el frontend necesita LEER
+         * desde JS (response.headers.get(...)). Por defecto el
+         * navegador solo expone un set fijo de headers "simples";
+         * cualquier header custom debe declararse acá explícitamente
+         * o el navegador lo descarta aunque el servidor lo mande.
+         */
+        config.setExposedHeaders(List.of("X-No-Access"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config); // Aplica la configuración de CORS a todas las rutas

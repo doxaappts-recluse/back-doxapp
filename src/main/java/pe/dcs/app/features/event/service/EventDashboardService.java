@@ -5,5 +5,5 @@ import pe.dcs.app.features.event.response.dashboard.EventDashboardResponse;
 import java.util.UUID;
 
 public interface EventDashboardService {
-    //EventDashboardResponse getDashboard(UUID eventId);
+    EventDashboardResponse getDashboard(UUID eventId);
 }

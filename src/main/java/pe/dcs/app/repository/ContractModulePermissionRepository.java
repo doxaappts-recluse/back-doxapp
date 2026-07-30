@@ -33,6 +33,30 @@ public interface ContractModulePermissionRepository extends JpaRepository<Contra
             @Param("moduleId") UUID moduleId
     );
 
+    /**
+     * Igual que findPermissions, pero UNIENDO los permisos de
+     * varios contratos a la vez (DISTINCT). Una sede puede tener
+     * simultáneamente un contrato activo de ORGANIZATION y otro de
+     * BRANCH: el sidebar debe mostrar, por módulo, la unión de lo
+     * que cada uno habilita (p.ej. módulo 1 con permisos 2,3,4 en
+     * el contrato de organización + permiso 1 en el de sede =
+     * módulo 1 con 1,2,3,4), no los de un solo contrato.
+     */
+    @Query("""
+        SELECT DISTINCT p.code
+        FROM ContractModulePermission cmp
+        JOIN cmp.permission p
+        JOIN cmp.contractModule cm
+        WHERE cm.contract.id IN :contractIds
+          AND cm.module.id = :moduleId
+          AND cm.status = 'ACTIVE'
+          AND p.status = 'ACTIVE'
+    """)
+    List<String> findPermissionsByContractIds(
+            @Param("contractIds") List<UUID> contractIds,
+            @Param("moduleId") UUID moduleId
+    );
+
     // =========================================================
     // VALIDAR PERMISO
     // =========================================================

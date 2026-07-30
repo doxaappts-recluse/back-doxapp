@@ -21,7 +21,7 @@ import java.util.UUID;
 @RequestMapping("/api/v1/events")
 public class EventController {
 
-    /*private final EventService eventService;
+    private final EventService eventService;
     private final SupabaseStorageService storageService;
 
     @PostMapping("/create")
@@ -94,5 +94,5 @@ public class EventController {
                 3600
         );
 
-    }*/
+    }
 }

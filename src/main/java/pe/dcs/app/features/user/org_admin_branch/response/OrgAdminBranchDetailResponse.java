@@ -5,6 +5,7 @@ import lombok.Setter;
 import pe.dcs.app.util.enums.MaritalStatusType;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -21,4 +22,10 @@ public class OrgAdminBranchDetailResponse {
     private String address;
     private LocalDate dateBirth;
     private String username;
+
+    /**
+     * Todos los accesos (activos e inactivos) de la persona,
+     * para gestionarlos desde la pantalla de edición.
+     */
+    private List<UserAccessResponse> accesses;
 }

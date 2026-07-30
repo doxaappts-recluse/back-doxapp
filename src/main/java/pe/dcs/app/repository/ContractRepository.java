@@ -126,6 +126,20 @@ public interface ContractRepository extends JpaRepository<Contract, UUID>, JpaSp
             @Param("endDate") LocalDate endDate
     );
 
+    @Query("""
+        SELECT c
+        FROM Contract c
+        WHERE c.organization.id = :organizationId
+          AND c.scope = 'ORGANIZATION'
+          AND c.startDate <= :endDate
+          AND c.endDate >= :startDate
+    """)
+    List<Contract> findOverlappingOrganizationContracts(
+            @Param("organizationId") UUID organizationId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
     // =========================================================
     // LOCK PARA OPERACIONES CRITICAS
     // =========================================================

@@ -56,12 +56,15 @@ public class SidebarService {
                             : RoleType.SYSTEM_SUPPORT
             );
 
+            List<Module> systemVisible =
+                    moduleRepository.findAllActive()
+                            .stream()
+                            .filter(m -> !Boolean.FALSE.equals(m.getVisibleSystem()))
+                            .toList();
+
             response.setModules(
-                    sidebarMapper.toTree(
-                            moduleRepository.findAllActive(),
-                            null,
-                            null,
-                            null
+                    sidebarMapper.toTreeForSystem(
+                            systemVisible
                     )
             );
 
@@ -119,6 +122,19 @@ public class SidebarService {
 
         List<Module> modules = moduleRepository.findAllActive();
 
+        /*
+         * Una sede puede tener un contrato de ORGANIZATION Y otro
+         * propio de BRANCH activos al mismo tiempo (contracts ya
+         * trae ambos, ver ContractResolver.getActiveContractsByBranch
+         * -> findActiveContractsForBranch). Los permisos por módulo
+         * deben ser la UNIÓN de lo que habilita cada uno, no solo
+         * el primero: se pasa la lista completa, no un solo id.
+         */
+        List<UUID> contractIds =
+                contracts.stream()
+                        .map(Contract::getId)
+                        .toList();
+
         // =====================================================
         // ORGANIZATION ADMIN
         // =====================================================
@@ -127,15 +143,16 @@ public class SidebarService {
 
             response.setAccessType(RoleType.ORG_ADMIN);
 
+            List<Module> orgAdminVisible =
+                    modules.stream()
+                            .filter(m -> !Boolean.FALSE.equals(m.getVisibleOrgAdmin()))
+                            .toList();
+
             response.setModules(
                     sidebarMapper.toTree(
-                            modules,
+                            orgAdminVisible,
                             contractModuleIds,
-                            contracts
-                                    .stream()
-                                    .map(Contract::getId)
-                                    .findFirst()
-                                    .orElse(null),
+                            contractIds,
                             null
                     )
             );
@@ -151,11 +168,16 @@ public class SidebarService {
 
             response.setAccessType(RoleType.ORG_BRANCH_ADMIN);
 
+            List<Module> branchAdminVisible =
+                    modules.stream()
+                            .filter(m -> !Boolean.FALSE.equals(m.getVisibleBranchAdmin()))
+                            .toList();
+
             response.setModules(
                     sidebarMapper.toTree(
-                            modules,
+                            branchAdminVisible,
                             contractModuleIds,
-                            null,
+                            contractIds,
                             null
                     )
             );
@@ -172,8 +194,10 @@ public class SidebarService {
             Set<UUID> userModules =
                     new HashSet<>(
                             userModuleRepository
-                                    .findActiveModuleIdsByPersonId(
+                                    .findActiveModuleIdsByPersonIdAndOrganizationIdAndBranchId(
                                             user.getUserId(),
+                                            organizationId,
+                                            branchId,
                                             StatusType.ACTIVE
                                     )
                     );
@@ -184,7 +208,9 @@ public class SidebarService {
              *
              * Usuario solo puede ver:
              *
-             * 1. Lo asignado personalmente
+             * 1. Lo asignado personalmente EN ESTA sede/organización
+             *    (una persona puede tener otro UserAccess en otra
+             *    sede, con otros módulos delegados: no deben mezclarse)
              * 2. Lo permitido por contrato
              *
              */
@@ -193,12 +219,19 @@ public class SidebarService {
 
             response.setAccessType(RoleType.ORG_USER);
 
+            List<Module> userVisible =
+                    modules.stream()
+                            .filter(m -> !Boolean.FALSE.equals(m.getVisibleUser()))
+                            .toList();
+
             response.setModules(
                     sidebarMapper.toTree(
-                            modules,
+                            userVisible,
                             userModules,
                             null,
-                            user.getUserId()
+                            user.getUserId(),
+                            organizationId,
+                            branchId
                     )
             );
 

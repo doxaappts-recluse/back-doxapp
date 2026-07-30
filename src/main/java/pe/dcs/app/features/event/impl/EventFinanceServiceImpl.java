@@ -33,11 +33,22 @@ import java.util.UUID;
 public class EventFinanceServiceImpl
         implements EventFinanceService {
 
-    /*private final EventFinanceRepository eventFinanceRepository;
+    private final EventFinanceRepository eventFinanceRepository;
     private final EventRepository eventRepository;
     private final EventFinanceMapper eventFinanceMapper;
     private final AuthContext authContext;
     private final PersonRepository userRepository;
+    private final EventAccessGuard eventAccessGuard;
+
+    /**
+     * Valida que el evento pertenezca a la organización del
+     * contexto actual, y que quien llama tenga acceso a él (tier
+     * amplio) — delega en EventAccessGuard, misma regla que
+     * EventServiceImpl/EventRegistrationServiceImpl.
+     */
+    private void validateEventOrg(Event event) {
+        eventAccessGuard.assertCanAccess(event);
+    }
 
     @Override
     @Transactional
@@ -55,6 +66,8 @@ public class EventFinanceServiceImpl
                                         HttpStatus.NOT_FOUND
                                 )
                         );
+
+        validateEventOrg(event);
 
         Person user =
                 userRepository.findById(
@@ -96,13 +109,7 @@ public class EventFinanceServiceImpl
                 request.getObservations()
         );
 
-        if(
-                authContext.isSystem()
-                ||
-                authContext.isCurrentOrganizationAdmin()
-                ||
-                authContext.isCurrentBranchAdmin()
-        ) {
+        if (eventAccessGuard.canManage(event)) {
 
             finance.setStatus(
                     EventFinanceStatus.APPROVED
@@ -124,7 +131,8 @@ public class EventFinanceServiceImpl
         }
 
         return eventFinanceMapper.simple(
-                eventFinanceRepository.save(finance)
+                eventFinanceRepository.save(finance),
+                authContext.canViewAudit()
         );
     }
 
@@ -155,13 +163,7 @@ public class EventFinanceServiceImpl
         }
 
 
-        if (
-                !authContext.isSystem()
-                &&
-                !authContext.isCurrentOrganizationAdmin()
-                &&
-                !authContext.isCurrentBranchAdmin()
-        ) {
+        if (!eventAccessGuard.canManage(finance.getEvent())) {
 
             UUID ownerId =
                     finance.getCreatedByUser()
@@ -188,6 +190,8 @@ public class EventFinanceServiceImpl
                                         HttpStatus.NOT_FOUND
                                 )
                         );
+
+        validateEventOrg(event);
 
         finance.setEvent(event);
 
@@ -233,7 +237,8 @@ public class EventFinanceServiceImpl
         );
 
         return eventFinanceMapper.simple(
-                eventFinanceRepository.save(finance)
+                eventFinanceRepository.save(finance),
+                authContext.canViewAudit()
         );
     }
 
@@ -244,20 +249,6 @@ public class EventFinanceServiceImpl
             EventFinanceApproveRequest request
     ) {
 
-        if (
-                !authContext.isSystem()
-                &&
-                !authContext.isCurrentOrganizationAdmin()
-                &&
-                !authContext.isCurrentBranchAdmin()
-        ) {
-
-            throw new Exceptions(
-                    "No tiene permisos para aprobar movimientos",
-                    HttpStatus.FORBIDDEN
-            );
-        }
-
         EventFinance finance =
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
@@ -266,6 +257,14 @@ public class EventFinanceServiceImpl
                                         HttpStatus.NOT_FOUND
                                 )
                         );
+
+        if (!eventAccessGuard.canManage(finance.getEvent())) {
+
+            throw new Exceptions(
+                    "No tiene permisos para aprobar movimientos de este evento",
+                    HttpStatus.FORBIDDEN
+            );
+        }
 
         if (finance.getStatus() !=
                 EventFinanceStatus.PENDING) {
@@ -308,7 +307,8 @@ public class EventFinanceServiceImpl
         }
 
         return eventFinanceMapper.simple(
-                eventFinanceRepository.save(finance)
+                eventFinanceRepository.save(finance),
+                authContext.canViewAudit()
         );
     }
 
@@ -319,20 +319,6 @@ public class EventFinanceServiceImpl
             EventFinanceRejectRequest request
     ) {
 
-        if (
-                !authContext.isSystem()
-                &&
-                !authContext.isCurrentOrganizationAdmin()
-                &&
-                !authContext.isCurrentBranchAdmin()
-        ) {
-
-            throw new Exceptions(
-                    "No tiene permisos para aprobar movimientos",
-                    HttpStatus.FORBIDDEN
-            );
-        }
-
         EventFinance finance =
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
@@ -341,6 +327,14 @@ public class EventFinanceServiceImpl
                                         HttpStatus.NOT_FOUND
                                 )
                         );
+
+        if (!eventAccessGuard.canManage(finance.getEvent())) {
+
+            throw new Exceptions(
+                    "No tiene permisos para aprobar movimientos de este evento",
+                    HttpStatus.FORBIDDEN
+            );
+        }
 
         if (finance.getStatus() !=
                 EventFinanceStatus.PENDING) {
@@ -364,7 +358,8 @@ public class EventFinanceServiceImpl
         );
 
         return eventFinanceMapper.simple(
-                eventFinanceRepository.save(finance)
+                eventFinanceRepository.save(finance),
+                authContext.canViewAudit()
         );
     }
 
@@ -383,8 +378,11 @@ public class EventFinanceServiceImpl
                                 )
                         );
 
+        validateEventOrg(finance.getEvent());
+
         return eventFinanceMapper.simple(
-                finance
+                finance,
+                authContext.canViewAudit()
         );
     }
 
@@ -401,6 +399,27 @@ public class EventFinanceServiceImpl
 
         EventFinanceFilter filters =
                 request.getFilters();
+
+        if (filters == null || filters.getEventId() == null) {
+
+            throw new Exceptions(
+                    "El evento es requerido",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        Event event =
+                eventRepository.findById(
+                                filters.getEventId()
+                        )
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "Evento no encontrado",
+                                        HttpStatus.NOT_FOUND
+                                )
+                        );
+
+        validateEventOrg(event);
 
         Specification<EventFinance> spec =
                 EventFinanceSpecification.filter(
@@ -427,10 +446,12 @@ public class EventFinanceServiceImpl
                         pageable
                 );
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(eventFinanceMapper::simple)
+                        .map(f -> eventFinanceMapper.simple(f, showAudit))
                         .toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),
@@ -439,5 +460,5 @@ public class EventFinanceServiceImpl
                         page.getNumber()
                 )
         );
-    }*/
+    }
 }

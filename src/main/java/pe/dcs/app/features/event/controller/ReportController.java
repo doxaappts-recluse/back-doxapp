@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import pe.dcs.app.features.event.impl.EventAccessGuard;
 import pe.dcs.app.features.event.response.reports.AgeReportResponse;
 import pe.dcs.app.features.event.response.reports.FinanceReportResponse;
 import pe.dcs.app.features.event.response.reports.OccupancyReportResponse;
@@ -28,9 +29,19 @@ public class ReportController {
     private final OccupancyReportService occupancyReportService;
     private final AgeReportService ageReportService;
 
+    /**
+     * Los reportes muestran información interna del evento
+     * (montos, asistentes, edades): quedan reservados al org
+     * admin o a la sede coordinadora, sin importar el scope. Ver
+     * EventAccessGuard.
+     */
+    private final EventAccessGuard eventAccessGuard;
 
     @GetMapping("/registrations/{eventId}")
     public ApiResponse<List<RegistrationReportResponse>> getRegistration(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
         return new ApiResponse<>(
                 200,
                 "Reporte de inscripciones obtenido correctamente",
@@ -41,6 +52,9 @@ public class ReportController {
 
     @GetMapping("/finance/{eventId}")
     public ApiResponse<List<FinanceReportResponse>> getFinance(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
         return new ApiResponse<>(
                 200,
                 "Reporte de finanzas obtenido correctamente",
@@ -50,6 +64,9 @@ public class ReportController {
 
     @GetMapping("/occupancy/{eventId}")
     public ApiResponse<List<OccupancyReportResponse>> getOccupancy(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
         return new ApiResponse<>(
                 200,
                 "Reporte de finanzas obtenido correctamente",
@@ -61,6 +78,8 @@ public class ReportController {
     public ApiResponse<List<AgeReportResponse>> ageReport(
             @PathVariable UUID eventId
     ) {
+
+        eventAccessGuard.assertCanManage(eventId);
 
         return new ApiResponse<>(
                 200,

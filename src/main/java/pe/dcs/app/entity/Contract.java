@@ -86,6 +86,8 @@ public class Contract extends Auditable {
 
     private Instant cancelledAt;
 
+    private Instant replacedAt;
+
     // =========================================================
     // LIFECYCLE
     // =========================================================
@@ -211,6 +213,19 @@ public class Contract extends Auditable {
 
         status = ContractStatus.CANCELLED;
         cancelledAt = Instant.now();
+    }
+
+    /**
+     * Lo llama ContractServiceImpl cuando una edición con cambio
+     * comercial (plan/precio/módulos/licencias) crea un contrato
+     * nuevo que reemplaza a este. No pasa por assertNotTerminalState
+     * porque se invoca directamente sobre un contrato aún vigente
+     * (ACTIVE/PENDING/SUSPENDED) que se está cerrando a propósito,
+     * no sobre una transición de usuario tipo activate/suspend.
+     */
+    public void markReplaced() {
+        status = ContractStatus.REPLACED;
+        replacedAt = Instant.now();
     }
 
     public void expire() {

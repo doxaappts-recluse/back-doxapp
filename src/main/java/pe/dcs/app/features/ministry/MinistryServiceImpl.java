@@ -15,6 +15,7 @@ import pe.dcs.app.features.ministry.request.MinistryRequest;
 import pe.dcs.app.features.ministry.request.MinistrySearchRequest;
 import pe.dcs.app.features.ministry.response.MinistryResponse;
 import pe.dcs.app.features.ministry.service.MinistryService;
+import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.enums.StatusType;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PaginationResponse;
@@ -32,10 +33,31 @@ public class MinistryServiceImpl implements MinistryService {
 
     private final MinistryRepository ministryRepository;
     private final MinistryMapper ministryMapper;
+    private final AuthContext authContext;
+
+    /**
+     * El catálogo de ministerios es de gestión exclusiva de
+     * SYSTEM. El listado que consumen org/branch admin para
+     * asignar servicio ministerial se resuelve aparte, en
+     * MinistryAssignmentService (getAllMinistries), que no pasa
+     * por este service.
+     */
+    private void assertSystem() {
+
+        if (!authContext.isSystem()) {
+
+            throw new Exceptions(
+                    "Solo un administrador del sistema puede gestionar el catálogo de ministerios.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
     @Override
     @Transactional
     public MinistryResponse create(MinistryRequest request){
+
+        assertSystem();
 
         Ministry ministry = new Ministry();
 
@@ -48,13 +70,15 @@ public class MinistryServiceImpl implements MinistryService {
                         : StatusType.ACTIVE
         );
 
-        return ministryMapper.simple(ministryRepository.save(ministry));
+        return ministryMapper.simple(ministryRepository.save(ministry), authContext.canViewAudit());
 
     }
 
     @Override
     @Transactional
     public MinistryResponse update(UUID id, MinistryRequest request){
+
+        assertSystem();
 
         Ministry ministry =
                 ministryRepository.findById(id)
@@ -67,13 +91,15 @@ public class MinistryServiceImpl implements MinistryService {
 
         ministryMapper.updateEntity(ministry, request);
 
-        return ministryMapper.simple(ministryRepository.save(ministry));
+        return ministryMapper.simple(ministryRepository.save(ministry), authContext.canViewAudit());
 
     }
 
     @Override
     @Transactional
     public void disable(UUID id){
+
+        assertSystem();
 
         Ministry ministry =
                 ministryRepository.findById(id)
@@ -92,6 +118,8 @@ public class MinistryServiceImpl implements MinistryService {
     @Override
     @Transactional
     public void enable(UUID id){
+
+        assertSystem();
 
         Ministry ministry =
                 ministryRepository.findById(id)
@@ -112,6 +140,8 @@ public class MinistryServiceImpl implements MinistryService {
     @Transactional(readOnly = true)
     public MinistryResponse getById(UUID id){
 
+        assertSystem();
+
         Ministry ministry =
                 ministryRepository.findById(id)
                         .orElseThrow(() ->
@@ -121,7 +151,7 @@ public class MinistryServiceImpl implements MinistryService {
                                 )
                         );
 
-        return ministryMapper.simple(ministry);
+        return ministryMapper.simple(ministry, authContext.canViewAudit());
 
     }
 
@@ -129,12 +159,16 @@ public class MinistryServiceImpl implements MinistryService {
     @Transactional(readOnly = true)
     public List<MinistryResponse> findAll(){
 
+        assertSystem();
+
+        boolean showAudit = authContext.canViewAudit();
+
         return ministryRepository
                 .findAllByStatusOrderByNameAsc(
                         StatusType.ACTIVE
                 )
                 .stream()
-                .map(ministryMapper::simple)
+                .map(ministry -> ministryMapper.simple(ministry, showAudit))
                 .toList();
 
     }
@@ -142,6 +176,8 @@ public class MinistryServiceImpl implements MinistryService {
     @Override
     @Transactional(readOnly = true)
     public PageResponse<MinistryResponse> search(MinistrySearchRequest request){
+
+        assertSystem();
 
         Pageable pageable =
                 PageableUtil.buildPageable(
@@ -168,10 +204,12 @@ public class MinistryServiceImpl implements MinistryService {
                         pageable
                 );
 
+        boolean showAudit = authContext.canViewAudit();
+
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(ministryMapper::simple)
+                        .map(ministry -> ministryMapper.simple(ministry, showAudit))
                         .toList(),
 
                 new PaginationResponse(

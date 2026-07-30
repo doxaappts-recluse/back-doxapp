@@ -1,5 +1,6 @@
 package pe.dcs.app.features.user.org_admin_branch.service;
 
+import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchAddAccessRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchCreateRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchListRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchUpdateRequest;
@@ -22,5 +23,11 @@ public interface OrgAdminBranchService {
     void enable(UUID id);
 
     void disable(UUID id);
+
+    void addAccess(UUID personId, OrgAdminBranchAddAccessRequest request);
+
+    void enableAccess(UUID accessId);
+
+    void disableAccess(UUID accessId);
 
 }

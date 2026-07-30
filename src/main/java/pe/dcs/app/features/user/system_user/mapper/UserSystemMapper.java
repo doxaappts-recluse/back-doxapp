@@ -7,12 +7,13 @@ import pe.dcs.app.entity.Role;
 import pe.dcs.app.entity.Person;
 import pe.dcs.app.entity.UserAccess;
 import pe.dcs.app.features.user.system_user.response.UserSystemResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 import pe.dcs.app.util.enums.StatusType;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UserSystemMapper {
 
-    public static UserSystemResponse toResponse(Person user) {
+    public static UserSystemResponse toResponse(Person user, boolean showAudit) {
 
         Credential credential = user.getCredential();
 
@@ -28,7 +29,7 @@ public class UserSystemMapper {
                 ? access.getRole()
                 : null;
 
-        return UserSystemResponse.builder()
+        UserSystemResponse response = UserSystemResponse.builder()
                 .id(user.getId())
 
                 .name(user.getName())
@@ -73,6 +74,10 @@ public class UserSystemMapper {
                 )
 
                 .build();
+
+        BaseMapper.mapAudit(user, response, showAudit);
+
+        return response;
     }
 
 }

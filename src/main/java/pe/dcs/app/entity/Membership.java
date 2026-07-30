@@ -6,7 +6,8 @@ import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.membership.MembershipExitReason;
-import pe.dcs.app.util.enums.membership.MembershipStatus;
+import pe.dcs.app.util.enums.membership.MembershipReason;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -40,12 +41,13 @@ public class Membership extends Auditable {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private MembershipStatus status;
+    private StatusType status;
 
     @Enumerated(EnumType.STRING)
     private MembershipExitReason exitReason;
 
-    private String reason;
+    @Enumerated(EnumType.STRING)
+    private MembershipReason reason;
 
     @Column
     private Boolean current;

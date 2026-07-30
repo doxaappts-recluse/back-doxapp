@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import pe.dcs.app.security.service.OrganizationContext;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
 import pe.dcs.app.security.service.credentials.CredentialDetailsService;
 import pe.dcs.app.util.constant.JwtConstant;
@@ -28,6 +29,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtProvider jwtProvider;
     private final CredentialDetailsService credentialDetailsService;
+    private final OrganizationContext organizationContext;
 
     @Override
     protected void doFilterInternal(
@@ -147,8 +149,19 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                             authentication
                     );
 
-            filterChain.doFilter(request, response);
+            /*
+             * Contexto actual (org/sede) para este hilo.
+             * Lo consume AuthContext.getCurrentOrganizationId()/getCurrentBranchId().
+             * Se limpia siempre en el finally: el hilo puede
+             * reutilizarse para otra request (pool de Tomcat).
+             */
+            organizationContext.set(organizationId, branchId);
 
+            try {
+                filterChain.doFilter(request, response);
+            } finally {
+                organizationContext.clear();
+            }
 
         }
         catch(Exception ex){

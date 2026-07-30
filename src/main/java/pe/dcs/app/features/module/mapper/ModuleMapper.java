@@ -3,6 +3,7 @@ package pe.dcs.app.features.module.mapper;
 import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.Module;
 import pe.dcs.app.features.module.response.ModuleResponse;
+import pe.dcs.app.util.auditable.BaseMapper;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
@@ -10,9 +11,11 @@ import java.util.List;
 @Component
 public class ModuleMapper {
 
-    public ModuleResponse simple(Module module){
+    public ModuleResponse simple(Module module, boolean showAudit){
 
         ModuleResponse dto = new ModuleResponse();
+
+        BaseMapper.mapAudit(module, dto, showAudit);
 
         dto.setId(module.getId());
         dto.setName(module.getName());
@@ -22,6 +25,11 @@ public class ModuleMapper {
         dto.setOrderNum(module.getOrderNum());
 
         dto.setStatus(module.getStatus());
+
+        dto.setVisibleSystem(module.getVisibleSystem());
+        dto.setVisibleOrgAdmin(module.getVisibleOrgAdmin());
+        dto.setVisibleBranchAdmin(module.getVisibleBranchAdmin());
+        dto.setVisibleUser(module.getVisibleUser());
 
         dto.setRoot(module.isRoot());
 

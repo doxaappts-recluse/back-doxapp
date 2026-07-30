@@ -1,6 +1,7 @@
 package pe.dcs.app.features.user.system_user.response;
 
 import lombok.*;
+import pe.dcs.app.util.auditable.AuditableResponse;
 import pe.dcs.app.util.enums.MaritalStatusType;
 import pe.dcs.app.util.enums.StatusType;
 import pe.dcs.app.util.enums.RoleType;
@@ -13,7 +14,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserSystemResponse {
+public class UserSystemResponse extends AuditableResponse {
 
     private UUID id;
     private String name;

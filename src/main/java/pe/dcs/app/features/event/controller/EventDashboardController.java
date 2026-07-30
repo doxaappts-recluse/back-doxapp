@@ -16,7 +16,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EventDashboardController {
 
-    /*private final EventDashboardService dashboardService;
+    private final EventDashboardService dashboardService;
 
     @GetMapping("/get/{eventId}")
     public ApiResponse<EventDashboardResponse> getDashboard(
@@ -27,5 +27,5 @@ public class EventDashboardController {
                 "Dashboard fetched successfully",
                 dashboardService.getDashboard(eventId)
         );
-    }*/
+    }
 }

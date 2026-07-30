@@ -12,14 +12,23 @@ import pe.dcs.app.util.enums.contract.ContractStatus;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
+/**
+ * Corre una vez al día: vence contratos cuya fecha fin ya
+ * pasó, y activa los PENDING cuya fecha inicio ya llegó.
+ *
+ * No hace falta revalidar solapamiento acá: eso ya se
+ * garantiza al crear/editar un contrato (validateNoOverlap
+ * en ContractServiceImpl), así que dos contratos ACTIVE del
+ * mismo alcance (misma sede, o misma organización) nunca
+ * deberían coexistir en la misma fecha.
+ */
 @Component
 @RequiredArgsConstructor
 @Slf4j
 public class ContractScheduler {
 
-    /*private final ContractRepository contractRepository;
+    private final ContractRepository contractRepository;
 
     @Scheduled(
             cron = "0 0 0 * * *",
@@ -30,9 +39,18 @@ public class ContractScheduler {
 
         LocalDate today = LocalDate.now();
 
-        expireContracts(today);
-
+        /*
+         * Activar ANTES de vencer: una renovación a futuro deja el
+         * contrato viejo ACTIVE (sin tocar) hasta que a su sucesor
+         * le toque arrancar. Si hoy es ese día, hay que activar el
+         * nuevo y marcar el viejo como REPLACED (no EXPIRED) antes
+         * de que el paso de "vencer" siquiera lo vea, para que
+         * quede reflejado como una transición de versión y no como
+         * un vencimiento común.
+         */
         activatePendingContracts(today);
+
+        expireContracts(today);
     }
 
     // =====================================================
@@ -79,31 +97,38 @@ public class ContractScheduler {
         }
 
         List<Contract> activated = new ArrayList<>();
+        List<Contract> replacedPredecessors = new ArrayList<>();
 
         for (Contract contract : pendingContracts) {
 
-            UUID organizationId =
-                    contract.getOrganization().getId();
-
-            boolean hasActive =
-                    contractRepository
-                            .existsByOrganizationIdAndStatus(
-                                    organizationId,
-                                    ContractStatus.ACTIVE
-                            );
-
-            // evita dos activos
-            if (hasActive) {
-                continue;
-            }
-
             try {
 
-                contract.activateManually();
+                contract.activate();
 
                 activated.add(contract);
 
-            } catch (Exception ex) {
+                /*
+                 * Este PENDING puede venir de una renovación
+                 * declarada a futuro (ver ContractServiceImpl.
+                 * tryReplaceWithNewVersion): en ese caso el
+                 * contrato anterior se dejó ACTIVE a propósito,
+                 * sin tocar, para que siguiera editable hasta hoy.
+                 * Ahora que el sucesor de verdad arranca, recién
+                 * corresponde cerrar el anterior como REPLACED.
+                 */
+                Contract previous = contract.getPreviousContract();
+
+                if (previous != null
+                        && previous.getStatus() != ContractStatus.CANCELLED
+                        && previous.getStatus() != ContractStatus.EXPIRED
+                        && previous.getStatus() != ContractStatus.REPLACED) {
+
+                    previous.markReplaced();
+
+                    replacedPredecessors.add(previous);
+                }
+
+            } catch (IllegalStateException ex) {
 
                 log.warn(
                         "Could not activate contract {}: {}",
@@ -114,6 +139,7 @@ public class ContractScheduler {
         }
 
         if (!activated.isEmpty()) {
+
             contractRepository.saveAll(activated);
 
             log.info(
@@ -121,5 +147,25 @@ public class ContractScheduler {
                     activated.size()
             );
         }
-    }*/
+
+        if (!replacedPredecessors.isEmpty()) {
+
+            contractRepository.saveAll(replacedPredecessors);
+
+            /*
+             * Flush explícito: expireContracts() corre justo
+             * después dentro de la misma transacción y consulta
+             * por status=ACTIVE; sin este flush, un predecesor
+             * recién marcado REPLACED podría seguir viéndose como
+             * ACTIVE en esa consulta (misma lección que el fix de
+             * ContractModuleServiceImpl.replaceModules).
+             */
+            contractRepository.flush();
+
+            log.info(
+                    "Replaced {} predecessor contracts",
+                    replacedPredecessors.size()
+            );
+        }
+    }
 }

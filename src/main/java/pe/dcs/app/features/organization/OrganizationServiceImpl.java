@@ -16,6 +16,7 @@ import pe.dcs.app.features.organization.response.OrganizationResponse;
 import pe.dcs.app.features.organization.service.OrganizationService;
 import pe.dcs.app.repository.ContractRepository;
 import pe.dcs.app.repository.OrganizationRepository;
+import pe.dcs.app.security.service.AuthContext;
 import pe.dcs.app.util.DateUtils;
 import pe.dcs.app.util.enums.contract.ContractStatus;
 import pe.dcs.app.util.pagination.PageResponse;
@@ -34,8 +35,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 
     private final OrganizationRepository repository;
     private final ContractRepository contractRepository;
+    private final AuthContext authContext;
+
+    /**
+     * El catálogo completo de organizaciones (búsqueda/CRUD) es
+     * de gestión exclusiva de SYSTEM. El único punto compartido
+     * con org/branch admin es list() (dropdown simple), que en
+     * cambio se acota a la organización del contexto.
+     */
+    private void assertSystem() {
+
+        if (!authContext.isSystem()) {
+
+            throw new Exceptions(
+                    "Solo un administrador del sistema puede gestionar organizaciones.",
+                    HttpStatus.FORBIDDEN
+            );
+        }
+    }
 
     @Override public PageResponse<OrganizationResponse> findAll(OrganizationListRequest request) {
+
+        assertSystem();
 
         Pageable pageable =
                 PageableUtil.buildPageable(
@@ -43,11 +64,13 @@ public class OrganizationServiceImpl implements OrganizationService {
                         request.getSorts()
                 );
 
+        boolean showAudit = authContext.canViewAudit();
+
         var page = repository.findAll(
                         OrganizationSpecification.filter(request),
                         pageable
                 )
-                .map(OrganizationMapper::toResponse);
+                .map(organization -> OrganizationMapper.toResponse(organization, showAudit));
 
         return new PageResponse<>(
                 page.getContent(),
@@ -60,10 +83,35 @@ public class OrganizationServiceImpl implements OrganizationService {
         );
     }
 
+    /**
+     * Dropdown simple de organizaciones (id + nombre). A
+     * diferencia del resto del service, no es exclusivo de
+     * SYSTEM: lo usan pantallas de org/branch admin (Accesos,
+     * Org-Admin-Branch) para poblar filtros. SYSTEM ve todas
+     * las organizaciones activas; org/branch admin solo ve la
+     * organización de su contexto actual.
+     */
     @Override
     public List<OrganizationListResponse> list() {
 
-        List<Organization> organizations = repository.findByStatusOrderByNameAsc(StatusType.ACTIVE);
+        List<Organization> organizations;
+
+        if (authContext.isSystem()) {
+
+            organizations = repository.findByStatusOrderByNameAsc(StatusType.ACTIVE);
+
+        } else {
+
+            UUID currentOrgId = authContext.getCurrentOrganizationId();
+
+            organizations =
+                    currentOrgId == null
+                            ? List.of()
+                            : repository.findById(currentOrgId)
+                                    .filter(o -> o.getStatus() == StatusType.ACTIVE)
+                                    .map(List::of)
+                                    .orElse(List.of());
+        }
 
         return organizations
                 .stream()
@@ -85,12 +133,16 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     public OrganizationResponse findById(UUID id) {
 
-        return OrganizationMapper.toResponse(getOrganization(id));
+        assertSystem();
+
+        return OrganizationMapper.toResponse(getOrganization(id), authContext.canViewAudit());
     }
 
     @Transactional
     @Override
     public OrganizationResponse create(OrganizationCreateRequest request) {
+
+        assertSystem();
 
         validateRucForCreate(request.getRuc());
 
@@ -115,11 +167,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         repository.save(organization);
 
-        return OrganizationMapper.toResponse(organization);
+        return OrganizationMapper.toResponse(organization, authContext.canViewAudit());
     }
 
     @Override
     public OrganizationResponse update(UUID id, OrganizationUpdateRequest request) {
+
+        assertSystem();
 
         Organization organization = getOrganization(id);
 
@@ -133,12 +187,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         repository.save(organization);
 
-        return OrganizationMapper.toResponse(organization);
+        return OrganizationMapper.toResponse(organization, authContext.canViewAudit());
     }
 
     @Override
     @Transactional
     public void enable(UUID id) {
+
+        assertSystem();
 
         Organization organization = getOrganization(id);
 
@@ -153,6 +209,8 @@ public class OrganizationServiceImpl implements OrganizationService {
     @Override
     @Transactional
     public void disable(UUID id) {
+
+        assertSystem();
 
         Organization organization = getOrganization(id);
 

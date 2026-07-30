@@ -5,7 +5,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import pe.dcs.app.entity.Membership;
-import pe.dcs.app.util.enums.membership.MembershipStatus;
+import pe.dcs.app.util.enums.StatusType;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
 
     boolean existsByPersonIdAndCurrentTrueAndStatus(
             UUID personId,
-            MembershipStatus status
+            StatusType status
     );
 
 }

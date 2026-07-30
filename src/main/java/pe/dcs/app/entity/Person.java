@@ -38,7 +38,11 @@ public class Person extends Auditable {
 
     private String lastname;
 
-    @Column(unique = true)
+    /**
+     * Único por organización (no globalmente): se valida en el
+     * service, ya que la organización de la persona se resuelve
+     * vía branchHistory -> branch -> organization.
+     */
     private String dni;
 
     private String sex;
@@ -109,6 +113,17 @@ public class Person extends Auditable {
             fetch = FetchType.LAZY
     )
     private List<Membership> memberships =
+            new ArrayList<>();
+
+    /**
+     * Historial de servicio ministerial (periodos sirviendo
+     * con un rol dentro de un ministerio).
+     */
+    @OneToMany(
+            mappedBy = "person",
+            fetch = FetchType.LAZY
+    )
+    private List<MinistryAssignment> ministryAssignments =
             new ArrayList<>();
 
 }

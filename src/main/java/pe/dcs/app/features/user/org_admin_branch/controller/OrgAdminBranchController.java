@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchAddAccessRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchCreateRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchListRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchUpdateRequest;
@@ -102,6 +103,49 @@ public class OrgAdminBranchController {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
                 "User disabled successfully",
+                "OK"
+        );
+    }
+
+    @PostMapping("/{id}/accesses")
+    public ApiResponse<String> addAccess(
+            @PathVariable UUID id,
+            @Valid @RequestBody OrgAdminBranchAddAccessRequest request
+    ) {
+
+        service.addAccess(id, request);
+
+        return new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Access added successfully",
+                null
+        );
+    }
+
+    @PatchMapping("/accesses/{accessId}/enable")
+    public ApiResponse<String> enableAccess(
+            @PathVariable UUID accessId
+    ) {
+
+        service.enableAccess(accessId);
+
+        return new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Access enabled successfully",
+                "OK"
+        );
+    }
+
+    @PatchMapping("/accesses/{accessId}/disable")
+    public ApiResponse<String> disableAccess(
+            @PathVariable UUID accessId
+    ) {
+
+        service.disableAccess(accessId);
+
+        return new ApiResponse<>(
+                HttpStatus.OK.value(),
+                "Access disabled successfully",
                 "OK"
         );
     }

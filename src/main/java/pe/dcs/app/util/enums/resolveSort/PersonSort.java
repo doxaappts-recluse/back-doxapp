@@ -7,6 +7,7 @@ public enum PersonSort {
     NAME("name", "name"),
     LASTNAME("lastname", "lastname"),
     DNI("dni", "dni"),
+    SEX("sex", "sex"),
     USERNAME("username", "credential.username"),
     ROLE_NAME("roleName", "accesses.role.name"),
     ROLE_CODE("roleCode", "accesses.role.value"),

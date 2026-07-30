@@ -1,6 +1,7 @@
 package pe.dcs.app.features.organization.response;
 
 import lombok.*;
+import pe.dcs.app.util.auditable.AuditableResponse;
 import pe.dcs.app.util.enums.StatusType;
 
 import java.time.LocalDate;
@@ -12,7 +13,7 @@ import java.util.UUID;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrganizationResponse {
+public class OrganizationResponse extends AuditableResponse {
     private UUID id;
     private String name;
     private String address;

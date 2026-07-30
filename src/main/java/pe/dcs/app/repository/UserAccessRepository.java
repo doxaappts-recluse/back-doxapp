@@ -34,6 +34,13 @@ public interface UserAccessRepository extends JpaRepository<UserAccess, UUID>, J
             UUID roleId
     );
 
+    Optional<UserAccess> findByPersonIdAndOrganizationIdAndBranchIdAndRoleId(
+            UUID personId,
+            UUID organizationId,
+            UUID branchId,
+            UUID roleId
+    );
+
     List<UserAccess> findByPersonId(
             UUID personId
     );

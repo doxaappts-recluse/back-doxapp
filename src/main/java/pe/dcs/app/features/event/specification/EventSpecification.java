@@ -3,6 +3,7 @@ package pe.dcs.app.features.event.specification;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import pe.dcs.app.entity.Event;
+import pe.dcs.app.util.enums.events.EventScope;
 import pe.dcs.app.util.enums.events.EventStatus;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ public class EventSpecification {
 
     public static Specification<Event> filter(
             UUID organizationId,
+            UUID visibleBranchId,
+            boolean restrictToBranch,
             String name,
             EventStatus status,
             LocalDateTime startDateFrom,
@@ -35,6 +38,34 @@ public class EventSpecification {
                             organizationId
                     )
             );
+
+            /*
+             * Branch admin: solo ve eventos ORGANIZATION
+             * (compartidos por toda la organización) o BRANCH de
+             * su propia sede. Org admin ve todo (restrictToBranch
+             * = false), igual que antes.
+             */
+            if (restrictToBranch) {
+
+                predicates.add(
+                        cb.or(
+                                cb.equal(
+                                        root.get("scope"),
+                                        EventScope.ORGANIZATION
+                                ),
+                                cb.and(
+                                        cb.equal(
+                                                root.get("scope"),
+                                                EventScope.BRANCH
+                                        ),
+                                        cb.equal(
+                                                root.get("branch").get("id"),
+                                                visibleBranchId
+                                        )
+                                )
+                        )
+                );
+            }
 
             if (name != null && !name.isBlank()) {
 

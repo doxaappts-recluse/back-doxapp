@@ -1,6 +1,7 @@
 package pe.dcs.app.features.user.org_admin_branch.response;
 
 import lombok.*;
+import pe.dcs.app.util.auditable.AuditableResponse;
 
 import java.util.UUID;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OrgAdminBranchResponse {
+public class OrgAdminBranchResponse extends AuditableResponse {
 
     private UUID id;
 

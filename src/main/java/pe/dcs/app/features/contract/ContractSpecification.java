@@ -44,6 +44,35 @@ public class ContractSpecification {
             }
 
             // =========================================
+            // BRANCH
+            // =========================================
+
+            if (filters.getBranchId() != null) {
+
+                predicates.add(
+                        cb.equal(
+                                root.get("branch")
+                                        .get("id"),
+                                filters.getBranchId()
+                        )
+                );
+            }
+
+            // =========================================
+            // SCOPE
+            // =========================================
+
+            if (filters.getScope() != null) {
+
+                predicates.add(
+                        cb.equal(
+                                root.get("scope"),
+                                filters.getScope()
+                        )
+                );
+            }
+
+            // =========================================
             // PLAN
             // =========================================
 
