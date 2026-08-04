@@ -13,8 +13,8 @@ public class StorageBucketResolver {
     public String resolve(StorageBucket bucket) {
         return switch (bucket) {
             case EVENTS -> props.getStorage().getBuckets().get("events");
+            case DOCUMENT_TEMPLATES -> props.getStorage().getBuckets().get("document-templates");
             //case PROFILES -> props.getStorage().getBuckets().get("profiles");
-            //case CERTIFICATES -> props.getStorage().getBuckets().get("certificates");
         };
     }
 }

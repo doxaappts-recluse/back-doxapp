@@ -12,16 +12,26 @@ import pe.dcs.app.util.auditable.BaseMapper;
 @Component
 public class MembershipMapper {
 
-    public MembershipSearchRowResponse toSearchRow(Person person, Membership current, boolean showAudit) {
+    public MembershipSearchRowResponse toSearchRow(
+            Person person,
+            Membership current,
+            boolean showAudit,
+            boolean visible
+    ) {
 
         MembershipSearchRowResponse row = new MembershipSearchRowResponse();
-
-        BaseMapper.mapAudit(current, row, showAudit);
 
         row.setId(person.getId());
         row.setName(person.getName());
         row.setLastname(person.getLastname());
         row.setHasMembership(current != null);
+
+        if (current != null && !visible) {
+            row.setRestricted(true);
+            return row;
+        }
+
+        BaseMapper.mapAudit(current, row, showAudit);
 
         if (current != null) {
 
@@ -93,11 +103,23 @@ public class MembershipMapper {
         return response;
     }
 
-    public MembershipContextResponse toContextResponse(Person person, Membership current) {
+    public MembershipContextResponse toContextResponse(
+            Person person,
+            Membership current,
+            boolean visible
+    ) {
 
         MembershipContextResponse response = new MembershipContextResponse();
 
         response.setUser(toUserResponse(person));
+
+        if (current != null && !visible) {
+
+            response.setRestricted(true);
+            response.setCurrentMembership(null);
+
+            return response;
+        }
 
         response.setCurrentMembership(
                 current != null

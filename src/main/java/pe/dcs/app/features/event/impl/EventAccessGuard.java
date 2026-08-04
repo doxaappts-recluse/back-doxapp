@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.Event;
+import pe.dcs.app.entity.EventRegistration;
 import pe.dcs.app.entity.Module;
 import pe.dcs.app.repository.EventRepository;
 import pe.dcs.app.repository.ModuleRepository;
@@ -198,6 +199,47 @@ public class EventAccessGuard {
                 && event.getCreatedBy()
                         .getId()
                         .equals(authContext.getUserId());
+    }
+
+    /**
+     * ¿Puede gestionar esta inscripción puntual (editarla, marcarla
+     * pagada)? Igual que canManage(event) — org admin siempre,
+     * branch admin/org user delegado de la sede coordinadora — PERO
+     * ampliado: la sede que registró la entrada (reg.branch)
+     * también puede gestionar sus propias inscripciones, aunque no
+     * gestione el evento entero. Así, en un evento compartido, cada
+     * sede administra lo que ella misma inscribió, y quien gestiona
+     * el evento puede administrar TODAS las inscripciones sin
+     * importar qué sede las creó.
+     */
+    public boolean canManageRegistration(EventRegistration registration) {
+
+        if (canManage(registration.getEvent())) {
+            return true;
+        }
+
+        UUID regBranchId =
+                registration.getBranch() != null
+                        ? registration.getBranch().getId()
+                        : null;
+
+        UUID currentBranchId =
+                authContext.getCurrentBranchId();
+
+        return regBranchId != null
+                && currentBranchId != null
+                && regBranchId.equals(currentBranchId);
+    }
+
+    public void assertCanManageRegistration(EventRegistration registration) {
+
+        if (!canManageRegistration(registration)) {
+
+            throw new Exceptions(
+                    "Solo quien gestiona el evento o la sede que registró esta inscripción puede modificarla",
+                    HttpStatus.FORBIDDEN
+            );
+        }
     }
 
     // =========================================================

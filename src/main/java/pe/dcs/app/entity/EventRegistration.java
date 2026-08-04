@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 import pe.dcs.app.util.auditable.Auditable;
+import pe.dcs.app.util.enums.events.PaymentStatus;
 import pe.dcs.app.util.enums.events.RegistrationCategory;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
@@ -102,6 +103,27 @@ public class EventRegistration extends Auditable {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RegistrationStatus status;
+
+    /**
+     * PENDING/PAID. Se autocompleta PAID en la creación cuando el
+     * finalPrice es 0 (entrada gratuita); en caso contrario queda
+     * PENDING hasta que alguien con permiso la marque como pagada.
+     */
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    private PaymentStatus paymentStatus;
+
+    /**
+     * Sede que registró la entrada. No es necesariamente la sede
+     * coordinadora del evento: en eventos compartidos
+     * (scope=ORGANIZATION) cualquier sede puede inscribir gente
+     * usando la suya propia. Determina quién puede editarla/marcarla
+     * pagada además de quien gestiona el evento — ver
+     * {@link pe.dcs.app.features.event.impl.EventAccessGuard#canManageRegistration}.
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 
     private String observations;
 

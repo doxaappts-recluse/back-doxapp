@@ -1,9 +1,11 @@
 package pe.dcs.app.security.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import pe.dcs.app.security.service.credentials.CredentialDetailsImpl;
+import pe.dcs.app.util.Exceptions;
 
 import java.util.List;
 import java.util.UUID;
@@ -176,5 +178,49 @@ public class AuthContext {
         return isSystem()
                 || isCurrentOrganizationAdmin()
                 || isCurrentBranchAdmin();
+    }
+
+    /**
+     * Chequeo genérico de "puede gestionar" reutilizado por varias
+     * features (Bautizo, Membresía, Traslados, Servicio
+     * Ministerial): SYSTEM, admin de la organización actual o
+     * admin de la sede actual. Centralizado acá para que cada
+     * ServiceImpl no reimplemente el mismo if/throw con su propio
+     * mensaje — ver {@link #assertCanManageCurrent(String)}.
+     */
+    public boolean canManageCurrent() {
+        return isSystem()
+                || isCurrentOrganizationAdmin()
+                || isCurrentBranchAdmin();
+    }
+
+    /**
+     * Igual que {@link #canManageCurrent()} pero lanzando
+     * FORBIDDEN con el mensaje propio del feature que llama —
+     * cada dominio conserva su texto de error, solo se comparte la
+     * condición.
+     */
+    public void assertCanManageCurrent(String message) {
+
+        if (!canManageCurrent()) {
+            throw new Exceptions(message, HttpStatus.FORBIDDEN);
+        }
+    }
+
+    /**
+     * Igual que {@link #canManageOrgOrBranchOnly(UUID, UUID)} pero
+     * usando la organización/sede actuales del contexto (excluye
+     * SYSTEM a propósito) — evita que cada caller repita
+     * getCurrentOrganizationId()/getCurrentBranchId() y el
+     * if/throw asociado.
+     */
+    public void assertCanManageOrgOrBranchOnlyForCurrent(String message) {
+
+        if (!canManageOrgOrBranchOnly(
+                getCurrentOrganizationId(),
+                getCurrentBranchId()
+        )) {
+            throw new Exceptions(message, HttpStatus.FORBIDDEN);
+        }
     }
 }

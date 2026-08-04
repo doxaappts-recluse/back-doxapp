@@ -24,4 +24,10 @@ public class MinistryAssignmentGroupedItemResponse {
 
     private boolean current;
 
+    /**
+     * true = este periodo pertenece a otra sede sin visibilidad
+     * concedida; role/reason/observation quedan sin setear.
+     */
+    private boolean restricted;
+
 }

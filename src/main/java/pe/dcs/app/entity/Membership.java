@@ -54,4 +54,16 @@ public class Membership extends Auditable {
 
     @Column(length = 1000)
     private String notes;
+
+    /**
+     * Sede desde la que se creó este registro (la sede activa de
+     * la persona en ese momento). Se usa para saber, si la persona
+     * se traslada de sede después, de quién es "dueño" este
+     * registro a efectos de DataAccessRule/VisibilityGrant. Null
+     * en registros previos a esta columna (se tratan como
+     * visibles, sin restricción).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
 }

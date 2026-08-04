@@ -90,6 +90,16 @@ public class EventRegistrationSpecification {
                 );
             }
 
+            if (filter.getBranchId() != null) {
+
+                predicates.add(
+                        cb.equal(
+                                root.get("branch").get("id"),
+                                filter.getBranchId()
+                        )
+                );
+            }
+
             // =========================
             // CREATED AT
             // =========================

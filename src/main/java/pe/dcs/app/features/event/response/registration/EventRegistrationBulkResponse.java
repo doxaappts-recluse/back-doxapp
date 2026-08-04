@@ -16,4 +16,8 @@ public class EventRegistrationBulkResponse {
     private Integer totalProcessed;
 
     private List<EventRegistrationResponse> registrations;
+
+    private Integer totalFailed;
+
+    private List<EventRegistrationBulkErrorResponse> failed;
 }

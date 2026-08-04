@@ -14,4 +14,11 @@ public class MembershipContextResponse {
     private MembershipUserResponse user;
 
     private MembershipDetailResponse currentMembership;
+
+    /**
+     * true = existe membresía pero pertenece a otra sede sin
+     * visibilidad concedida (currentMembership queda null en ese
+     * caso, aunque el registro exista).
+     */
+    private boolean restricted;
 }

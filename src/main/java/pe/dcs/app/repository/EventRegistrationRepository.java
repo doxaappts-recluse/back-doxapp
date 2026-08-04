@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import pe.dcs.app.entity.EventRegistration;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -52,6 +53,21 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
     boolean existsByQrToken(String qrToken);
 
     long countByEventId(UUID eventId);
+
+    /**
+     * Ingresos por inscripciones pagadas (paymentStatus=PAID,
+     * excluyendo canceladas). Estadística independiente del Balance
+     * de Finanzas — deliberadamente no se suma ahí para evitar
+     * doble conteo, ver EventDashboardServiceImpl.
+     */
+    @Query("""
+        SELECT COALESCE(SUM(r.finalPrice), 0)
+        FROM EventRegistration r
+        WHERE r.event.id = :eventId
+          AND r.paymentStatus = 'PAID'
+          AND r.status <> 'CANCELLED'
+    """)
+    BigDecimal sumRegistrationIncome(@Param("eventId") UUID eventId);
 
     @Query(value = """
         SELECT
@@ -101,5 +117,45 @@ public interface EventRegistrationRepository extends JpaRepository<EventRegistra
             END
     """, nativeQuery = true)
     List<Object[]> ageReport(@Param("eventId") UUID eventId);
+
+    /**
+     * Mezcla de categorías entre las inscripciones activas (no
+     * canceladas): cuántos Miembro/Staff/Visitante/Invitado/Becado.
+     */
+    @Query("""
+        SELECT r.category, COUNT(r)
+        FROM EventRegistration r
+        WHERE r.event.id = :eventId
+          AND r.status <> 'CANCELLED'
+        GROUP BY r.category
+    """)
+    List<Object[]> categoryReport(@Param("eventId") UUID eventId);
+
+    /**
+     * Pagado vs Pendiente entre las inscripciones activas: cantidad
+     * y monto (finalPrice) por estado de pago.
+     */
+    @Query("""
+        SELECT r.paymentStatus, COUNT(r), COALESCE(SUM(r.finalPrice), 0)
+        FROM EventRegistration r
+        WHERE r.event.id = :eventId
+          AND r.status <> 'CANCELLED'
+        GROUP BY r.paymentStatus
+    """)
+    List<Object[]> paymentStatusReport(@Param("eventId") UUID eventId);
+
+    /**
+     * Inscripciones activas por sede. Solo tiene sentido mostrarlo
+     * en el front cuando el evento es scope=ORGANIZATION (un evento
+     * de sede única siempre da una sola fila).
+     */
+    @Query("""
+        SELECT r.branch.id, r.branch.name, COUNT(r), COALESCE(SUM(r.finalPrice), 0)
+        FROM EventRegistration r
+        WHERE r.event.id = :eventId
+          AND r.status <> 'CANCELLED'
+        GROUP BY r.branch.id, r.branch.name
+    """)
+    List<Object[]> branchReport(@Param("eventId") UUID eventId);
 
 }

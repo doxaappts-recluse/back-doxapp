@@ -50,6 +50,35 @@ public class EventFinanceServiceImpl
         eventAccessGuard.assertCanAccess(event);
     }
 
+    /**
+     * simple() + canManage/owner calculados — el front los usa para
+     * mostrar editar/aprobar/rechazar solo a quien corresponde:
+     * canManage (org admin, sede coordinadora, u org user creador
+     * del EVENTO con EDIT) habilita aprobar/rechazar; canManage U
+     * owner (creador de ESTE movimiento puntual) habilita editar.
+     * Deliberadamente NO se le da a `owner` autoridad de aprobación
+     * — ver doc en EventFinanceResponse.
+     */
+    private EventFinanceResponse toResponse(EventFinance finance, boolean showAudit) {
+
+        EventFinanceResponse response =
+                eventFinanceMapper.simple(finance, showAudit);
+
+        response.setCanManage(
+                eventAccessGuard.canManage(finance.getEvent())
+        );
+
+        UUID currentUserId = authContext.getUserId();
+
+        response.setOwner(
+                finance.getCreatedByUser() != null
+                        && currentUserId != null
+                        && finance.getCreatedByUser().getId().equals(currentUserId)
+        );
+
+        return response;
+    }
+
     @Override
     @Transactional
     public EventFinanceResponse create(
@@ -130,7 +159,7 @@ public class EventFinanceServiceImpl
             );
         }
 
-        return eventFinanceMapper.simple(
+        return toResponse(
                 eventFinanceRepository.save(finance),
                 authContext.canViewAudit()
         );
@@ -236,7 +265,7 @@ public class EventFinanceServiceImpl
                 Instant.now()
         );
 
-        return eventFinanceMapper.simple(
+        return toResponse(
                 eventFinanceRepository.save(finance),
                 authContext.canViewAudit()
         );
@@ -306,7 +335,7 @@ public class EventFinanceServiceImpl
             );
         }
 
-        return eventFinanceMapper.simple(
+        return toResponse(
                 eventFinanceRepository.save(finance),
                 authContext.canViewAudit()
         );
@@ -357,7 +386,7 @@ public class EventFinanceServiceImpl
                 Instant.now()
         );
 
-        return eventFinanceMapper.simple(
+        return toResponse(
                 eventFinanceRepository.save(finance),
                 authContext.canViewAudit()
         );
@@ -380,7 +409,7 @@ public class EventFinanceServiceImpl
 
         validateEventOrg(finance.getEvent());
 
-        return eventFinanceMapper.simple(
+        return toResponse(
                 finance,
                 authContext.canViewAudit()
         );
@@ -451,7 +480,7 @@ public class EventFinanceServiceImpl
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(f -> eventFinanceMapper.simple(f, showAudit))
+                        .map(f -> toResponse(f, showAudit))
                         .toList(),
                 new PaginationResponse(
                         (int) page.getTotalElements(),

@@ -126,4 +126,27 @@ public class Person extends Auditable {
     private List<MinistryAssignment> ministryAssignments =
             new ArrayList<>();
 
+    /**
+     * Registro de bautizo (único por persona, ver constraint
+     * uk_baptism_user en Baptism). Puede no existir.
+     */
+    @OneToOne(
+            mappedBy = "user",
+            fetch = FetchType.LAZY
+    )
+    private Baptism baptism;
+
+    /**
+     * Líder pastoral asignado para el seguimiento de esta persona
+     * (llamadas/visitas de FollowUpContact, atención de sus
+     * PrayerRequest). Genérico para CUALQUIER Person — no exclusivo
+     * de Visitor — porque también aplica a seguimiento de miembros
+     * (p.ej. "miembros inactivos"). Es la misma Person que hace el
+     * seguimiento (normalmente alguien con servicio ministerial
+     * activo), no un rol aparte. Puede quedar sin asignar (null).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_leader_id")
+    private Person assignedLeader;
+
 }

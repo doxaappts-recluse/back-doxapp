@@ -4,6 +4,9 @@ import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.StatusType;
 
+import java.time.LocalDate;
+import java.util.UUID;
+
 @Getter
 @Setter
 public class MembershipFilterRequest {
@@ -20,4 +23,16 @@ public class MembershipFilterRequest {
     private Boolean hasMembership;
 
     private StatusType membershipStatus;
+
+    /** Rango sobre Membership.startDate — solo usado por Reportes Avanzados. */
+    private LocalDate startDate;
+
+    private LocalDate endDate;
+
+    /**
+     * Solo relevante para org admin/SYSTEM; para branch admin/org
+     * user delegado el scope ya lo fija MembershipSpecification con
+     * la sede actual.
+     */
+    private UUID branchId;
 }

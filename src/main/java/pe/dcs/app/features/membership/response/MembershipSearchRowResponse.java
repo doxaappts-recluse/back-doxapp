@@ -34,4 +34,11 @@ public class MembershipSearchRowResponse extends AuditableResponse {
     private LocalDate membershipEndDate;
 
     private String membershipExitReason;
+
+    /**
+     * true = existe membresía pero pertenece a otra sede y no hay
+     * visibilidad concedida todavía (ver VisibilityGrant); los
+     * campos de arriba quedan sin setear en ese caso.
+     */
+    private boolean restricted;
 }

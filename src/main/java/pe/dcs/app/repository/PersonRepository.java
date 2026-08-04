@@ -59,6 +59,20 @@ public interface PersonRepository extends JpaRepository<Person, UUID>, JpaSpecif
     @Query("""
         SELECT DISTINCT p
         FROM Person p
+        JOIN p.branchHistory pb
+        JOIN pb.branch b
+        JOIN b.organization o
+        WHERE p.dni = :dni
+        AND o.id = :organizationId
+    """)
+    Optional<Person> findByDniInOrganization(
+            @Param("dni") String dni,
+            @Param("organizationId") UUID organizationId
+    );
+
+    @Query("""
+        SELECT DISTINCT p
+        FROM Person p
         LEFT JOIN FETCH p.credential c
         LEFT JOIN FETCH p.accesses ua
         LEFT JOIN FETCH ua.organization

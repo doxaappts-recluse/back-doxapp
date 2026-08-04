@@ -17,6 +17,7 @@ import pe.dcs.app.features.membership.response.MembershipContextResponse;
 import pe.dcs.app.features.membership.response.MembershipDetailResponse;
 import pe.dcs.app.features.membership.response.MembershipSearchRowResponse;
 import pe.dcs.app.features.membership.service.MembershipService;
+import pe.dcs.app.features.visibility.VisibilityGuard;
 import pe.dcs.app.repository.MembershipRepository;
 import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.AuthContext;
@@ -46,6 +47,9 @@ public class MembershipServiceImpl implements MembershipService {
     private final MembershipRepository membershipRepository;
     private final MembershipMapper mapper;
     private final AuthContext authContext;
+    private final VisibilityGuard visibilityGuard;
+
+    private static final String MODULE_CODE = "MEMBERSHIP";
 
     // =====================================================
     // SEARCH
@@ -75,13 +79,23 @@ public class MembershipServiceImpl implements MembershipService {
         return new PageResponse<>(
                 page.getContent()
                         .stream()
-                        .map(person -> mapper.toSearchRow(
-                                person,
-                                membershipRepository
-                                        .findByPersonIdAndCurrentTrue(person.getId())
-                                        .orElse(null),
-                                showAudit
-                        ))
+                        .map(person -> {
+
+                            Membership current =
+                                    membershipRepository
+                                            .findByPersonIdAndCurrentTrue(person.getId())
+                                            .orElse(null);
+
+                            boolean visible =
+                                    current == null
+                                            || visibilityGuard.canView(
+                                                    current.getBranch(),
+                                                    person.getId(),
+                                                    MODULE_CODE
+                                            );
+
+                            return mapper.toSearchRow(person, current, showAudit, visible);
+                        })
                         .toList(),
 
                 new PaginationResponse(
@@ -110,7 +124,11 @@ public class MembershipServiceImpl implements MembershipService {
                         .findByPersonIdAndCurrentTrue(userId)
                         .orElse(null);
 
-        return mapper.toContextResponse(person, current);
+        boolean visible =
+                current == null
+                        || visibilityGuard.canView(current.getBranch(), userId, MODULE_CODE);
+
+        return mapper.toContextResponse(person, current, visible);
     }
 
     // =====================================================
@@ -123,7 +141,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         Person person = findPersonOrThrow(userId);
 
-        validateAccess(person);
+        PersonBranch activeBranch = validateAccess(person);
 
         validateForm(request);
 
@@ -144,6 +162,15 @@ public class MembershipServiceImpl implements MembershipService {
         membership.setExitReason(request.getExitReason());
         membership.setNotes(request.getNotes());
         membership.setCurrent(true);
+
+        /*
+         * Sede "dueña" del registro: la sede activa de la persona
+         * en este momento, no la del que hace el trámite (un org
+         * admin puede crear membresías para personas de cualquier
+         * sede). Se usa luego para DataAccessRule/VisibilityGrant
+         * si la persona se traslada de sede.
+         */
+        membership.setBranch(activeBranch.getBranch());
 
         membershipRepository.save(membership);
     }
@@ -228,6 +255,7 @@ public class MembershipServiceImpl implements MembershipService {
         return new PageResponse<>(
                 page.getContent()
                         .stream()
+                        .filter(m -> visibilityGuard.canView(m.getBranch(), userId, MODULE_CODE))
                         .map(mapper::toDetailResponse)
                         .toList(),
 
@@ -354,19 +382,10 @@ public class MembershipServiceImpl implements MembershipService {
     }
 
     private void assertCallerCanManage() {
-
-        if (!authContext.isSystem()
-                && !authContext.isCurrentOrganizationAdmin()
-                && !authContext.isCurrentBranchAdmin()) {
-
-            throw new Exceptions(
-                    "No tiene permisos para gestionar membresías.",
-                    HttpStatus.FORBIDDEN
-            );
-        }
+        authContext.assertCanManageCurrent("No tiene permisos para gestionar membresías.");
     }
 
-    private void validateAccess(Person person) {
+    private PersonBranch validateAccess(Person person) {
 
         PersonBranch activeBranch =
                 person.getBranchHistory()
@@ -395,6 +414,8 @@ public class MembershipServiceImpl implements MembershipService {
                     HttpStatus.UNAUTHORIZED
             );
         }
+
+        return activeBranch;
     }
 
     private Person findPersonOrThrow(UUID id) {

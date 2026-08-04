@@ -2,9 +2,11 @@ package pe.dcs.app.features.event.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import pe.dcs.app.features.event.request.registration.EventPersonSearchRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationBulkRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationSearchRequest;
+import pe.dcs.app.features.event.response.registration.EventPersonSearchResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationBulkResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationDetailResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationResponse;
@@ -84,15 +86,54 @@ public class EventRegistrationController {
         );
     }
 
+    @PatchMapping("/pay/{id}")
+    public ApiResponse<Void> markPaid(
+            @PathVariable UUID id
+    ) {
+
+        service.markPaid(id);
+
+        return new ApiResponse<>(
+                200,
+                "Inscripción marcada como pagada",
+                null
+        );
+    }
+
+    @PostMapping("/search-persons")
+    public ApiResponse<PageResponse<EventPersonSearchResponse>> searchPersons(
+            @RequestBody EventPersonSearchRequest request
+    ) {
+
+        return new ApiResponse<>(
+                200,
+                "Personas obtenidas",
+                service.searchPersons(request)
+        );
+    }
+
     @PostMapping("/bulk-create")
     public ApiResponse<EventRegistrationBulkResponse> bulkCreate(
             @RequestBody EventRegistrationBulkRequest request
     ) {
-        service.bulkCreate(request);
+
+        EventRegistrationBulkResponse result = service.bulkCreate(request);
+
+        boolean hasFailures =
+                result.getTotalFailed() != null && result.getTotalFailed() > 0;
+
+        String message = hasFailures
+                ? String.format(
+                        "%d inscripción(es) registrada(s), %d no se pudieron registrar",
+                        result.getTotalProcessed(),
+                        result.getTotalFailed()
+                )
+                : "Inscripciones registradas correctamente";
+
         return new ApiResponse<>(
                 200,
-                "Inscripciones registradas correctamente",
-                null
+                message,
+                result
         );
     }
 }

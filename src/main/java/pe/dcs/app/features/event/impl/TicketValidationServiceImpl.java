@@ -11,6 +11,7 @@ import pe.dcs.app.features.event.service.ticket.TicketValidationService;
 import pe.dcs.app.repository.EventAttendanceRepository;
 import pe.dcs.app.repository.EventRegistrationRepository;
 import pe.dcs.app.util.Exceptions;
+import pe.dcs.app.util.enums.events.RegistrationStatus;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -33,7 +34,26 @@ public class TicketValidationServiceImpl implements TicketValidationService {
                         HttpStatus.NOT_FOUND
                 ));
 
-        // 2. Si ya fue usado → bloquear
+        // 2. Si la inscripción está cancelada → bloquear con mensaje
+        // explícito, SIN pasar por la validación normal de QR
+        // usado/asistencia (una cancelada nunca debe registrar
+        // asistencia, sin importar si su QR ya se usó o no).
+        if (reg.getStatus() == RegistrationStatus.CANCELLED) {
+
+            return new TicketValidationResponse(
+                    false,
+                    "Esta inscripción está cancelada, no se puede registrar asistencia",
+                    reg.getId(),
+                    reg.getEvent().getId(),
+                    reg.getEvent().getName(),
+                    getAttendeeName(reg),
+                    reg.getQrUsedAt(),
+                    false,
+                    false
+            );
+        }
+
+        // 3. Si ya fue usado → bloquear
         if (Boolean.TRUE.equals(reg.getQrUsed())) {
 
             return new TicketValidationResponse(
@@ -51,11 +71,11 @@ public class TicketValidationServiceImpl implements TicketValidationService {
 
         Instant now = Instant.now();
 
-        // 3. Marcar QR como usado
+        // 4. Marcar QR como usado
         reg.setQrUsed(true);
         reg.setQrUsedAt(now);
 
-        // 4. Crear attendance si no existe
+        // 5. Crear attendance si no existe
         boolean alreadyHasAttendance =
                 attendanceRepository.existsByRegistrationId(reg.getId());
 
@@ -68,10 +88,10 @@ public class TicketValidationServiceImpl implements TicketValidationService {
             attendanceRepository.save(attendance);
         }
 
-        // 5. persistir registro
+        // 6. persistir registro
         registrationRepository.save(reg);
 
-        // 6. response
+        // 7. response
         return new TicketValidationResponse(
                 true,
                 "Registro correcto",

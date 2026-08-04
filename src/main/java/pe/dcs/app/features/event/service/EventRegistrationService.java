@@ -1,8 +1,10 @@
 package pe.dcs.app.features.event.service;
 
+import pe.dcs.app.features.event.request.registration.EventPersonSearchRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationBulkRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationRequest;
 import pe.dcs.app.features.event.request.registration.EventRegistrationSearchRequest;
+import pe.dcs.app.features.event.response.registration.EventPersonSearchResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationBulkResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationDetailResponse;
 import pe.dcs.app.features.event.response.registration.EventRegistrationResponse;
@@ -29,7 +31,15 @@ public interface EventRegistrationService {
             EventRegistrationSearchRequest request
     );
 
+    PageResponse<EventPersonSearchResponse> searchPersons(
+            EventPersonSearchRequest request
+    );
+
     void cancel(
+            UUID id
+    );
+
+    void markPaid(
             UUID id
     );
 

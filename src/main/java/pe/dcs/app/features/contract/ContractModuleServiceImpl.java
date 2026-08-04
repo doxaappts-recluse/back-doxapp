@@ -118,7 +118,14 @@ public class ContractModuleServiceImpl implements ContractModuleService {
                     new ContractModuleConfigResponse();
 
             response.setModuleId(module.getId());
+            response.setCode(module.getCode());
             response.setName(module.getName());
+
+            if (module.getParent() != null) {
+                response.setParentId(module.getParent().getId());
+                response.setParentName(module.getParent().getName());
+            }
+
             response.setAssigned(
                     assignedModuleIds.contains(module.getId())
             );

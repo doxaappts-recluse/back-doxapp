@@ -2,6 +2,7 @@ package pe.dcs.app.features.event.response.registration;
 
 import lombok.Getter;
 import lombok.Setter;
+import pe.dcs.app.util.enums.events.PaymentStatus;
 import pe.dcs.app.util.enums.events.RegistrationCategory;
 import pe.dcs.app.util.enums.events.RegistrationStatus;
 
@@ -40,6 +41,14 @@ public class EventRegistrationDetailResponse {
     private BigDecimal discount;
 
     private BigDecimal finalPrice;
+
+    private PaymentStatus paymentStatus;
+
+    private UUID branchId;
+
+    private String branchName;
+
+    private boolean canManage;
 
     private String observations;
 }

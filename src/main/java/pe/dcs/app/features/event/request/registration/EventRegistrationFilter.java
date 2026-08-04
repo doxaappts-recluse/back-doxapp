@@ -17,4 +17,13 @@ public class EventRegistrationFilter extends AuditableFilter {
     private String name;
     private String lastname;
     private String phone;
+
+    /**
+     * Sede que registró la inscripción. Enviado por el front solo
+     * cuando el evento es compartido (scope=ORGANIZATION); el
+     * backend además lo fuerza a la sede actual cuando quien
+     * consulta no gestiona el evento — ver
+     * EventRegistrationServiceImpl.search().
+     */
+    private UUID branchId;
 }

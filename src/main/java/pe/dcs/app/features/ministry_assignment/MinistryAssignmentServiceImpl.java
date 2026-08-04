@@ -17,6 +17,7 @@ import pe.dcs.app.features.ministry_assignment.response.MinistryAssignmentRespon
 import pe.dcs.app.features.ministry_assignment.response.MinistryRoleSimpleResponse;
 import pe.dcs.app.features.ministry_assignment.response.MinistrySimpleResponse;
 import pe.dcs.app.features.ministry_assignment.service.MinistryAssignmentService;
+import pe.dcs.app.features.visibility.VisibilityGuard;
 import pe.dcs.app.repository.MinistryAssignmentRepository;
 import pe.dcs.app.repository.MinistryRepository;
 import pe.dcs.app.repository.MinistryRoleRepository;
@@ -42,6 +43,9 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
     private final MinistryAssignmentRepository ministryAssignmentRepository;
     private final MinistryAssignmentMapper mapper;
     private final AuthContext authContext;
+    private final VisibilityGuard visibilityGuard;
+
+    private static final String MODULE_CODE = "MINISTERIAL_SERVICE";
 
     // =====================================================
     // CREATE
@@ -53,7 +57,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
 
         Person person = findPersonOrThrow(userId);
 
-        validateAccess(person);
+        PersonBranch activeBranch = validateAccess(person);
 
         Ministry ministry = findMinistryOrThrow(request.getMinistryId());
         MinistryRole role = findRoleOrThrow(request.getMinistryRoleId());
@@ -71,6 +75,12 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         assignment.setEndDate(request.getEndDate());
         assignment.setReason(request.getReason());
         assignment.setObservation(request.getObservation());
+
+        /*
+         * Sede "dueña" del registro. Ver Membership.branch en
+         * MembershipServiceImpl — mismo propósito.
+         */
+        assignment.setBranch(activeBranch.getBranch());
 
         ministryAssignmentRepository.save(assignment);
 
@@ -159,7 +169,14 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
                         return response;
                     });
 
-            group.getAssignments().add(mapper.toGroupedItem(assignment));
+            boolean visible =
+                    visibilityGuard.canView(
+                            assignment.getBranch(),
+                            userId,
+                            MODULE_CODE
+                    );
+
+            group.getAssignments().add(mapper.toGroupedItem(assignment, visible));
         }
 
         return new ArrayList<>(grouped.values());
@@ -283,7 +300,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
      * gestionar un administrador de organización o de sede
      * (nunca SYSTEM, que queda fuera de este flujo a propósito).
      */
-    private void validateAccess(Person person) {
+    private PersonBranch validateAccess(Person person) {
 
         PersonBranch activeBranch =
                 person.getBranchHistory()
@@ -312,6 +329,8 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
                     HttpStatus.FORBIDDEN
             );
         }
+
+        return activeBranch;
     }
 
     private Person findPersonOrThrow(UUID id) {

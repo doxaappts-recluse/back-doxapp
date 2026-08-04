@@ -9,4 +9,7 @@ public class NotificationsDashboard {
 
     private boolean noFinancialMovements;
     private boolean highCancellationRate;
+
+    /** Hay movimientos financieros PENDING (ingreso o egreso) esperando aprobación. */
+    private boolean pendingApprovals;
 }

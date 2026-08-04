@@ -54,6 +54,24 @@ public class ContractController {
     }
 
     /**
+     * A diferencia del resto de este controller (search/getById/
+     * create/update/activate/...), NO requiere ser SYSTEM — es
+     * información de solo lectura sobre los módulos contratados del
+     * propio contexto (org/sede) del caller autenticado, pensada
+     * para gatear features de UI (org admin, branch admin u org
+     * user delegado). Ver ContractServiceImpl.getActiveModuleCodesForCurrentContext().
+     */
+    @GetMapping("/active-module-codes")
+    public ApiResponse<List<String>> getActiveModuleCodes() {
+
+        return new ApiResponse<>(
+                200,
+                "Módulos contratados obtenidos correctamente",
+                contractService.getActiveModuleCodesForCurrentContext()
+        );
+    }
+
+    /**
      * Catálogo de módulos hoja + permisos para pintar el
      * formulario. Sin contractId (creación) todo llega en
      * false; con contractId (edición) llega lo ya asignado.

@@ -53,6 +53,20 @@ public class EventRegistrationMapper extends BaseMapper {
         response.setDiscount(entity.getDiscount());
         response.setFinalPrice(entity.getFinalPrice());
 
+        response.setPaymentStatus(entity.getPaymentStatus());
+
+        response.setBranchId(
+                entity.getBranch() != null
+                        ? entity.getBranch().getId()
+                        : null
+        );
+
+        response.setBranchName(
+                entity.getBranch() != null
+                        ? entity.getBranch().getName()
+                        : null
+        );
+
         return response;
     }
 
@@ -77,6 +91,18 @@ public class EventRegistrationMapper extends BaseMapper {
         response.setUserId(
                 entity.getUser() != null
                         ? entity.getUser().getId()
+                        : null
+        );
+
+        response.setBranchId(
+                entity.getBranch() != null
+                        ? entity.getBranch().getId()
+                        : null
+        );
+
+        response.setBranchName(
+                entity.getBranch() != null
+                        ? entity.getBranch().getName()
                         : null
         );
 

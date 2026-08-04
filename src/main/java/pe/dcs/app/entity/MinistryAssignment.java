@@ -61,4 +61,13 @@ public class MinistryAssignment extends Auditable {
     @Column(length = 500)
     private String observation;
 
+    /**
+     * Sede desde la que se creó este registro. Ver
+     * Membership.branch — mismo propósito (atribución para
+     * DataAccessRule/VisibilityGrant).
+     */
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "branch_id")
+    private Branch branch;
+
 }

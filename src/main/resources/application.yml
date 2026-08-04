@@ -29,8 +29,8 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      ddl-auto: update
-      #ddl-auto: create-drop
+      #ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         order_inserts: true
@@ -51,6 +51,7 @@ supabase:
   storage:
     buckets:
       events: events
+      document-templates: document-templates
 
 app:
   jwt:

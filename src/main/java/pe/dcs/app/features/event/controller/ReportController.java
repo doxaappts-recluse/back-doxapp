@@ -7,8 +7,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import pe.dcs.app.features.event.impl.EventAccessGuard;
 import pe.dcs.app.features.event.response.reports.AgeReportResponse;
+import pe.dcs.app.features.event.response.reports.BranchReportResponse;
+import pe.dcs.app.features.event.response.reports.CategoryReportResponse;
 import pe.dcs.app.features.event.response.reports.FinanceReportResponse;
 import pe.dcs.app.features.event.response.reports.OccupancyReportResponse;
+import pe.dcs.app.features.event.response.reports.PaymentStatusReportResponse;
 import pe.dcs.app.features.event.response.reports.RegistrationReportResponse;
 import pe.dcs.app.features.event.service.AgeReportService;
 import pe.dcs.app.features.event.service.FinanceReportService;
@@ -49,6 +52,42 @@ public class ReportController {
         );
     }
 
+
+    @GetMapping("/registrations/category/{eventId}")
+    public ApiResponse<List<CategoryReportResponse>> getCategoryBreakdown(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
+        return new ApiResponse<>(
+                200,
+                "Mezcla de categorías obtenida correctamente",
+                registrationReportService.getCategoryBreakdown(eventId)
+        );
+    }
+
+    @GetMapping("/registrations/payment-status/{eventId}")
+    public ApiResponse<List<PaymentStatusReportResponse>> getPaymentStatusBreakdown(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
+        return new ApiResponse<>(
+                200,
+                "Desglose por estado de pago obtenido correctamente",
+                registrationReportService.getPaymentStatusBreakdown(eventId)
+        );
+    }
+
+    @GetMapping("/registrations/branch/{eventId}")
+    public ApiResponse<List<BranchReportResponse>> getBranchBreakdown(@PathVariable UUID eventId) {
+
+        eventAccessGuard.assertCanManage(eventId);
+
+        return new ApiResponse<>(
+                200,
+                "Desglose por sede obtenido correctamente",
+                registrationReportService.getBranchBreakdown(eventId)
+        );
+    }
 
     @GetMapping("/finance/{eventId}")
     public ApiResponse<List<FinanceReportResponse>> getFinance(@PathVariable UUID eventId) {

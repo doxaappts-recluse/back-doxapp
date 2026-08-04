@@ -24,8 +24,10 @@ import pe.dcs.app.features.contract.response.ContractResponse;
 import pe.dcs.app.features.contract.response.ContractResponseSearch;
 import pe.dcs.app.features.contract.service.ContractModuleService;
 import pe.dcs.app.features.contract.service.ContractService;
+import pe.dcs.app.features.module.ContractResolver;
 import pe.dcs.app.repository.BranchRepository;
 import pe.dcs.app.repository.ContractBranchLicenseRepository;
+import pe.dcs.app.repository.ContractModuleRepository;
 import pe.dcs.app.repository.ContractRepository;
 import pe.dcs.app.repository.OrganizationRepository;
 import pe.dcs.app.security.service.AuthContext;
@@ -61,6 +63,8 @@ public class ContractServiceImpl implements ContractService {
     private final BranchRepository branchRepository;
     private final ContractBranchLicenseRepository contractBranchLicenseRepository;
     private final ContractModuleService contractModuleService;
+    private final ContractModuleRepository contractModuleRepository;
+    private final ContractResolver contractResolver;
     private final AuthContext authContext;
 
     // =====================================================
@@ -107,6 +111,36 @@ public class ContractServiceImpl implements ContractService {
                         page.getNumber()
                 )
         );
+    }
+
+    /**
+     * Sin assertSystemUser() a propósito: cualquier usuario con
+     * contexto org/sede (org admin, branch admin, org user) puede
+     * consultar SUS PROPIOS módulos contratados — el caller no
+     * elige de qué organización, siempre es la del contexto actual
+     * (ver AuthContext.getCurrentBranchId()). Reutiliza la misma
+     * resolución que SidebarService (unión de contrato de
+     * organización + contrato de sede, ver
+     * ContractResolver.getActiveContractsByBranch), así que un
+     * módulo cuenta como "contratado" con el mismo criterio con el
+     * que se decide si aparece en el sidebar.
+     */
+    @Override
+    @Transactional(readOnly = true)
+    public List<String> getActiveModuleCodesForCurrentContext() {
+
+        UUID branchId = authContext.getCurrentBranchId();
+
+        return contractResolver.getActiveContractsByBranch(branchId)
+                .stream()
+                .flatMap(contract ->
+                        contractModuleRepository
+                                .findActiveByContractId(contract.getId())
+                                .stream()
+                )
+                .map(contractModule -> contractModule.getModule().getCode())
+                .distinct()
+                .toList();
     }
 
     @Override

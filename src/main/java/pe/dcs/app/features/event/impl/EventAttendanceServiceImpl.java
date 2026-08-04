@@ -35,17 +35,9 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
      * explícitamente fuera (igual que el resto de Eventos).
      */
     private void assertCallerCanManage() {
-
-        if (!authContext.canManageOrgOrBranchOnly(
-                authContext.getCurrentOrganizationId(),
-                authContext.getCurrentBranchId()
-        )) {
-
-            throw new Exceptions(
-                    "Solo un administrador de organización o de sede puede registrar asistencia.",
-                    HttpStatus.FORBIDDEN
-            );
-        }
+        authContext.assertCanManageOrgOrBranchOnlyForCurrent(
+                "Solo un administrador de organización o de sede puede registrar asistencia."
+        );
     }
 
     @Transactional

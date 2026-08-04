@@ -3,7 +3,6 @@ package pe.dcs.app.features.ministerial_service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Person;
@@ -14,7 +13,6 @@ import pe.dcs.app.features.ministerial_service.service.MinisterialServiceService
 import pe.dcs.app.repository.MinistryAssignmentRepository;
 import pe.dcs.app.repository.PersonRepository;
 import pe.dcs.app.security.service.AuthContext;
-import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.resolveSort.PersonSort;
 import pe.dcs.app.util.pagination.PageResponse;
 import pe.dcs.app.util.pagination.PageableUtil;
@@ -72,16 +70,7 @@ public class MinisterialServiceServiceImpl implements MinisterialServiceService 
     }
 
     private void assertCallerCanManage() {
-
-        if (!authContext.isSystem()
-                && !authContext.isCurrentOrganizationAdmin()
-                && !authContext.isCurrentBranchAdmin()) {
-
-            throw new Exceptions(
-                    "No tiene permisos para gestionar el servicio ministerial.",
-                    HttpStatus.FORBIDDEN
-            );
-        }
+        authContext.assertCanManageCurrent("No tiene permisos para gestionar el servicio ministerial.");
     }
 
 }

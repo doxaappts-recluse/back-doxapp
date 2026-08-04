@@ -42,17 +42,23 @@ public class MinistryAssignmentMapper {
         return response;
     }
 
-    public MinistryAssignmentGroupedItemResponse toGroupedItem(MinistryAssignment assignment) {
+    public MinistryAssignmentGroupedItemResponse toGroupedItem(MinistryAssignment assignment, boolean visible) {
 
         MinistryAssignmentGroupedItemResponse item = new MinistryAssignmentGroupedItemResponse();
 
         item.setAssignmentId(assignment.getId());
-        item.setRole(assignment.getMinistryRole().getName());
         item.setStartDate(assignment.getStartDate());
         item.setEndDate(assignment.getEndDate());
+        item.setCurrent(assignment.getEndDate() == null);
+
+        if (!visible) {
+            item.setRestricted(true);
+            return item;
+        }
+
+        item.setRole(assignment.getMinistryRole().getName());
         item.setReason(assignment.getReason());
         item.setObservation(assignment.getObservation());
-        item.setCurrent(assignment.getEndDate() == null);
 
         return item;
     }

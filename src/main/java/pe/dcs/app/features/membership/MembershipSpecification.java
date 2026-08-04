@@ -117,6 +117,21 @@ public class MembershipSpecification {
                                     authContext.getCurrentOrganizationId()
                             )
                     );
+
+                    /*
+                     * Acotar a una sede puntual dentro de la
+                     * organización — solo tiene sentido ofrecerlo a
+                     * org admin (ver Reportes Avanzados), branch
+                     * admin ya quedó fijado arriba.
+                     */
+                    if (filter.getBranchId() != null) {
+                        predicates.add(
+                                cb.equal(
+                                        branch.get("id"),
+                                        filter.getBranchId()
+                                )
+                        );
+                    }
                 }
             }
 
@@ -167,6 +182,24 @@ public class MembershipSpecification {
                         cb.equal(
                                 membership.get("status"),
                                 filter.getMembershipStatus()
+                        )
+                );
+            }
+
+            if (filter.getStartDate() != null) {
+                predicates.add(
+                        cb.greaterThanOrEqualTo(
+                                membership.get("startDate"),
+                                filter.getStartDate()
+                        )
+                );
+            }
+
+            if (filter.getEndDate() != null) {
+                predicates.add(
+                        cb.lessThanOrEqualTo(
+                                membership.get("startDate"),
+                                filter.getEndDate()
                         )
                 );
             }
