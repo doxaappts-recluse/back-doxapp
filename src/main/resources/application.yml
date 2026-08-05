@@ -10,6 +10,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/RJ_DoxApp_v1
     username: postgres
     password: Clannad
+    #url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
+    #username: postgres.eehevpofwzkhmfetldyz
+    #password: :XY>Xwp;Pj/5NM4k
 
     hikari:
       auto-commit: false
@@ -35,8 +38,8 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      ddl-auto: update
-      #ddl-auto: create-drop
+      #ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         order_inserts: true
