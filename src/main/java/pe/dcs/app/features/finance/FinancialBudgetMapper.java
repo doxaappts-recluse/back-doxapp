@@ -24,7 +24,7 @@ public class FinancialBudgetMapper {
 
         if (budget.getFund() != null) {
             response.setFundId(budget.getFund().getId());
-            response.setFundName(budget.getFund().getName());
+            response.setFundName(budget.getFund().getLocalizedName());
         }
 
         if (budget.getCategory() != null) {

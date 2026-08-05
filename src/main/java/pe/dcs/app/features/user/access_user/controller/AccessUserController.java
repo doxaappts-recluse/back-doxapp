@@ -40,7 +40,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Usuarios obtenidos correctamente",
+                "success.usuariosObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -52,7 +52,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Usuario encontrado",
+                "success.usuarioEncontrado",
                 service.getById(id)
         );
     }
@@ -67,7 +67,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Módulos actualizados",
+                "success.modulosActualizados",
                 null
         );
     }
@@ -81,7 +81,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Usuario habilitado correctamente",
+                "success.usuarioHabilitadoCorrectamente",
                 "OK"
         );
     }
@@ -95,7 +95,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Usuario deshabilitado correctamente",
+                "success.usuarioDeshabilitadoCorrectamente",
                 "OK"
         );
     }
@@ -110,7 +110,7 @@ public class AccessUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Contraseña actualizada correctamente",
+                "success.contrasenaActualizadaCorrectamente",
                 "OK"
         );
     }

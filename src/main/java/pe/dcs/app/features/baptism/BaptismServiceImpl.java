@@ -143,7 +143,7 @@ public class BaptismServiceImpl implements BaptismService {
         if (baptismRepository.existsByUserId(userId)) {
 
             throw new Exceptions(
-                    "La persona ya tiene un registro de bautizo. Edítalo en vez de crear uno nuevo.",
+                    "error.personaTieneRegistroBautizoEditaloVez",
                     HttpStatus.CONFLICT
             );
         }
@@ -185,7 +185,7 @@ public class BaptismServiceImpl implements BaptismService {
                 baptismRepository.findById(baptismId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Registro de bautizo no encontrado.",
+                                        "error.registroBautizoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -194,7 +194,7 @@ public class BaptismServiceImpl implements BaptismService {
                 || !baptism.getUser().getId().equals(userId)) {
 
             throw new Exceptions(
-                    "El registro de bautizo no pertenece a esta persona.",
+                    "error.registroBautizoNoPertenecePersona",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -217,21 +217,21 @@ public class BaptismServiceImpl implements BaptismService {
 
         if (request.getBaptismDate() == null) {
             throw new Exceptions(
-                    "La fecha de bautizo es obligatoria.",
+                    "error.fechaBautizoObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getChurchName() == null || request.getChurchName().isBlank()) {
             throw new Exceptions(
-                    "La iglesia donde se bautizó es obligatoria.",
+                    "error.iglesiaDondeBautizoObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
     }
 
     private void assertCallerCanManage() {
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar bautizos.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarBautizos");
     }
 
     private PersonBranch validateAccess(Person person) {
@@ -245,7 +245,7 @@ public class BaptismServiceImpl implements BaptismService {
 
         if (activeBranch == null) {
             throw new Exceptions(
-                    "La persona no tiene una sede activa.",
+                    "error.personaNoTieneSedeActiva",
                     HttpStatus.CONFLICT
             );
         }
@@ -259,7 +259,7 @@ public class BaptismServiceImpl implements BaptismService {
         if (!authContext.canAccess(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "No tiene permisos para gestionar el bautizo de esta persona.",
+                    "error.noTienePermisosGestionarBautizoPersona",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -272,7 +272,7 @@ public class BaptismServiceImpl implements BaptismService {
         return personRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Persona no encontrada.",
+                                "error.personaNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );

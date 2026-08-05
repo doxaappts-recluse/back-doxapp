@@ -1,5 +1,6 @@
 package pe.dcs.app.features.module.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,7 +10,13 @@ import java.util.UUID;
 @Setter
 public class ModuleRequest {
 
-    private String name;
+    @NotBlank(message = "{error.nombreModuloObligatorio}")
+    private String nameEs;
+
+    @NotBlank(message = "{error.nombreModuloObligatorio}")
+    private String nameEn;
+
+    @NotBlank(message = "{error.codigoModuloObligatorio}")
     private String code;
     private String icon;
     private String route;

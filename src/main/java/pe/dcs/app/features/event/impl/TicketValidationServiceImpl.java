@@ -30,7 +30,7 @@ public class TicketValidationServiceImpl implements TicketValidationService {
         // 1. Buscar registro
         EventRegistration reg = registrationRepository.findByQrToken(qrToken)
                 .orElseThrow(() -> new Exceptions(
-                        "QR inválido",
+                        "error.qrInvalido",
                         HttpStatus.NOT_FOUND
                 ));
 

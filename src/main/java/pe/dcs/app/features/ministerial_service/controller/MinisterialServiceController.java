@@ -26,7 +26,7 @@ public class MinisterialServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Personas obtenidas correctamente",
+                "success.personasObtenidasCorrectamente",
                 service.search(request)
         );
     }

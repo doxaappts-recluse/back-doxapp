@@ -16,7 +16,18 @@ public class ModuleResponse extends AuditableResponse {
 
     private UUID id;
 
+    /*
+     * 'name' es el nombre resuelto según el locale de la request
+     * (getLocalizedName()) — se usa en la tabla CRUD de Módulos.
+     * nameEs/nameEn van SIEMPRE los dos (tanto en el CRUD, para
+     * precargar el formulario de edición, como en el árbol del
+     * sidebar — ver SidebarMapper — para que el frontend pueda
+     * cachear ambos y cambiar de idioma sin volver a pedirlo al
+     * backend).
+     */
     private String name;
+    private String nameEs;
+    private String nameEn;
     private String code;
     private String icon;
     private String route;

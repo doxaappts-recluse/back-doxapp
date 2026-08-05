@@ -1,5 +1,6 @@
 package pe.dcs.app.features.finance;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.finance.request.FinancialCashRegisterCloseRequest;
@@ -19,12 +20,12 @@ public class FinancialCashRegisterController {
 
     @PostMapping("/open")
     public ApiResponse<FinancialCashRegisterResponse> open(
-            @RequestBody FinancialCashRegisterOpenRequest request
+            @Valid @RequestBody FinancialCashRegisterOpenRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Caja abierta correctamente",
+                "success.cajaAbiertaCorrectamente",
                 financialCashRegisterService.open(request)
         );
     }
@@ -32,12 +33,12 @@ public class FinancialCashRegisterController {
     @PatchMapping("/close/{id}")
     public ApiResponse<FinancialCashRegisterResponse> close(
             @PathVariable UUID id,
-            @RequestBody FinancialCashRegisterCloseRequest request
+            @Valid @RequestBody FinancialCashRegisterCloseRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Caja cerrada correctamente",
+                "success.cajaCerradaCorrectamente",
                 financialCashRegisterService.close(id, request)
         );
     }
@@ -49,7 +50,7 @@ public class FinancialCashRegisterController {
 
         return new ApiResponse<>(
                 200,
-                "Caja obtenida correctamente",
+                "success.cajaObtenidaCorrectamente",
                 financialCashRegisterService.getById(id)
         );
     }
@@ -59,7 +60,7 @@ public class FinancialCashRegisterController {
 
         return new ApiResponse<>(
                 200,
-                "Cajas obtenidas correctamente",
+                "success.cajasObtenidasCorrectamente",
                 financialCashRegisterService.listAll()
         );
     }
@@ -71,7 +72,7 @@ public class FinancialCashRegisterController {
 
         return new ApiResponse<>(
                 200,
-                "Caja abierta obtenida correctamente",
+                "success.cajaAbiertaObtenidaCorrectamente",
                 financialCashRegisterService.getOpenByBranch(branchId)
         );
     }

@@ -32,7 +32,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<JwtResponse>> login(
-            @RequestBody LoginRequest request
+            @Valid @RequestBody LoginRequest request
     ) {
 
         Authentication authentication =
@@ -105,7 +105,7 @@ public class AuthController {
         return responseBuilder.body(
                 new ApiResponse<>(
                         200,
-                        "Login exitoso",
+                        "success.loginExitoso",
                         response
                 )
         );
@@ -131,7 +131,7 @@ public class AuthController {
 
         return new ApiResponse<>(
                         200,
-                        "Context changed.",
+                        "success.contextChanged",
                         new ContextResponse(token)
         );
 

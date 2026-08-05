@@ -1,5 +1,6 @@
 package pe.dcs.app.features.finance;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.finance.request.FinancialMovementApproveRequest;
@@ -25,12 +26,12 @@ public class FinancialMovementController {
 
     @PostMapping("/create")
     public ApiResponse<FinancialMovementResponse> create(
-            @RequestBody FinancialMovementRequest request
+            @Valid @RequestBody FinancialMovementRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero creado correctamente",
+                "success.movimientoFinancieroCreadoCorrectamente",
                 financialMovementService.create(request)
         );
     }
@@ -38,12 +39,12 @@ public class FinancialMovementController {
     @PutMapping("/update/{id}")
     public ApiResponse<FinancialMovementResponse> update(
             @PathVariable UUID id,
-            @RequestBody FinancialMovementRequest request
+            @Valid @RequestBody FinancialMovementRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero actualizado correctamente",
+                "success.movimientoFinancieroActualizadoCorrectamente",
                 financialMovementService.update(id, request)
         );
     }
@@ -57,7 +58,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero aprobado correctamente",
+                "success.movimientoFinancieroAprobadoCorrectamente",
                 financialMovementService.approve(id, request)
         );
     }
@@ -70,7 +71,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero rechazado correctamente",
+                "success.movimientoFinancieroRechazadoCorrectamente",
                 financialMovementService.reject(id, request)
         );
     }
@@ -82,7 +83,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Movimientos financieros obtenidos correctamente",
+                "success.movimientosFinancierosObtenidosCorrectamente",
                 financialMovementService.search(request)
         );
     }
@@ -95,7 +96,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Resumen de movimientos financieros obtenido correctamente",
+                "success.resumenMovimientosFinancierosObtenidoCorrectamente",
                 financialMovementService.summary(filters)
         );
     }
@@ -108,7 +109,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Donantes obtenidos correctamente",
+                "success.donantesObtenidosCorrectamente",
                 financialMovementService.donors(filters)
         );
     }
@@ -120,7 +121,7 @@ public class FinancialMovementController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero obtenido correctamente",
+                "success.movimientoFinancieroObtenidoCorrectamente",
                 financialMovementService.getById(id)
         );
     }

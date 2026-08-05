@@ -48,7 +48,7 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No se pudo determinar la organización actual",
+                    "error.noPudoDeterminarOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -62,7 +62,7 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                 documentTemplateRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Plantilla no encontrada",
+                                        "error.plantillaNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -70,7 +70,7 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
         if (!template.getOrganization().getId().equals(currentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a esta plantilla",
+                    "error.noTieneAccesoPlantilla",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -92,7 +92,7 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                 organizationRepository.findById(currentOrganizationId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Organización no encontrada",
+                                        "error.organizacionNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -193,14 +193,14 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                 branchRepository.findById(branchId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede no encontrada",
+                                        "error.sedeNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
         if (!branch.getOrganization().getId().equals(organizationId)) {
             throw new Exceptions(
-                    "La sede no pertenece a la organización actual",
+                    "error.sedeNoPerteneceOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -314,7 +314,7 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                         .findFirst())
                 .orElseThrow(() ->
                         new Exceptions(
-                                "No hay una plantilla configurada para este tipo de documento",
+                                "error.noHayPlantillaConfiguradaTipoDocumento",
                                 HttpStatus.NOT_FOUND
                         )
                 );

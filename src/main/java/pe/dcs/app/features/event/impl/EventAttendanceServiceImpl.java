@@ -51,7 +51,7 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         EventRegistration registration =
                 registrationRepository.findByQrToken(token)
                         .orElseThrow(() ->
-                                new Exceptions("QR inválido", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.qrInvalido", HttpStatus.NOT_FOUND)
                         );
 
         // 2. Validar evento activo
@@ -60,18 +60,18 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         eventAccessGuard.assertCanManage(event);
 
         if (event.getStatus() != EventStatus.PUBLISHED) {
-            throw new Exceptions("Evento no activo", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.eventoNoActivo", HttpStatus.BAD_REQUEST);
         }
 
         // 3. Validar inscripción válida
         if (registration.getStatus() != RegistrationStatus.REGISTERED) {
-            throw new Exceptions("Inscripción inválida", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.inscripcionInvalida", HttpStatus.BAD_REQUEST);
         }
 
         // 4. ANTI FRAUDE: ya tiene asistencia (tu modelo es 1–1)
         if (registration.getAttendance() != null) {
             throw new Exceptions(
-                    "El usuario ya registró asistencia",
+                    "error.usuarioRegistroAsistencia",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -79,7 +79,7 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
         // 5. ANTI FRAUDE: QR reutilizado
         if (Boolean.TRUE.equals(registration.getQrUsed())) {
             throw new Exceptions(
-                    "QR ya utilizado",
+                    "error.qrYaUtilizado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -112,7 +112,7 @@ public class EventAttendanceServiceImpl implements EventAttendanceService {
     private String extractToken(String input) {
 
         if (input == null || input.isBlank()) {
-            throw new Exceptions("Token vacío", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.tokenVacio", HttpStatus.BAD_REQUEST);
         }
 
         if (input.contains("token=")) {

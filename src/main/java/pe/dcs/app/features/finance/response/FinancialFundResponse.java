@@ -14,7 +14,10 @@ public class FinancialFundResponse extends AuditableResponse {
 
     private UUID organizationId;
 
+    private String code;
     private String name;
+    private String nameEs;
+    private String nameEn;
     private String description;
     private String status;
 }

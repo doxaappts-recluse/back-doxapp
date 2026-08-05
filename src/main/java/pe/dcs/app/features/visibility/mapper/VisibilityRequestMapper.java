@@ -25,7 +25,7 @@ public class VisibilityRequestMapper {
         row.setPersonLastname(request.getPerson().getLastname());
 
         row.setModuleCode(request.getModule().getCode());
-        row.setModuleName(request.getModule().getName());
+        row.setModuleName(request.getModule().getLocalizedName());
 
         row.setSourceBranchId(request.getSourceBranch().getId());
         row.setSourceBranchName(request.getSourceBranch().getName());

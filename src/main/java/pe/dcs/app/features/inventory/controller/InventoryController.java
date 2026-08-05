@@ -1,5 +1,6 @@
 package pe.dcs.app.features.inventory.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -38,7 +39,7 @@ public class InventoryController {
     public ApiResponse<InventoryPersonSearchResponse> findPersonByDni(@RequestParam String dni) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
@@ -47,7 +48,7 @@ public class InventoryController {
     public ApiResponse<List<InventoryMinistryOptionResponse>> listMinistries() {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ministerios obtenidos correctamente",
+                "success.ministeriosObtenidosCorrectamente",
                 service.listMinistries()
         );
     }
@@ -60,7 +61,7 @@ public class InventoryController {
     public ApiResponse<PageResponse<InventoryItemResponse>> searchItems(@RequestBody InventoryItemSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ítems obtenidos correctamente",
+                "success.itemsObtenidosCorrectamente",
                 service.searchItems(request)
         );
     }
@@ -69,24 +70,24 @@ public class InventoryController {
     public ApiResponse<InventoryItemResponse> getItemById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ítem obtenido correctamente",
+                "success.itemObtenidoCorrectamente",
                 service.getItemById(id)
         );
     }
 
     @PostMapping("/items/create")
-    public ApiResponse<UUID> createItem(@RequestBody InventoryItemFormRequest request) {
+    public ApiResponse<UUID> createItem(@Valid @RequestBody InventoryItemFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ítem registrado correctamente",
+                "success.itemRegistradoCorrectamente",
                 service.createItem(request)
         );
     }
 
     @PutMapping("/items/update/{id}")
-    public ApiResponse<String> updateItem(@PathVariable UUID id, @RequestBody InventoryItemFormRequest request) {
+    public ApiResponse<String> updateItem(@PathVariable UUID id, @Valid @RequestBody InventoryItemFormRequest request) {
         service.updateItem(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Ítem actualizado correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.itemActualizadoCorrectamente", "OK");
     }
 
     // =====================================================
@@ -97,7 +98,7 @@ public class InventoryController {
     public ApiResponse<PageResponse<InventoryMovementResponse>> searchMovements(@RequestBody InventoryMovementSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Movimientos obtenidos correctamente",
+                "success.movimientosObtenidosCorrectamente",
                 service.searchMovements(request)
         );
     }
@@ -106,16 +107,16 @@ public class InventoryController {
     public ApiResponse<InventoryMovementResponse> getMovementById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Movimiento obtenido correctamente",
+                "success.movimientoObtenidoCorrectamente",
                 service.getMovementById(id)
         );
     }
 
     @PostMapping("/movements/create")
-    public ApiResponse<UUID> createMovement(@RequestBody InventoryMovementFormRequest request) {
+    public ApiResponse<UUID> createMovement(@Valid @RequestBody InventoryMovementFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Movimiento registrado correctamente",
+                "success.movimientoRegistradoCorrectamente",
                 service.createMovement(request)
         );
     }
@@ -128,7 +129,7 @@ public class InventoryController {
     public ApiResponse<PageResponse<InventoryAssignmentResponse>> searchAssignments(@RequestBody InventoryAssignmentSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asignaciones obtenidas correctamente",
+                "success.asignacionesObtenidasCorrectamente",
                 service.searchAssignments(request)
         );
     }
@@ -137,16 +138,16 @@ public class InventoryController {
     public ApiResponse<InventoryAssignmentResponse> getAssignmentById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asignación obtenida correctamente",
+                "success.asignacionObtenidaCorrectamente",
                 service.getAssignmentById(id)
         );
     }
 
     @PostMapping("/assignments/create")
-    public ApiResponse<UUID> createAssignment(@RequestBody InventoryAssignmentFormRequest request) {
+    public ApiResponse<UUID> createAssignment(@Valid @RequestBody InventoryAssignmentFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asignación registrada correctamente",
+                "success.asignacionRegistradaCorrectamente",
                 service.createAssignment(request)
         );
     }
@@ -154,6 +155,6 @@ public class InventoryController {
     @PostMapping("/assignments/{id}/return")
     public ApiResponse<String> returnAssignment(@PathVariable UUID id, @RequestBody(required = false) InventoryAssignmentReturnRequest request) {
         service.returnAssignment(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Devolución registrada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.devolucionRegistradaCorrectamente", "OK");
     }
 }

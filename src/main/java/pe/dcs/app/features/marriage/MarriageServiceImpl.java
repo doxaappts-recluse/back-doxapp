@@ -76,7 +76,7 @@ public class MarriageServiceImpl implements MarriageService {
     @Transactional(readOnly = true)
     public PageResponse<MarriageSearchRowResponse> search(MarriageSearchRequest request) {
 
-        authContext.assertCanManageCurrent("No tiene permisos para ver matrimonios.");
+        authContext.assertCanManageCurrent("error.noTienePermisosVerMatrimonios");
 
         Pageable pageable =
                 PageableUtil.buildPageable(
@@ -129,20 +129,20 @@ public class MarriageServiceImpl implements MarriageService {
     @Transactional(readOnly = true)
     public MarriageSpouseSearchResponse findSpouseByDni(String dni) {
 
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar matrimonios.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarMatrimonios");
 
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
 
         if (dni == null || dni.isBlank()) {
             throw new Exceptions(
-                    "El DNI es obligatorio.",
+                    "error.elDniEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -151,7 +151,7 @@ public class MarriageServiceImpl implements MarriageService {
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "No se encontró ninguna persona con ese DNI en la organización.",
+                                        "error.noEncontroNingunaPersonaDniOrganizacion",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -173,7 +173,7 @@ public class MarriageServiceImpl implements MarriageService {
     @Transactional
     public void create(MarriageFormRequest request) {
 
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar matrimonios.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarMatrimonios");
 
         validateForm(request);
 
@@ -200,7 +200,7 @@ public class MarriageServiceImpl implements MarriageService {
     @Transactional
     public void update(UUID id, MarriageFormRequest request) {
 
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar matrimonios.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarMatrimonios");
 
         validateForm(request);
 
@@ -389,20 +389,20 @@ public class MarriageServiceImpl implements MarriageService {
             return branchRepository.findById(
                     authContext.getCurrentBranchId()
             ).orElseThrow(() ->
-                    new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                    new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
             );
         }
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del matrimonio.",
+                    "error.debeSeleccionarSedeMatrimonio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -413,7 +413,7 @@ public class MarriageServiceImpl implements MarriageService {
                         .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este registro.",
+                    "error.noTieneAccesoRegistro",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -423,28 +423,28 @@ public class MarriageServiceImpl implements MarriageService {
 
         if (request.getMarriageDate() == null) {
             throw new Exceptions(
-                    "La fecha del matrimonio es obligatoria.",
+                    "error.fechaMatrimonioObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getChurchName() == null || request.getChurchName().isBlank()) {
             throw new Exceptions(
-                    "La iglesia donde se casaron es obligatoria.",
+                    "error.iglesiaDondeCasaronObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getSpouse1Name() == null || request.getSpouse1Name().isBlank()) {
             throw new Exceptions(
-                    "El nombre del primer cónyuge es obligatorio.",
+                    "error.nombrePrimerConyugeObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getSpouse2Name() == null || request.getSpouse2Name().isBlank()) {
             throw new Exceptions(
-                    "El nombre del segundo cónyuge es obligatorio.",
+                    "error.nombreSegundoConyugeObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -455,7 +455,7 @@ public class MarriageServiceImpl implements MarriageService {
         return marriageRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Registro de matrimonio no encontrado.",
+                                "error.registroMatrimonioNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -465,7 +465,7 @@ public class MarriageServiceImpl implements MarriageService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

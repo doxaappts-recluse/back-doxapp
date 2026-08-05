@@ -18,7 +18,7 @@ public class DashboardController {
     public ApiResponse<DashboardHomeResponse> getHome() {
         return new ApiResponse<>(
                 200,
-                "Dashboard fetched successfully",
+                "success.dashboardFetchedSuccessfully",
                 dashboardService.getHome()
         );
     }

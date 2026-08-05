@@ -31,7 +31,7 @@ public class EventController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Event created",
+                "success.eventCreated",
                 eventService.create(request, file)
         );
     }
@@ -44,7 +44,7 @@ public class EventController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Event updated",
+                "success.eventUpdated",
                 eventService.update(id, request, file)
         );
     }
@@ -55,7 +55,7 @@ public class EventController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Evento obtenido correctamente",
+                "success.eventoObtenidoCorrectamente",
                 eventService.getById(id)
         );
     }
@@ -65,14 +65,14 @@ public class EventController {
             @RequestBody
                     EventSearchRequest request
     ) {
-        return new ApiResponse<>(200, "Eventos fetched", eventService.search(request));
+        return new ApiResponse<>(200, "success.eventosFetched", eventService.search(request));
     }
 
     @PatchMapping("/publish/{id}")
     public ApiResponse<EventDetailResponse> publish(
             @PathVariable UUID id
     ) {
-        return new ApiResponse<>(200, "Events published", eventService.publish(id));
+        return new ApiResponse<>(200, "success.eventsPublished", eventService.publish(id));
 
     }
 
@@ -80,7 +80,7 @@ public class EventController {
     public ApiResponse<EventDetailResponse> cancel(
             @PathVariable UUID id
     ) {
-        return new ApiResponse<>(200, "Events cancelled", eventService.cancel(id));
+        return new ApiResponse<>(200, "success.eventsCancelled", eventService.cancel(id));
     }
 
     @GetMapping("/events/{id}/image")

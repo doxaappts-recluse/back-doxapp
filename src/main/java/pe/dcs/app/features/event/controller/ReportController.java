@@ -47,7 +47,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Reporte de inscripciones obtenido correctamente",
+                "success.reporteInscripcionesObtenidoCorrectamente",
                 registrationReportService.get(eventId)
         );
     }
@@ -60,7 +60,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Mezcla de categorías obtenida correctamente",
+                "success.mezclaCategoriasObtenidaCorrectamente",
                 registrationReportService.getCategoryBreakdown(eventId)
         );
     }
@@ -72,7 +72,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Desglose por estado de pago obtenido correctamente",
+                "success.desglosePorEstadoPagoObtenidoCorrectamente",
                 registrationReportService.getPaymentStatusBreakdown(eventId)
         );
     }
@@ -84,7 +84,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Desglose por sede obtenido correctamente",
+                "success.desglosePorSedeObtenidoCorrectamente",
                 registrationReportService.getBranchBreakdown(eventId)
         );
     }
@@ -96,7 +96,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Reporte de finanzas obtenido correctamente",
+                "success.reporteFinanzasObtenidoCorrectamente",
                 financeReportService.get(eventId)
         );
     }
@@ -108,7 +108,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Reporte de finanzas obtenido correctamente",
+                "success.reporteFinanzasObtenidoCorrectamente",
                 occupancyReportService.get(eventId)
         );
     }
@@ -122,7 +122,7 @@ public class ReportController {
 
         return new ApiResponse<>(
                 200,
-                "Reporte de edades obtenido correctamente",
+                "success.reporteEdadesObtenidoCorrectamente",
                 ageReportService.get(eventId)
         );
 

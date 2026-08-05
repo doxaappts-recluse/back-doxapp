@@ -52,7 +52,7 @@ public class DocumentTemplateAccessGuard {
             return;
         }
 
-        throw forbidden("crear plantillas de documentos");
+        throw forbidden("action.crearPlantillasDocumentos");
     }
 
     /** ¿Puede usar el módulo (listar)? Admin siempre; org user delegado con cualquier permiso. */
@@ -66,14 +66,14 @@ public class DocumentTemplateAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a plantillas de documentos");
+        throw forbidden("action.accederPlantillasDocumentos");
     }
 
     public void assertCanManage(DocumentTemplate template) {
 
         if (!canManage(template)) {
             throw new Exceptions(
-                    "Solo el administrador de la organización, el administrador de la sede, o un usuario delegado de esa sede pueden gestionar esta plantilla",
+                    "error.soloAdministradorOrganizacionAdministradorSedeUsuario",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -163,10 +163,14 @@ public class DocumentTemplateAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

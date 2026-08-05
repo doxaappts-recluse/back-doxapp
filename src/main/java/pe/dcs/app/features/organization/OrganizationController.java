@@ -1,5 +1,6 @@
 package pe.dcs.app.features.organization;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class OrganizationController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Organizaciones filtradas",
+                "success.organizacionesFiltradas",
                 service.findAll(request)
         );
     }
@@ -42,7 +43,7 @@ public class OrganizationController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Listado de organizaciones",
+                "success.listadoOrganizaciones",
                 service.list()
         );
     }
@@ -57,7 +58,7 @@ public class OrganizationController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Organización encontrada",
+                "success.organizacionEncontrada",
                 service.findById(id)
         );
     }
@@ -67,12 +68,12 @@ public class OrganizationController {
     // =====================================================
     @PostMapping("/create")
     public ApiResponse<OrganizationResponse> create(
-            @RequestBody OrganizationCreateRequest request
+            @Valid @RequestBody OrganizationCreateRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.CREATED.value(),
-                "Organización creada",
+                "success.organizacionCreada",
                 service.create(request)
         );
     }
@@ -83,12 +84,12 @@ public class OrganizationController {
     @PutMapping("/update/{id}")
     public ApiResponse<OrganizationResponse> update(
             @PathVariable UUID id,
-            @RequestBody OrganizationUpdateRequest request
+            @Valid @RequestBody OrganizationUpdateRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Organización actualizada",
+                "success.organizacionActualizada",
                 service.update(id, request)
         );
     }
@@ -105,7 +106,7 @@ public class OrganizationController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Organización habilitada",
+                "success.organizacionHabilitada",
                 null
         );
     }
@@ -122,7 +123,7 @@ public class OrganizationController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Organización deshabilitada",
+                "success.organizacionDeshabilitada",
                 null
         );
     }

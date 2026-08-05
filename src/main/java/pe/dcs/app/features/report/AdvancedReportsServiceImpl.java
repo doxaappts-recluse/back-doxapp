@@ -624,7 +624,7 @@ public class AdvancedReportsServiceImpl implements AdvancedReportsService {
 
         if (!activeModules.contains(moduleCode)) {
             throw new Exceptions(
-                    "El módulo solicitado no está activo en el contrato actual.",
+                    "error.moduloSolicitadoNoActivoContratoActual",
                     HttpStatus.FORBIDDEN
             );
         }

@@ -34,7 +34,7 @@ public class AdvancedReportsController {
     public ApiResponse<ExecutiveDashboardResponse> getExecutiveDashboard() {
         return new ApiResponse<>(
                 200,
-                "Executive dashboard fetched successfully",
+                "success.executiveDashboardFetchedSuccessfully",
                 advancedReportsService.getExecutiveDashboard()
         );
     }
@@ -45,7 +45,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Financial movements report fetched successfully",
+                "success.financialMovementsReportFetchedSuccessfully",
                 advancedReportsService.getFinancialMovementsReport(filter)
         );
     }
@@ -56,7 +56,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Events report fetched successfully",
+                "success.eventsReportFetchedSuccessfully",
                 advancedReportsService.getEventsReport(filter)
         );
     }
@@ -67,7 +67,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Membership report fetched successfully",
+                "success.membershipReportFetchedSuccessfully",
                 advancedReportsService.getMembershipReport(filter)
         );
     }
@@ -78,7 +78,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Baptism report fetched successfully",
+                "success.baptismReportFetchedSuccessfully",
                 advancedReportsService.getBaptismReport(filter)
         );
     }
@@ -89,7 +89,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Marriages report fetched successfully",
+                "success.marriagesReportFetchedSuccessfully",
                 advancedReportsService.getMarriagesReport(filter)
         );
     }
@@ -100,7 +100,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Visitors report fetched successfully",
+                "success.visitorsReportFetchedSuccessfully",
                 advancedReportsService.getVisitorsReport(filter)
         );
     }
@@ -111,7 +111,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Inactive members report fetched successfully",
+                "success.inactiveMembersReportFetchedSuccessfully",
                 advancedReportsService.getInactiveMembersReport(filter)
         );
     }
@@ -122,7 +122,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Small groups report fetched successfully",
+                "success.smallGroupsReportFetchedSuccessfully",
                 advancedReportsService.getSmallGroupsReport(filter)
         );
     }
@@ -133,7 +133,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Space reservations report fetched successfully",
+                "success.spaceReservationsReportFetchedSuccessfully",
                 advancedReportsService.getSpaceReservationsReport(filter)
         );
     }
@@ -144,7 +144,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Inventory movements report fetched successfully",
+                "success.inventoryMovementsReportFetchedSuccessfully",
                 advancedReportsService.getInventoryMovementsReport(filter)
         );
     }
@@ -155,7 +155,7 @@ public class AdvancedReportsController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Leave requests report fetched successfully",
+                "success.leaveRequestsReportFetchedSuccessfully",
                 advancedReportsService.getLeaveRequestsReport(filter)
         );
     }

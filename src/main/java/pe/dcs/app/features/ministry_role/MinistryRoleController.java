@@ -1,5 +1,6 @@
 package pe.dcs.app.features.ministry_role;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.ministry_role.request.MinistryRoleRequest;
@@ -21,29 +22,29 @@ public class MinistryRoleController {
 
     @PostMapping("/create")
     public ApiResponse<MinistryRoleResponse> create(
-            @RequestBody MinistryRoleRequest request
+            @Valid @RequestBody MinistryRoleRequest request
     ) {
-        return new ApiResponse<>(200, "Ministry role created", service.create(request));
+        return new ApiResponse<>(200, "success.ministryRoleCreated", service.create(request));
     }
 
     @PutMapping("/update/{id}")
     public ApiResponse<MinistryRoleResponse> update(
             @PathVariable UUID id,
-            @RequestBody MinistryRoleRequest request
+            @Valid @RequestBody MinistryRoleRequest request
     ) {
-        return new ApiResponse<>(200, "Ministry role updated", service.update(id, request));
+        return new ApiResponse<>(200, "success.ministryRoleUpdated", service.update(id, request));
     }
 
     @PostMapping("/enable/{id}")
     public ApiResponse<Void> enable(@PathVariable UUID id) {
         service.enable(id);
-        return new ApiResponse<>(200, "Ministry role active", null);
+        return new ApiResponse<>(200, "success.ministryRoleActive", null);
     }
 
     @PostMapping("/disable/{id}")
     public ApiResponse<Void> disable(@PathVariable UUID id) {
         service.disable(id);
-        return new ApiResponse<>(200, "Ministry role desactive", null);
+        return new ApiResponse<>(200, "success.ministryRoleDesactive", null);
     }
 
     @PostMapping("/search/{id}")
@@ -51,7 +52,7 @@ public class MinistryRoleController {
             @PathVariable UUID id,
             @RequestBody MinistryRoleSearchRequest request
     ) {
-        return new ApiResponse<>(200, "Ministry roles fetched", service.search(id, request));
+        return new ApiResponse<>(200, "success.ministryRolesFetched", service.search(id, request));
     }
 
     @GetMapping("/all")
@@ -59,7 +60,7 @@ public class MinistryRoleController {
 
         return new ApiResponse<>(
                 200,
-                "Ministry roles fetched successfully",
+                "success.ministryRolesFetchedSuccessfully",
                 service.findAll()
         );
     }
@@ -69,7 +70,7 @@ public class MinistryRoleController {
 
         return new ApiResponse<>(
                 200,
-                "Rol ministerial obtenido correctamente",
+                "success.rolMinisterialObtenidoCorrectamente",
                 service.getById(id)
         );
     }

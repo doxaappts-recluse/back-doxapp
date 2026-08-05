@@ -116,7 +116,7 @@ public class InventoryMapper {
 
         if (assignment.getAssignedToMinistry() != null) {
             response.setAssignedToMinistryId(assignment.getAssignedToMinistry().getId());
-            response.setAssignedToMinistryName(assignment.getAssignedToMinistry().getName());
+            response.setAssignedToMinistryName(assignment.getAssignedToMinistry().getLocalizedName());
         }
 
         InventoryItem item = assignment.getItem();

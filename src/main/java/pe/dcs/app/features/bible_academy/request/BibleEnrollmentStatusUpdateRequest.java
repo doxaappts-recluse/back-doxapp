@@ -1,5 +1,6 @@
 package pe.dcs.app.features.bible_academy.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.bible_academy.BibleEnrollmentStatus;
@@ -8,6 +9,7 @@ import pe.dcs.app.util.enums.bible_academy.BibleEnrollmentStatus;
 @Setter
 public class BibleEnrollmentStatusUpdateRequest {
 
+    @NotNull(message = "{error.elEstadoEsObligatorio}")
     private BibleEnrollmentStatus status;
 
     private Integer finalGrade;

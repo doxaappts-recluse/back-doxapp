@@ -1,5 +1,6 @@
 package pe.dcs.app.features.visitor.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,7 @@ public class VisitorController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Visitantes obtenidos correctamente",
+                "success.visitantesObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -45,7 +46,7 @@ public class VisitorController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Visitante obtenido correctamente",
+                "success.visitanteObtenidoCorrectamente",
                 service.getByPersonId(personId)
         );
     }
@@ -53,14 +54,14 @@ public class VisitorController {
     @PostMapping("/{personId}")
     public ApiResponse<String> create(
             @PathVariable UUID personId,
-            @RequestBody VisitorFormRequest request
+            @Valid @RequestBody VisitorFormRequest request
     ) {
 
         service.create(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Visitante registrado correctamente",
+                "success.visitanteRegistradoCorrectamente",
                 "OK"
         );
     }
@@ -68,14 +69,14 @@ public class VisitorController {
     @PutMapping("/{personId}")
     public ApiResponse<String> update(
             @PathVariable UUID personId,
-            @RequestBody VisitorFormRequest request
+            @Valid @RequestBody VisitorFormRequest request
     ) {
 
         service.update(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Visitante actualizado correctamente",
+                "success.visitanteActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -83,14 +84,14 @@ public class VisitorController {
     @PostMapping("/{personId}/convert-to-member")
     public ApiResponse<String> convertToMember(
             @PathVariable UUID personId,
-            @RequestBody VisitorConvertToMemberRequest request
+            @Valid @RequestBody VisitorConvertToMemberRequest request
     ) {
 
         service.convertToMember(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Visitante convertido a miembro correctamente",
+                "success.visitanteConvertidoMiembroCorrectamente",
                 "OK"
         );
     }

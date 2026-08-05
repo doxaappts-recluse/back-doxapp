@@ -1,5 +1,6 @@
 package pe.dcs.app.features.finance.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -7,7 +8,14 @@ import lombok.Setter;
 @Setter
 public class FinancialFundRequest {
 
-    private String name;
+    @NotBlank(message = "{error.codigoFondoObligatorio}")
+    private String code;
+
+    @NotBlank(message = "{error.nombreEsFondoObligatorio}")
+    private String nameEs;
+
+    @NotBlank(message = "{error.nombreEnFondoObligatorio}")
+    private String nameEn;
 
     private String description;
 }

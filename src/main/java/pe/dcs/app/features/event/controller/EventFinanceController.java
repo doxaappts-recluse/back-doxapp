@@ -1,5 +1,6 @@
 package pe.dcs.app.features.event.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.event.request.finance.EventFinanceApproveRequest;
@@ -22,12 +23,12 @@ public class EventFinanceController {
 
     @PostMapping("/create")
     public ApiResponse<EventFinanceResponse> create(
-            @RequestBody EventFinanceRequest request
+            @Valid @RequestBody EventFinanceRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero creado correctamente",
+                "success.movimientoFinancieroCreadoCorrectamente",
                 eventFinanceService.create(request)
         );
     }
@@ -35,12 +36,12 @@ public class EventFinanceController {
     @PutMapping("/update/{id}")
     public ApiResponse<EventFinanceResponse> update(
             @PathVariable UUID id,
-            @RequestBody EventFinanceRequest request
+            @Valid @RequestBody EventFinanceRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero actualizado correctamente",
+                "success.movimientoFinancieroActualizadoCorrectamente",
                 eventFinanceService.update(id, request)
         );
     }
@@ -54,7 +55,7 @@ public class EventFinanceController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero aprobado correctamente",
+                "success.movimientoFinancieroAprobadoCorrectamente",
                 eventFinanceService.approve(id, request)
         );
     }
@@ -67,7 +68,7 @@ public class EventFinanceController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero rechazado correctamente",
+                "success.movimientoFinancieroRechazadoCorrectamente",
                 eventFinanceService.reject(id, request)
         );
     }
@@ -79,7 +80,7 @@ public class EventFinanceController {
 
         return new ApiResponse<>(
                 200,
-                "Movimientos financieros obtenidos correctamente",
+                "success.movimientosFinancierosObtenidosCorrectamente",
                 eventFinanceService.search(request)
         );
     }
@@ -91,7 +92,7 @@ public class EventFinanceController {
 
         return new ApiResponse<>(
                 200,
-                "Movimiento financiero obtenido correctamente",
+                "success.movimientoFinancieroObtenidoCorrectamente",
                 eventFinanceService.getById(id)
         );
     }

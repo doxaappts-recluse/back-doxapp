@@ -1,5 +1,6 @@
 package pe.dcs.app.features.hr.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class HrController {
     public ApiResponse<HrPersonSearchResponse> findPersonByDni(@RequestParam String dni) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
@@ -49,7 +50,7 @@ public class HrController {
     public ApiResponse<PageResponse<StaffMemberResponse>> searchStaff(@RequestBody StaffMemberSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Fichas de empleado obtenidas correctamente",
+                "success.fichasEmpleadoObtenidasCorrectamente",
                 service.searchStaff(request)
         );
     }
@@ -58,24 +59,24 @@ public class HrController {
     public ApiResponse<StaffMemberResponse> getStaffById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ficha de empleado obtenida correctamente",
+                "success.fichaEmpleadoObtenidaCorrectamente",
                 service.getStaffById(id)
         );
     }
 
     @PostMapping("/staff/create")
-    public ApiResponse<UUID> createStaff(@RequestBody StaffMemberFormRequest request) {
+    public ApiResponse<UUID> createStaff(@Valid @RequestBody StaffMemberFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ficha de empleado registrada correctamente",
+                "success.fichaEmpleadoRegistradaCorrectamente",
                 service.createStaff(request)
         );
     }
 
     @PutMapping("/staff/update/{id}")
-    public ApiResponse<String> updateStaff(@PathVariable UUID id, @RequestBody StaffMemberFormRequest request) {
+    public ApiResponse<String> updateStaff(@PathVariable UUID id, @Valid @RequestBody StaffMemberFormRequest request) {
         service.updateStaff(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Ficha de empleado actualizada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.fichaEmpleadoActualizadaCorrectamente", "OK");
     }
 
     // =====================================================
@@ -86,7 +87,7 @@ public class HrController {
     public ApiResponse<PageResponse<LeaveRequestResponse>> searchLeaveRequests(@RequestBody LeaveRequestSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitudes obtenidas correctamente",
+                "success.solicitudesObtenidasCorrectamente",
                 service.searchLeaveRequests(request)
         );
     }
@@ -95,16 +96,16 @@ public class HrController {
     public ApiResponse<LeaveRequestResponse> getLeaveRequestById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitud obtenida correctamente",
+                "success.solicitudObtenidaCorrectamente",
                 service.getLeaveRequestById(id)
         );
     }
 
     @PostMapping("/leave-requests/create")
-    public ApiResponse<UUID> createLeaveRequest(@RequestBody LeaveRequestFormRequest request) {
+    public ApiResponse<UUID> createLeaveRequest(@Valid @RequestBody LeaveRequestFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitud registrada correctamente",
+                "success.solicitudRegistradaCorrectamente",
                 service.createLeaveRequest(request)
         );
     }
@@ -112,13 +113,13 @@ public class HrController {
     @PostMapping("/leave-requests/{id}/approve")
     public ApiResponse<String> approveLeaveRequest(@PathVariable UUID id, @RequestBody(required = false) LeaveRequestDecisionRequest request) {
         service.approveLeaveRequest(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Solicitud aprobada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.solicitudAprobadaCorrectamente", "OK");
     }
 
     @PostMapping("/leave-requests/{id}/reject")
     public ApiResponse<String> rejectLeaveRequest(@PathVariable UUID id, @RequestBody LeaveRequestDecisionRequest request) {
         service.rejectLeaveRequest(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Solicitud rechazada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.solicitudRechazadaCorrectamente", "OK");
     }
 
     // =====================================================
@@ -129,7 +130,7 @@ public class HrController {
     public ApiResponse<PageResponse<PayrollRecordResponse>> searchPayrollRecords(@RequestBody PayrollRecordSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Pagos de planilla obtenidos correctamente",
+                "success.pagosPlanillaObtenidosCorrectamente",
                 service.searchPayrollRecords(request)
         );
     }
@@ -138,16 +139,16 @@ public class HrController {
     public ApiResponse<PayrollRecordResponse> getPayrollRecordById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Pago de planilla obtenido correctamente",
+                "success.pagoPlanillaObtenidoCorrectamente",
                 service.getPayrollRecordById(id)
         );
     }
 
     @PostMapping("/payroll/create")
-    public ApiResponse<UUID> createPayrollRecord(@RequestBody PayrollRecordFormRequest request) {
+    public ApiResponse<UUID> createPayrollRecord(@Valid @RequestBody PayrollRecordFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Pago de planilla registrado correctamente",
+                "success.pagoPlanillaRegistradoCorrectamente",
                 service.createPayrollRecord(request)
         );
     }

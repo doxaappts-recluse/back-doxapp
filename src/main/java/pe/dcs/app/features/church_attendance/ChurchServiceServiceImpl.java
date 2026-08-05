@@ -127,14 +127,14 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
 
         if (dni == null || dni.isBlank()) {
             throw new Exceptions(
-                    "El DNI es obligatorio.",
+                    "error.elDniEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -143,7 +143,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "No se encontró ninguna persona con ese DNI en la organización.",
+                                        "error.noEncontroNingunaPersonaDniOrganizacion",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -232,7 +232,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
 
         if (request.getPersonId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar la persona que asistió.",
+                    "error.debeSeleccionarPersonaAsistio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -248,7 +248,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
                 churchServiceId, person.getId(), attendanceDate)) {
 
             throw new Exceptions(
-                    "Esta persona ya fue marcada como presente en este culto y fecha.",
+                    "error.personaFueMarcadaComoPresenteCulto",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -274,12 +274,12 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
         ChurchServiceAttendance attendance =
                 attendanceRepository.findById(attendanceId)
                         .orElseThrow(() ->
-                                new Exceptions("Registro de asistencia no encontrado.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.registroAsistenciaNoEncontrado", HttpStatus.NOT_FOUND)
                         );
 
         if (!attendance.getChurchService().getId().equals(churchServiceId)) {
             throw new Exceptions(
-                    "Este registro de asistencia no pertenece a este culto.",
+                    "error.registroAsistenciaNoPerteneceCulto",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -324,14 +324,14 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
 
         if (resolvedId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del culto.",
+                    "error.debeSeleccionarSedeCulto",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(resolvedId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -342,7 +342,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
                         .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este registro.",
+                    "error.noTieneAccesoRegistro",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -352,7 +352,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
 
         if (request.getName() == null || request.getName().isBlank()) {
             throw new Exceptions(
-                    "El nombre del culto es obligatorio.",
+                    "error.nombreCultoObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -363,7 +363,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
         return churchServiceRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Culto no encontrado.",
+                                "error.cultoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -373,7 +373,7 @@ public class ChurchServiceServiceImpl implements ChurchServiceService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

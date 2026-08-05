@@ -11,10 +11,14 @@ import java.util.UUID;
 @Repository
 public interface FinancialFundRepository extends JpaRepository<FinancialFund, UUID> {
 
-    List<FinancialFund> findByOrganizationIdOrderByNameAsc(UUID organizationId);
+    List<FinancialFund> findByOrganizationIdOrderByNameEsAsc(UUID organizationId);
 
-    List<FinancialFund> findByOrganizationIdAndStatusOrderByNameAsc(
+    List<FinancialFund> findByOrganizationIdAndStatusOrderByNameEsAsc(
             UUID organizationId,
             StatusType status
     );
+
+    boolean existsByOrganizationIdAndCodeIgnoreCase(UUID organizationId, String code);
+
+    boolean existsByOrganizationIdAndCodeIgnoreCaseAndIdNot(UUID organizationId, String code, UUID id);
 }

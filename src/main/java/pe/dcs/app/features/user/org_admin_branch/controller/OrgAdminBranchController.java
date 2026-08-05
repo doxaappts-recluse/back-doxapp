@@ -30,7 +30,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Users retrieved successfully",
+                "success.usersRetrievedSuccessfully",
                 service.search(request)
         );
 
@@ -43,7 +43,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Users found",
+                "success.usersFound",
                 service.findById(id)
         );
 
@@ -57,7 +57,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User created",
+                "success.userCreated",
                 null
         );
 
@@ -72,7 +72,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User updated",
+                "success.userUpdated",
                 null
         );
 
@@ -87,7 +87,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User enabled successfully",
+                "success.userEnabledSuccessfully",
                 "OK"
         );
 
@@ -102,7 +102,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User disabled successfully",
+                "success.userDisabledSuccessfully",
                 "OK"
         );
     }
@@ -117,7 +117,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Access added successfully",
+                "success.accessAddedSuccessfully",
                 null
         );
     }
@@ -131,7 +131,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Access enabled successfully",
+                "success.accessEnabledSuccessfully",
                 "OK"
         );
     }
@@ -145,7 +145,7 @@ public class OrgAdminBranchController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Access disabled successfully",
+                "success.accessDisabledSuccessfully",
                 "OK"
         );
     }

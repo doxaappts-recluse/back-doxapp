@@ -1,5 +1,6 @@
 package pe.dcs.app.features.ministry_assignment.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -25,12 +26,12 @@ public class MinistryAssignmentController {
     @PostMapping("/create/{userId}")
     public ApiResponse<MinistryAssignmentResponse> create(
             @PathVariable UUID userId,
-            @RequestBody MinistryAssignmentCreateRequest request
+            @Valid @RequestBody MinistryAssignmentCreateRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Servicio ministerial registrado correctamente",
+                "success.servicioMinisterialRegistradoCorrectamente",
                 service.create(userId, request)
         );
     }
@@ -39,12 +40,12 @@ public class MinistryAssignmentController {
     public ApiResponse<MinistryAssignmentResponse> update(
             @PathVariable UUID userId,
             @PathVariable UUID assignmentId,
-            @RequestBody MinistryAssignmentUpdateRequest request
+            @Valid @RequestBody MinistryAssignmentUpdateRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Servicio ministerial actualizado correctamente",
+                "success.servicioMinisterialActualizadoCorrectamente",
                 service.update(userId, assignmentId, request)
         );
     }
@@ -59,7 +60,7 @@ public class MinistryAssignmentController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Servicio ministerial eliminado correctamente",
+                "success.servicioMinisterialEliminadoCorrectamente",
                 "OK"
         );
     }
@@ -71,7 +72,7 @@ public class MinistryAssignmentController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Servicio ministerial obtenido correctamente",
+                "success.servicioMinisterialObtenidoCorrectamente",
                 service.getByUser(userId)
         );
     }
@@ -81,7 +82,7 @@ public class MinistryAssignmentController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Ministerios obtenidos correctamente",
+                "success.ministeriosObtenidosCorrectamente",
                 service.getAllMinistries()
         );
     }
@@ -91,7 +92,7 @@ public class MinistryAssignmentController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Roles obtenidos correctamente",
+                "success.rolesObtenidosCorrectamente",
                 service.getAllRoles()
         );
     }

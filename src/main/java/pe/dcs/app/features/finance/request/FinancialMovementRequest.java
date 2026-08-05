@@ -1,5 +1,7 @@
 package pe.dcs.app.features.finance.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.finance.FinancialMovementCategory;
@@ -16,8 +18,10 @@ public class FinancialMovementRequest {
 
     private UUID branchId;
 
+    @NotNull(message = "{error.tipoMovimientoObligatorio}")
     private FinancialMovementType type;
 
+    @NotNull(message = "{error.categoriaObligatoria}")
     private FinancialMovementCategory category;
 
     /**
@@ -33,10 +37,13 @@ public class FinancialMovementRequest {
 
     private FinancialMovementPaymentMethod paymentMethod;
 
+    @NotBlank(message = "{error.conceptoObligatorio}")
     private String concept;
 
+    @NotNull(message = "{error.montoObligatorio}")
     private BigDecimal amount;
 
+    @NotNull(message = "{error.fechaTransaccionObligatoria}")
     private LocalDate movementDate;
 
     private String observations;

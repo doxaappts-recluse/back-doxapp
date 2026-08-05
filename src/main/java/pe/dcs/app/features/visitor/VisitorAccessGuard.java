@@ -45,7 +45,7 @@ public class VisitorAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a visitantes");
+        throw forbidden("action.accederAVisitantes");
     }
 
     public void assertCanCreate() {
@@ -58,14 +58,14 @@ public class VisitorAccessGuard {
             return;
         }
 
-        throw forbidden("registrar visitantes");
+        throw forbidden("action.registrarVisitantes");
     }
 
     public void assertCanManage(Branch visitorBranch) {
 
         if (!canManage(visitorBranch)) {
             throw new Exceptions(
-                    "No tiene permisos para gestionar este visitante.",
+                    "error.noTienePermisosGestionarVisitante",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -145,10 +145,14 @@ public class VisitorAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

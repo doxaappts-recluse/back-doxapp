@@ -22,7 +22,9 @@ public class FamilyGroupFormRequest {
      * Solo obligatorio en create(): persona encontrada por DNI (ver
      * FamilyGroupController.findPersonByDni) que se agrega de una vez
      * como HEAD_OF_HOUSEHOLD. En update() se ignora — los miembros se
-     * gestionan con los endpoints de member.
+     * gestionan con los endpoints de member. No se valida acá con
+     * @NotNull porque en update() el frontend lo envía en null (ver
+     * FamilyGroupServiceImpl.create validando el caso obligatorio).
      */
     private UUID headPersonId;
 

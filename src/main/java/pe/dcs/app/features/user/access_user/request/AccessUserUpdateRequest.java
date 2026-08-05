@@ -1,5 +1,6 @@
 package pe.dcs.app.features.user.access_user.request;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +16,7 @@ import java.util.List;
 @Setter
 public class AccessUserUpdateRequest {
 
+    @Valid
     private List<AccessUserModuleRequest> modules = new ArrayList<>();
 
 }

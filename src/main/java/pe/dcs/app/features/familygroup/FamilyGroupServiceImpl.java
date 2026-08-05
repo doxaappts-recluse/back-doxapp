@@ -142,14 +142,14 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
 
         if (dni == null || dni.isBlank()) {
             throw new Exceptions(
-                    "El DNI es obligatorio.",
+                    "error.elDniEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -158,7 +158,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "No se encontró ninguna persona con ese DNI en la organización.",
+                                        "error.noEncontroNingunaPersonaDniOrganizacion",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -188,7 +188,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (request.getHeadPersonId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar el jefe de hogar inicial del grupo familiar.",
+                    "error.debeSeleccionarJefeHogarInicialGrupo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -291,7 +291,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (request.getRole() == null) {
             throw new Exceptions(
-                    "El rol es obligatorio.",
+                    "error.elRolEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -421,7 +421,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (familyMemberRepository.existsByPersonId(person.getId())) {
             throw new Exceptions(
-                    "Esta persona ya pertenece a otro grupo familiar. Quítela de ese grupo antes de agregarla acá.",
+                    "error.personaPerteneceOtroGrupoFamiliarQuitela",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -439,7 +439,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (alreadyHasHead) {
             throw new Exceptions(
-                    "Este grupo familiar ya tiene un jefe de hogar.",
+                    "error.grupoFamiliarTieneJefeHogar",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -485,20 +485,20 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
             return branchRepository.findById(
                     authContext.getCurrentBranchId()
             ).orElseThrow(() ->
-                    new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                    new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
             );
         }
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del grupo familiar.",
+                    "error.debeSeleccionarSedeGrupoFamiliar",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -506,14 +506,14 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         if (request.getPersonId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar la persona a agregar.",
+                    "error.debeSeleccionarPersonaAgregar",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getRole() == null) {
             throw new Exceptions(
-                    "El rol es obligatorio.",
+                    "error.elRolEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -524,7 +524,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
         return familyGroupRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Grupo familiar no encontrado.",
+                                "error.grupoFamiliarNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -535,12 +535,12 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
         FamilyMember member =
                 familyMemberRepository.findById(memberId)
                         .orElseThrow(() ->
-                                new Exceptions("Miembro no encontrado.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.miembroNoEncontrado", HttpStatus.NOT_FOUND)
                         );
 
         if (!member.getFamilyGroup().getId().equals(groupId)) {
             throw new Exceptions(
-                    "Este miembro no pertenece a este grupo familiar.",
+                    "error.miembroNoPerteneceGrupoFamiliar",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -552,7 +552,7 @@ public class FamilyGroupServiceImpl implements FamilyGroupService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

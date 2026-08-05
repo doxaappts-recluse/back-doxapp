@@ -120,7 +120,7 @@ public class VisitorServiceImpl implements VisitorService {
 
         if (visitorRepository.existsByPersonId(personId)) {
             throw new Exceptions(
-                    "Esta persona ya tiene un registro de visitante.",
+                    "error.personaTieneRegistroVisitante",
                     HttpStatus.CONFLICT
             );
         }
@@ -177,14 +177,14 @@ public class VisitorServiceImpl implements VisitorService {
 
         if (isActiveMember(person)) {
             throw new Exceptions(
-                    "Esta persona ya tiene una membresía activa.",
+                    "error.personaTieneMembresiaActiva",
                     HttpStatus.CONFLICT
             );
         }
 
         if (request.getStartDate() == null) {
             throw new Exceptions(
-                    "La fecha de inicio de membresía es obligatoria.",
+                    "error.fechaInicioMembresiaObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -245,14 +245,14 @@ public class VisitorServiceImpl implements VisitorService {
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del visitante.",
+                    "error.debeSeleccionarSedeVisitante",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -260,21 +260,21 @@ public class VisitorServiceImpl implements VisitorService {
 
         if (request.getFirstVisitDate() == null) {
             throw new Exceptions(
-                    "La fecha de primera visita es obligatoria.",
+                    "error.fechaPrimeraVisitaObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getHowArrived() == null) {
             throw new Exceptions(
-                    "Cómo llegó el visitante es obligatorio.",
+                    "error.comoLlegoVisitanteObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getConsolidationStage() == null) {
             throw new Exceptions(
-                    "La etapa de consolidación es obligatoria.",
+                    "error.etapaConsolidacionObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -285,7 +285,7 @@ public class VisitorServiceImpl implements VisitorService {
         return visitorRepository.findByPersonId(personId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Esta persona no tiene un registro de visitante.",
+                                "error.personaNoTieneRegistroVisitante",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -295,7 +295,7 @@ public class VisitorServiceImpl implements VisitorService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

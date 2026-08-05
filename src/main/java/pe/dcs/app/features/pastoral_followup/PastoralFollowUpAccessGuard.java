@@ -53,7 +53,7 @@ public class PastoralFollowUpAccessGuard {
             return;
         }
 
-        throw forbidden("acceder al seguimiento pastoral");
+        throw forbidden("action.accederSeguimientoPastoral");
     }
 
     public void assertCanCreate() {
@@ -66,14 +66,14 @@ public class PastoralFollowUpAccessGuard {
             return;
         }
 
-        throw forbidden("registrar seguimiento pastoral");
+        throw forbidden("action.registrarSeguimientoPastoral");
     }
 
     public void assertCanManage(Branch recordBranch) {
 
         if (!canManage(recordBranch)) {
             throw new Exceptions(
-                    "No tiene permisos para gestionar este registro de seguimiento pastoral.",
+                    "error.noTienePermisosGestionarRegistroSeguimiento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -99,7 +99,7 @@ public class PastoralFollowUpAccessGuard {
 
         if (!isAdmin()) {
             throw new Exceptions(
-                    "Solo un administrador de la organización o de la sede puede asignar el líder de seguimiento.",
+                    "error.soloAdministradorOrganizacionSedePuedeAsignar",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -164,10 +164,14 @@ public class PastoralFollowUpAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

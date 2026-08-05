@@ -28,7 +28,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla creada correctamente",
+                "success.plantillaCreadaCorrectamente",
                 documentTemplateService.create(request, file)
         );
     }
@@ -42,7 +42,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla actualizada correctamente",
+                "success.plantillaActualizadaCorrectamente",
                 documentTemplateService.update(id, request, file)
         );
     }
@@ -54,7 +54,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla habilitada correctamente",
+                "success.plantillaHabilitadaCorrectamente",
                 documentTemplateService.enable(id)
         );
     }
@@ -66,7 +66,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla inhabilitada correctamente",
+                "success.plantillaInhabilitadaCorrectamente",
                 documentTemplateService.disable(id)
         );
     }
@@ -78,7 +78,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla obtenida correctamente",
+                "success.plantillaObtenidaCorrectamente",
                 documentTemplateService.getById(id)
         );
     }
@@ -88,7 +88,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantillas obtenidas correctamente",
+                "success.plantillasObtenidasCorrectamente",
                 documentTemplateService.listAll()
         );
     }
@@ -107,7 +107,7 @@ public class DocumentTemplateController {
 
         return new ApiResponse<>(
                 200,
-                "Plantilla obtenida correctamente",
+                "success.plantillaObtenidaCorrectamente",
                 documentTemplateService.download(documentType)
         );
     }

@@ -28,7 +28,7 @@ public class SidebarController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Sidebar fetched successfully",
+                        "success.sidebarFetchedSuccessfully",
                         response
                 )
         );

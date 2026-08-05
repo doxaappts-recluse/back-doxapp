@@ -36,7 +36,7 @@ public class ContextController {
 
         return  new ApiResponse<>(
                         200,
-                        "Contextos disponibles",
+                        "success.contextosDisponibles",
                         response
                 );
 

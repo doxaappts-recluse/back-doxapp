@@ -43,7 +43,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
         }
 
         throw new Exceptions(
-                "Solo el administrador de la organización puede gestionar los fondos",
+                "error.soloAdministradorOrganizacionPuedeGestionarFondos",
                 HttpStatus.FORBIDDEN
         );
     }
@@ -54,7 +54,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No se pudo determinar la organización actual",
+                    "error.noPudoDeterminarOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -68,7 +68,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
                 financialFundRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Fondo no encontrado",
+                                        "error.fondoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -77,7 +77,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
                 && !fund.getOrganization().getId().equals(currentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este fondo",
+                    "error.noTieneAccesoFondo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -95,15 +95,26 @@ public class FinancialFundServiceImpl implements FinancialFundService {
                 organizationRepository.findById(currentOrganizationId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Organización no encontrada",
+                                        "error.organizacionNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
+        String code = request.getCode().trim().toUpperCase();
+
+        if (financialFundRepository.existsByOrganizationIdAndCodeIgnoreCase(organization.getId(), code)) {
+            throw new Exceptions(
+                    "error.financialFundCodeAlreadyExists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         FinancialFund fund = new FinancialFund();
 
         fund.setOrganization(organization);
-        fund.setName(request.getName());
+        fund.setCode(code);
+        fund.setNameEs(request.getNameEs());
+        fund.setNameEn(request.getNameEn());
         fund.setDescription(request.getDescription());
         fund.setStatus(StatusType.ACTIVE);
 
@@ -121,7 +132,30 @@ public class FinancialFundServiceImpl implements FinancialFundService {
 
         FinancialFund fund = findOwn(id);
 
-        fund.setName(request.getName());
+        if (request.getCode() != null) {
+
+            String code = request.getCode().trim().toUpperCase();
+
+            if (financialFundRepository.existsByOrganizationIdAndCodeIgnoreCaseAndIdNot(
+                    fund.getOrganization().getId(), code, id)) {
+
+                throw new Exceptions(
+                        "error.financialFundCodeAlreadyExists",
+                        HttpStatus.BAD_REQUEST
+                );
+            }
+
+            fund.setCode(code);
+        }
+
+        if (request.getNameEs() != null) {
+            fund.setNameEs(request.getNameEs());
+        }
+
+        if (request.getNameEn() != null) {
+            fund.setNameEn(request.getNameEn());
+        }
+
         fund.setDescription(request.getDescription());
         fund.setUpdatedAt(Instant.now());
 
@@ -183,7 +217,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
 
         boolean showAudit = authContext.canViewAudit();
 
-        return financialFundRepository.findByOrganizationIdAndStatusOrderByNameAsc(
+        return financialFundRepository.findByOrganizationIdAndStatusOrderByNameEsAsc(
                         currentOrganizationId(),
                         StatusType.ACTIVE
                 )
@@ -200,7 +234,7 @@ public class FinancialFundServiceImpl implements FinancialFundService {
 
         boolean showAudit = authContext.canViewAudit();
 
-        return financialFundRepository.findByOrganizationIdOrderByNameAsc(
+        return financialFundRepository.findByOrganizationIdOrderByNameEsAsc(
                         currentOrganizationId()
                 )
                 .stream()

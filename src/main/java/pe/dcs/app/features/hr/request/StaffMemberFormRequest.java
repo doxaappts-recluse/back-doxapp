@@ -1,5 +1,7 @@
 package pe.dcs.app.features.hr.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.StatusType;
@@ -16,10 +18,17 @@ public class StaffMemberFormRequest {
     /** Solo requerido al crear — ver HrServiceImpl.createStaff. */
     private UUID personId;
 
+    @NotBlank(message = "{error.cargoObligatorio}")
     private String position;
+
+    @NotNull(message = "{error.tipoContratoObligatorio}")
     private HrContractType contractType;
+
     private BigDecimal baseSalary;
+
+    @NotNull(message = "{error.fechaIngresoObligatoria}")
     private LocalDate hireDate;
+
     private LocalDate terminationDate;
     private String notes;
 

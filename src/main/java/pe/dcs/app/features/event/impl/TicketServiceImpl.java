@@ -35,7 +35,7 @@ public class TicketServiceImpl implements TicketService {
         EventRegistration reg = registrationRepository.findById(registrationId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Inscripcion no encontrada",
+                                "error.inscripcionNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -55,7 +55,7 @@ public class TicketServiceImpl implements TicketService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Evento no encontrado",
+                                "error.eventoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );

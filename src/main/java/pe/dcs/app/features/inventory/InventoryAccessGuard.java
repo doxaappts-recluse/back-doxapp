@@ -55,7 +55,7 @@ public class InventoryAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a Inventario");
+        throw forbidden("action.accederAInventario");
     }
 
     // =========================================================
@@ -80,13 +80,13 @@ public class InventoryAccessGuard {
 
     public void assertCanManageItem(InventoryItem item) {
         if (!canManageItem(item)) {
-            throw forbidden("gestionar este ítem");
+            throw forbidden("action.gestionarEsteItem");
         }
     }
 
     public void assertCanCreateItem() {
         if (!isAdmin()) {
-            throw forbidden("crear ítems de inventario");
+            throw forbidden("action.crearItemsInventario");
         }
     }
 
@@ -104,7 +104,7 @@ public class InventoryAccessGuard {
             return;
         }
 
-        throw forbidden("registrar movimientos de inventario");
+        throw forbidden("action.registrarMovimientosInventario");
     }
 
     public boolean canManageMovement(InventoryMovement movement) {
@@ -115,7 +115,7 @@ public class InventoryAccessGuard {
 
     public void assertCanManageMovement(InventoryMovement movement) {
         if (!canManageMovement(movement)) {
-            throw forbidden("gestionar este movimiento");
+            throw forbidden("action.gestionarEsteMovimiento");
         }
     }
 
@@ -133,7 +133,7 @@ public class InventoryAccessGuard {
             return;
         }
 
-        throw forbidden("registrar asignaciones de inventario");
+        throw forbidden("action.registrarAsignacionesInventario");
     }
 
     public boolean canManageAssignment(InventoryAssignment assignment) {
@@ -144,7 +144,7 @@ public class InventoryAccessGuard {
 
     public void assertCanManageAssignment(InventoryAssignment assignment) {
         if (!canManageAssignment(assignment)) {
-            throw forbidden("gestionar esta asignación");
+            throw forbidden("action.gestionarEstaAsignacion");
         }
     }
 
@@ -224,10 +224,14 @@ public class InventoryAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

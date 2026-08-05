@@ -1,5 +1,6 @@
 package pe.dcs.app.features.church_attendance.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class ChurchServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Cultos obtenidos correctamente",
+                "success.cultosObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -51,7 +52,7 @@ public class ChurchServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Culto obtenido correctamente",
+                "success.cultoObtenidoCorrectamente",
                 service.getById(id)
         );
     }
@@ -63,19 +64,19 @@ public class ChurchServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
 
     @PostMapping("/create")
     public ApiResponse<UUID> create(
-            @RequestBody ChurchServiceFormRequest request
+            @Valid @RequestBody ChurchServiceFormRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Culto registrado correctamente",
+                "success.cultoRegistradoCorrectamente",
                 service.create(request)
         );
     }
@@ -83,14 +84,14 @@ public class ChurchServiceController {
     @PutMapping("/update/{id}")
     public ApiResponse<String> update(
             @PathVariable UUID id,
-            @RequestBody ChurchServiceFormRequest request
+            @Valid @RequestBody ChurchServiceFormRequest request
     ) {
 
         service.update(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Culto actualizado correctamente",
+                "success.cultoActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -105,7 +106,7 @@ public class ChurchServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asistencia obtenida correctamente",
+                "success.asistenciaObtenidaCorrectamente",
                 service.listAttendance(id, date)
         );
     }
@@ -113,14 +114,14 @@ public class ChurchServiceController {
     @PostMapping("/{id}/attendance")
     public ApiResponse<String> markAttendance(
             @PathVariable UUID id,
-            @RequestBody ChurchServiceAttendanceFormRequest request
+            @Valid @RequestBody ChurchServiceAttendanceFormRequest request
     ) {
 
         service.markAttendance(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asistencia registrada correctamente",
+                "success.asistenciaRegistradaCorrectamente",
                 "OK"
         );
     }
@@ -135,7 +136,7 @@ public class ChurchServiceController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Asistencia removida correctamente",
+                "success.asistenciaRemovidaCorrectamente",
                 "OK"
         );
     }

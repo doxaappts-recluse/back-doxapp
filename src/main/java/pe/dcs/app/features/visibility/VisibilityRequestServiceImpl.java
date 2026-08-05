@@ -140,14 +140,14 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
 
         if (dni == null || dni.isBlank()) {
             throw new Exceptions(
-                    "El DNI es obligatorio.",
+                    "error.elDniEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -156,7 +156,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "No se encontró ninguna persona con ese DNI en la organización.",
+                                        "error.noEncontroNingunaPersonaDniOrganizacion",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -237,28 +237,28 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
 
         if (requestBranchId == null) {
             throw new Exceptions(
-                    "Debe estar operando en el contexto de una sede para solicitar visibilidad.",
+                    "error.debeEstarOperandoContextoSedeSolicitar",
                     HttpStatus.CONFLICT
             );
         }
 
         if (request.getModuleCode() == null || request.getModuleCode().isBlank()) {
             throw new Exceptions(
-                    "El módulo es obligatorio.",
+                    "error.elModuloEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getSourceBranchId() == null) {
             throw new Exceptions(
-                    "La sede de origen es obligatoria.",
+                    "error.sedeOrigenObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getSourceBranchId().equals(requestBranchId)) {
             throw new Exceptions(
-                    "No puede solicitar visibilidad sobre su propia sede.",
+                    "error.noPuedeSolicitarVisibilidadSobrePropia",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -269,7 +269,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
                         StatusType.ACTIVE
                 ).orElseThrow(() ->
                         new Exceptions(
-                                "Módulo no encontrado.",
+                                "error.moduloNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -281,7 +281,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
 
         if (rule == null || rule.getScope() != DataScope.APPROVAL_REQUIRED) {
             throw new Exceptions(
-                    "Este módulo no requiere solicitud de visibilidad.",
+                    "error.moduloNoRequiereSolicitudVisibilidad",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -290,7 +290,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
                 branchRepository.findById(request.getSourceBranchId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede de origen no encontrada.",
+                                        "error.sedeOrigenNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -299,7 +299,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
                 branchRepository.findById(requestBranchId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede actual no encontrada.",
+                                        "error.sedeActualNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -308,7 +308,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
                 .equals(requestBranch.getOrganization().getId())) {
 
             throw new Exceptions(
-                    "La sede de origen debe pertenecer a la misma organización.",
+                    "error.sedeOrigenDebePertenecerMismaOrganizacion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -323,7 +323,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
 
         if (alreadyPending) {
             throw new Exceptions(
-                    "Ya existe una solicitud pendiente para esta persona, sede y módulo.",
+                    "error.existeSolicitudPendientePersonaSedeModulo",
                     HttpStatus.CONFLICT
             );
         }
@@ -363,7 +363,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         )) {
 
             throw new Exceptions(
-                    "No tiene permisos para aprobar solicitudes de la sede dueña de esta data.",
+                    "error.noTienePermisosAprobarSolicitudesSede",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -416,7 +416,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         )) {
 
             throw new Exceptions(
-                    "No tiene permisos para rechazar solicitudes de la sede dueña de esta data.",
+                    "error.noTienePermisosRechazarSolicitudesSede",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -439,7 +439,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         if (visibilityRequest.getStatus() != VisibilityStatus.PENDING) {
 
             throw new Exceptions(
-                    "Esta solicitud ya fue resuelta.",
+                    "error.solicitudFueResuelta",
                     HttpStatus.CONFLICT
             );
         }
@@ -450,7 +450,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         if (!authContext.isSystem() && authContext.getCurrentOrganizationId() == null) {
 
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -461,7 +461,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         return personRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Persona no encontrada.",
+                                "error.personaNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -472,7 +472,7 @@ public class VisibilityRequestServiceImpl implements VisibilityRequestService {
         return visibilityRequestRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Solicitud de visibilidad no encontrada.",
+                                "error.solicitudVisibilidadNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );

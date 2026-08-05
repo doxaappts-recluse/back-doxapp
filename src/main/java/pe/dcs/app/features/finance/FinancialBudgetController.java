@@ -1,5 +1,6 @@
 package pe.dcs.app.features.finance;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.finance.request.FinancialBudgetRequest;
@@ -19,12 +20,12 @@ public class FinancialBudgetController {
 
     @PostMapping("/create")
     public ApiResponse<FinancialBudgetResponse> create(
-            @RequestBody FinancialBudgetRequest request
+            @Valid @RequestBody FinancialBudgetRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Presupuesto creado correctamente",
+                "success.presupuestoCreadoCorrectamente",
                 financialBudgetService.create(request)
         );
     }
@@ -32,12 +33,12 @@ public class FinancialBudgetController {
     @PutMapping("/update/{id}")
     public ApiResponse<FinancialBudgetResponse> update(
             @PathVariable UUID id,
-            @RequestBody FinancialBudgetRequest request
+            @Valid @RequestBody FinancialBudgetRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Presupuesto actualizado correctamente",
+                "success.presupuestoActualizadoCorrectamente",
                 financialBudgetService.update(id, request)
         );
     }
@@ -49,7 +50,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Presupuesto habilitado correctamente",
+                "success.presupuestoHabilitadoCorrectamente",
                 financialBudgetService.enable(id)
         );
     }
@@ -61,7 +62,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Presupuesto inhabilitado correctamente",
+                "success.presupuestoInhabilitadoCorrectamente",
                 financialBudgetService.disable(id)
         );
     }
@@ -73,7 +74,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Presupuesto obtenido correctamente",
+                "success.presupuestoObtenidoCorrectamente",
                 financialBudgetService.getById(id)
         );
     }
@@ -83,7 +84,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Presupuestos obtenidos correctamente",
+                "success.presupuestosObtenidosCorrectamente",
                 financialBudgetService.listAll()
         );
     }
@@ -95,7 +96,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Avance del presupuesto obtenido correctamente",
+                "success.avancePresupuestoObtenidoCorrectamente",
                 financialBudgetService.progress(id)
         );
     }
@@ -108,7 +109,7 @@ public class FinancialBudgetController {
 
         return new ApiResponse<>(
                 200,
-                "Avance de presupuestos obtenido correctamente",
+                "success.avancePresupuestosObtenidoCorrectamente",
                 financialBudgetService.progressForPeriod(periodYear, periodMonth)
         );
     }

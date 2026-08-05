@@ -1,5 +1,7 @@
 package pe.dcs.app.features.marriage.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.finance.FinancialMovementPaymentMethod;
@@ -19,15 +21,21 @@ public class MarriageFormRequest {
      * Person nueva.
      */
     private UUID spouse1PersonId;
+
+    @NotBlank(message = "{error.nombrePrimerConyugeObligatorio}")
     private String spouse1Name;
     private String spouse1Dni;
 
     private UUID spouse2PersonId;
+
+    @NotBlank(message = "{error.nombreSegundoConyugeObligatorio}")
     private String spouse2Name;
     private String spouse2Dni;
 
+    @NotNull(message = "{error.fechaMatrimonioObligatoria}")
     private LocalDate marriageDate;
 
+    @NotBlank(message = "{error.iglesiaDondeCasaronObligatoria}")
     private String churchName;
 
     private String pastorName;

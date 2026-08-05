@@ -193,7 +193,7 @@ public class MembershipServiceImpl implements MembershipService {
                 membershipRepository.findById(membershipId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Membresía no encontrada.",
+                                        "error.membresiaNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -202,7 +202,7 @@ public class MembershipServiceImpl implements MembershipService {
                 || !membership.getPerson().getId().equals(userId)) {
 
             throw new Exceptions(
-                    "La membresía no pertenece a esta persona.",
+                    "error.membresiaNoPertenecePersona",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -210,7 +210,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (!Boolean.TRUE.equals(membership.getCurrent())) {
 
             throw new Exceptions(
-                    "Solo se puede editar el registro de membresía vigente.",
+                    "error.soloPuedeEditarRegistroMembresiaVigente",
                     HttpStatus.CONFLICT
             );
         }
@@ -324,7 +324,7 @@ public class MembershipServiceImpl implements MembershipService {
             if (overlaps) {
 
                 throw new Exceptions(
-                        "El periodo se solapa con otro registro de membresía de la persona.",
+                        "error.periodoSolapaOtroRegistroMembresiaPersona",
                         HttpStatus.CONFLICT
                 );
             }
@@ -358,7 +358,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (alreadyActive) {
 
             throw new Exceptions(
-                    "Ya existe un registro de membresía en estado activo para esta persona. Solo puede haber una membresía activa.",
+                    "error.existeRegistroMembresiaEstadoActivoPersona",
                     HttpStatus.CONFLICT
             );
         }
@@ -368,21 +368,21 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (request.getStartDate() == null) {
             throw new Exceptions(
-                    "La fecha de inicio es obligatoria.",
+                    "error.fechaInicioObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getStatus() == null) {
             throw new Exceptions(
-                    "El estado es obligatorio.",
+                    "error.elEstadoEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
     }
 
     private void assertCallerCanManage() {
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar membresías.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarMembresias");
     }
 
     private PersonBranch validateAccess(Person person) {
@@ -396,7 +396,7 @@ public class MembershipServiceImpl implements MembershipService {
 
         if (activeBranch == null) {
             throw new Exceptions(
-                    "La persona no tiene una sede activa.",
+                    "error.personaNoTieneSedeActiva",
                     HttpStatus.CONFLICT
             );
         }
@@ -410,7 +410,7 @@ public class MembershipServiceImpl implements MembershipService {
         if (!authContext.canAccess(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "No tiene permisos para gestionar la membresía de esta persona.",
+                    "error.noTienePermisosGestionarMembresiaPersona",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -423,7 +423,7 @@ public class MembershipServiceImpl implements MembershipService {
         return personRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Persona no encontrada.",
+                                "error.personaNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );

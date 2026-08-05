@@ -1,5 +1,7 @@
 package pe.dcs.app.features.smallgroup.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.StatusType;
@@ -11,6 +13,7 @@ import java.util.UUID;
 @Setter
 public class SmallGroupFormRequest {
 
+    @NotBlank(message = "{error.nombreGrupoObligatorio}")
     private String name;
 
     private String description;
@@ -22,6 +25,7 @@ public class SmallGroupFormRequest {
      * servicio ministerial generado automáticamente (ver
      * SmallGroupServiceImpl.syncLeaderMinistryService).
      */
+    @NotNull(message = "{error.fechaInicioTemporadaObligatoria}")
     private LocalDate startDate;
     private LocalDate endDate;
 
@@ -35,6 +39,9 @@ public class SmallGroupFormRequest {
      * SmallGroupController.findPersonByDni). Si es null, el grupo
      * queda con leaderName en texto libre nada más — el líder no
      * tiene por qué ser un miembro ni tener registro alguno.
+     * No se valida acá con @NotNull/@NotBlank porque es un OR:
+     * leaderPersonId presente O leaderName manual (ver
+     * SmallGroupServiceImpl.validateForm).
      */
     private UUID leaderPersonId;
     private String leaderName;

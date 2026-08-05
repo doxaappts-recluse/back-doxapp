@@ -1,5 +1,6 @@
 package pe.dcs.app.features.hr.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.finance.FinancialMovementPaymentMethod;
@@ -12,9 +13,13 @@ import java.util.UUID;
 @Setter
 public class PayrollRecordFormRequest {
 
+    @NotNull(message = "{error.empleadoObligatorio}")
     private UUID staffId;
 
+    @NotNull(message = "{error.mesPeriodoObligatorio}")
     private Integer periodMonth;
+
+    @NotNull(message = "{error.anioPeriodoObligatorio}")
     private Integer periodYear;
 
     /** Si no viene informado, se usa StaffMember.baseSalary — ver HrServiceImpl.createPayrollRecord. */

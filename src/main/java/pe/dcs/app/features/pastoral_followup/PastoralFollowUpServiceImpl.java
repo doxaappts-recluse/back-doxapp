@@ -106,7 +106,7 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
 
         if (request.getLeaderId().equals(personId)) {
             throw new Exceptions(
-                    "Una persona no puede ser su propio líder de seguimiento.",
+                    "error.personaNoPuedeSerPropioLider",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -190,12 +190,12 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
         FollowUpContact contact =
                 followUpContactRepository.findById(contactId)
                         .orElseThrow(() ->
-                                new Exceptions("Contacto no encontrado.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.contactoNoEncontrado", HttpStatus.NOT_FOUND)
                         );
 
         if (!contact.getPerson().getId().equals(personId)) {
             throw new Exceptions(
-                    "El contacto no pertenece a esta persona.",
+                    "error.contactoNoPertenecePersona",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -290,12 +290,12 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
         PrayerRequest prayerRequest =
                 prayerRequestRepository.findById(prayerRequestId)
                         .orElseThrow(() ->
-                                new Exceptions("Petición de oración no encontrada.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.peticionOracionNoEncontrada", HttpStatus.NOT_FOUND)
                         );
 
         if (!prayerRequest.getPerson().getId().equals(personId)) {
             throw new Exceptions(
-                    "La petición de oración no pertenece a esta persona.",
+                    "error.peticionOracionNoPertenecePersona",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -413,14 +413,14 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del registro.",
+                    "error.debeSeleccionarSedeRegistro",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -442,30 +442,30 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
     private void validateContactForm(FollowUpContactFormRequest request) {
 
         if (request.getContactDate() == null) {
-            throw new Exceptions("La fecha de contacto es obligatoria.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaContactoObligatoria", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getContactMethod() == null) {
-            throw new Exceptions("El medio de contacto es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.medioContactoObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getResult() == null) {
-            throw new Exceptions("El resultado del contacto es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.resultadoContactoObligatorio", HttpStatus.BAD_REQUEST);
         }
     }
 
     private void validatePrayerRequestForm(PrayerRequestFormRequest request) {
 
         if (request.getRequestDate() == null) {
-            throw new Exceptions("La fecha de la petición es obligatoria.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaPeticionObligatoria", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getDescription() == null || request.getDescription().isBlank()) {
-            throw new Exceptions("La descripción de la petición es obligatoria.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.descripcionPeticionObligatoria", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getStatus() == null) {
-            throw new Exceptions("El estado de la petición es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.estadoPeticionObligatorio", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -473,7 +473,7 @@ public class PastoralFollowUpServiceImpl implements PastoralFollowUpService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

@@ -16,7 +16,10 @@ public class MinistryMapper {
         BaseMapper.mapAudit(entity, dto, showAudit);
 
         dto.setId(entity.getId());
-        dto.setName(entity.getName());
+        dto.setCode(entity.getCode());
+        dto.setNameEs(entity.getNameEs());
+        dto.setNameEn(entity.getNameEn());
+        dto.setName(entity.getLocalizedName());
         dto.setDescription(entity.getDescription());
         dto.setStatus(entity.getStatus());
 
@@ -25,7 +28,9 @@ public class MinistryMapper {
 
     public void updateEntity(Ministry entity, MinistryRequest request){
 
-        entity.setName(request.getName());
+        entity.setCode(request.getCode().trim().toUpperCase());
+        entity.setNameEs(request.getNameEs());
+        entity.setNameEn(request.getNameEn());
         entity.setDescription(request.getDescription());
 
         if(request.getStatus() != null){

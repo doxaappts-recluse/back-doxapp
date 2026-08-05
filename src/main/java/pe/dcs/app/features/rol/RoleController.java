@@ -38,7 +38,7 @@ public class RoleController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Roles del sistema obtenidos correctamente",
+                        "success.rolesSistemaObtenidosCorrectamente",
                         rolService.getSystemRoles()
                 )
         );
@@ -55,7 +55,7 @@ public class RoleController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Roles de organización obtenidos correctamente",
+                        "success.rolesOrganizacionObtenidosCorrectamente",
                         rolService.getOrganizationRoles()
                 )
         );

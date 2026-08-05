@@ -57,15 +57,15 @@ public class HrAccessGuard {
     // =========================================================
 
     public void assertCanUseStaff() {
-        assertCanUse(STAFF_MEMBER_MODULE_CODE, "acceder a fichas de empleado");
+        assertCanUse(STAFF_MEMBER_MODULE_CODE, "action.accederFichasEmpleado");
     }
 
     public void assertCanUseLeaveRequest() {
-        assertCanUse(LEAVE_REQUEST_MODULE_CODE, "acceder a vacaciones/permisos");
+        assertCanUse(LEAVE_REQUEST_MODULE_CODE, "action.accederVacacionesPermisos");
     }
 
     public void assertCanUsePayroll() {
-        assertCanUse(PAYROLL_MODULE_CODE, "acceder a planilla");
+        assertCanUse(PAYROLL_MODULE_CODE, "action.accederPlanilla");
     }
 
     private void assertCanUse(String moduleCode, String action) {
@@ -103,13 +103,13 @@ public class HrAccessGuard {
 
     public void assertCanManageStaff(StaffMember staff) {
         if (!canManageStaff(staff)) {
-            throw forbidden("gestionar esta ficha de empleado");
+            throw forbidden("action.gestionarFichaEmpleado");
         }
     }
 
     public void assertCanCreateStaff() {
         if (!isAdmin()) {
-            throw forbidden("crear fichas de empleado");
+            throw forbidden("action.crearFichasEmpleado");
         }
     }
 
@@ -127,7 +127,7 @@ public class HrAccessGuard {
             return;
         }
 
-        throw forbidden("registrar solicitudes de vacaciones/permisos");
+        throw forbidden("action.registrarSolicitudesVacacionesPermisos");
     }
 
     public boolean canManageLeaveRequest(LeaveRequest leaveRequest) {
@@ -139,7 +139,7 @@ public class HrAccessGuard {
 
     public void assertCanManageLeaveRequest(LeaveRequest leaveRequest) {
         if (!canManageLeaveRequest(leaveRequest)) {
-            throw forbidden("gestionar esta solicitud");
+            throw forbidden("action.gestionarEstaSolicitud");
         }
     }
 
@@ -157,7 +157,7 @@ public class HrAccessGuard {
             return;
         }
 
-        throw forbidden("registrar pagos de planilla");
+        throw forbidden("action.registrarPagosPlanilla");
     }
 
     public boolean canManagePayroll(PayrollRecord payroll) {
@@ -169,7 +169,7 @@ public class HrAccessGuard {
 
     public void assertCanManagePayroll(PayrollRecord payroll) {
         if (!canManagePayroll(payroll)) {
-            throw forbidden("gestionar este pago de planilla");
+            throw forbidden("action.gestionarPagoPlanilla");
         }
     }
 
@@ -249,10 +249,14 @@ public class HrAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

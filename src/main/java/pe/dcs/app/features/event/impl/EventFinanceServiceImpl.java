@@ -91,7 +91,7 @@ public class EventFinanceServiceImpl
                         )
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -104,7 +104,7 @@ public class EventFinanceServiceImpl
                         )
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Usuario no encontrado",
+                                        "error.usuarioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -176,7 +176,7 @@ public class EventFinanceServiceImpl
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -186,7 +186,7 @@ public class EventFinanceServiceImpl
                 EventFinanceStatus.APPROVED) {
 
             throw new Exceptions(
-                    "No se puede editar un movimiento aprobado",
+                    "error.noPuedeEditarMovimientoAprobado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -203,7 +203,7 @@ public class EventFinanceServiceImpl
             )) {
 
                 throw new Exceptions(
-                        "No puede editar movimientos de otros usuarios",
+                        "error.noPuedeEditarMovimientosOtrosUsuarios",
                         HttpStatus.FORBIDDEN
                 );
             }
@@ -215,7 +215,7 @@ public class EventFinanceServiceImpl
                         )
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -282,7 +282,7 @@ public class EventFinanceServiceImpl
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -290,7 +290,7 @@ public class EventFinanceServiceImpl
         if (!eventAccessGuard.canManage(finance.getEvent())) {
 
             throw new Exceptions(
-                    "No tiene permisos para aprobar movimientos de este evento",
+                    "error.noTienePermisosAprobarMovimientosEvento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -299,7 +299,7 @@ public class EventFinanceServiceImpl
                 EventFinanceStatus.PENDING) {
 
             throw new Exceptions(
-                    "Solo se pueden aprobar movimientos pendientes",
+                    "error.soloPuedenAprobarMovimientosPendientes",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -310,7 +310,7 @@ public class EventFinanceServiceImpl
                         )
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Usuario no encontrado",
+                                        "error.usuarioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -352,7 +352,7 @@ public class EventFinanceServiceImpl
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -360,7 +360,7 @@ public class EventFinanceServiceImpl
         if (!eventAccessGuard.canManage(finance.getEvent())) {
 
             throw new Exceptions(
-                    "No tiene permisos para aprobar movimientos de este evento",
+                    "error.noTienePermisosAprobarMovimientosEvento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -369,7 +369,7 @@ public class EventFinanceServiceImpl
                 EventFinanceStatus.PENDING) {
 
             throw new Exceptions(
-                    "Solo se pueden rechazar movimientos pendientes",
+                    "error.soloPuedenRechazarMovimientosPendientes",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -402,7 +402,7 @@ public class EventFinanceServiceImpl
                 eventFinanceRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -432,7 +432,7 @@ public class EventFinanceServiceImpl
         if (filters == null || filters.getEventId() == null) {
 
             throw new Exceptions(
-                    "El evento es requerido",
+                    "error.elEventoEsRequerido",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -443,7 +443,7 @@ public class EventFinanceServiceImpl
                         )
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );

@@ -8,7 +8,12 @@ public class ApiResponse<T> {
 
     public ApiResponse(int status, String message, T data) {
         this.status = status;
-        this.message = message;
+        // message puede venir como clave de messages_xx.properties (p.ej.
+        // "success.contratoCreadoCorrectamente") o como texto literal
+        // legado; MessageSourceHolder.resolve hace fallback al valor
+        // recibido si no encuentra la clave, así que es seguro para
+        // ambos casos — ver Exceptions.java para el mismo patrón.
+        this.message = MessageSourceHolder.resolve(message);
         this.data = data;
         this.timestamp = java.time.LocalDateTime.now().toString();
     }

@@ -18,7 +18,9 @@ public class ModuleMapper {
         BaseMapper.mapAudit(module, dto, showAudit);
 
         dto.setId(module.getId());
-        dto.setName(module.getName());
+        dto.setName(module.getLocalizedName());
+        dto.setNameEs(module.getNameEs());
+        dto.setNameEn(module.getNameEn());
         dto.setCode(module.getCode());
         dto.setIcon(module.getIcon());
         dto.setRoute(module.getRoute());
@@ -35,7 +37,7 @@ public class ModuleMapper {
 
         if(module.getParent() != null){
             dto.setParentId(module.getParent().getId());
-            dto.setParentName(module.getParent().getName());
+            dto.setParentName(module.getParent().getLocalizedName());
         }
 
         /*

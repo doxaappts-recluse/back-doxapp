@@ -51,7 +51,7 @@ public class ContractModuleAccessService {
 
         if (authContext.isSystem()) {
             throw new Exceptions(
-                    "No disponible para usuarios de sistema.",
+                    "error.noDisponibleUsuariosSistema",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -60,7 +60,7 @@ public class ContractModuleAccessService {
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe indicar la sede.",
+                    "error.debeIndicarSede2",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -144,7 +144,7 @@ public class ContractModuleAccessService {
                                             new ContractModuleAccessResponse();
 
                                     r.setModuleId(module.getId());
-                                    r.setName(module.getName());
+                                    r.setName(module.getLocalizedName());
 
                                     return r;
                                 }

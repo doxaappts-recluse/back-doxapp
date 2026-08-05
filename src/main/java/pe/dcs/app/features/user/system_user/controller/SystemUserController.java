@@ -33,7 +33,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Users retrieved successfully",
+                "success.usersRetrievedSuccessfully",
                 service.findAllSystem(request)
         );
     }
@@ -49,7 +49,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User retrieved successfully",
+                "success.userRetrievedSuccessfully",
                 service.findById(id)
         );
     }
@@ -66,7 +66,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.CREATED.value(),
-                "User created successfully",
+                "success.userCreatedSuccessfully",
                 service.create(request)
         );
     }
@@ -84,7 +84,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User updated successfully",
+                "success.userUpdatedSuccessfully",
                 service.update(id, request)
         );
     }
@@ -102,7 +102,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User enabled successfully",
+                "success.userEnabledSuccessfully",
                 "OK"
         );
     }
@@ -120,7 +120,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User disabled successfully",
+                "success.userDisabledSuccessfully",
                 "OK"
         );
     }
@@ -140,7 +140,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Password updated successfully",
+                "success.passwordUpdatedSuccessfully",
                 "OK"
         );
     }
@@ -158,7 +158,7 @@ public class SystemUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "User deleted successfully",
+                "success.userDeletedSuccessfully",
                 "OK"
         );
     }

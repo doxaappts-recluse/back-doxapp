@@ -1,9 +1,10 @@
 package pe.dcs.app.features.profile;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import pe.dcs.app.features.profile.request.ProfileChangePasswordRequest;
+import pe.dcs.app.features.profile.request.ProfileUpdateContactRequest;
 import pe.dcs.app.features.profile.response.ProfileResponse;
 import pe.dcs.app.features.profile.service.ProfileService;
 import pe.dcs.app.util.ApiResponse;
@@ -20,8 +21,34 @@ public class ProfileController {
 
         return new ApiResponse<>(
                 200,
-                "Profile fetched successfully",
+                "success.profileFetchedSuccessfully",
                 profileService.getProfile()
+        );
+    }
+
+    @PatchMapping("/contact")
+    public ApiResponse<ProfileResponse> updateContact(
+            @RequestBody ProfileUpdateContactRequest request
+    ) {
+
+        return new ApiResponse<>(
+                200,
+                "success.perfilActualizadoCorrectamente",
+                profileService.updateContact(request)
+        );
+    }
+
+    @PatchMapping("/change-password")
+    public ApiResponse<Void> changePassword(
+            @Valid @RequestBody ProfileChangePasswordRequest request
+    ) {
+
+        profileService.changePassword(request);
+
+        return new ApiResponse<>(
+                200,
+                "success.contrasenaActualizadaCorrectamente",
+                null
         );
     }
 }

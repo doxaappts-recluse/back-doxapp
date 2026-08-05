@@ -1,5 +1,6 @@
 package pe.dcs.app.features.bible_academy.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,7 @@ public class BibleAcademyController {
     public ApiResponse<BiblePersonSearchResponse> findPersonByDni(@RequestParam String dni) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
@@ -56,7 +57,7 @@ public class BibleAcademyController {
     ) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Mallas curriculares obtenidas correctamente",
+                "success.mallasCurricularesObtenidasCorrectamente",
                 service.searchCurriculums(request)
         );
     }
@@ -65,36 +66,36 @@ public class BibleAcademyController {
     public ApiResponse<BibleCurriculumDetailResponse> getCurriculumById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Malla curricular obtenida correctamente",
+                "success.mallaCurricularObtenidaCorrectamente",
                 service.getCurriculumById(id)
         );
     }
 
     @PostMapping("/curriculums/create")
-    public ApiResponse<UUID> createCurriculum(@RequestBody BibleCurriculumFormRequest request) {
+    public ApiResponse<UUID> createCurriculum(@Valid @RequestBody BibleCurriculumFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Malla curricular registrada correctamente",
+                "success.mallaCurricularRegistradaCorrectamente",
                 service.createCurriculum(request)
         );
     }
 
     @PutMapping("/curriculums/update/{id}")
-    public ApiResponse<String> updateCurriculum(@PathVariable UUID id, @RequestBody BibleCurriculumFormRequest request) {
+    public ApiResponse<String> updateCurriculum(@PathVariable UUID id, @Valid @RequestBody BibleCurriculumFormRequest request) {
         service.updateCurriculum(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Malla curricular actualizada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.mallaCurricularActualizadaCorrectamente", "OK");
     }
 
     @PostMapping("/curriculums/{id}/activate")
     public ApiResponse<String> activateCurriculum(@PathVariable UUID id) {
         service.activateCurriculum(id);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Malla curricular activada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.mallaCurricularActivadaCorrectamente", "OK");
     }
 
     @PostMapping("/curriculums/{id}/retire")
     public ApiResponse<String> retireCurriculum(@PathVariable UUID id) {
         service.retireCurriculum(id);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Malla curricular retirada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.mallaCurricularRetiradaCorrectamente", "OK");
     }
 
     // =====================================================
@@ -105,7 +106,7 @@ public class BibleAcademyController {
     public ApiResponse<PageResponse<BibleCourseResponse>> searchCourses(@RequestBody BibleCourseSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Cursos obtenidos correctamente",
+                "success.cursosObtenidosCorrectamente",
                 service.searchCourses(request)
         );
     }
@@ -114,24 +115,24 @@ public class BibleAcademyController {
     public ApiResponse<BibleCourseResponse> getCourseById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Curso obtenido correctamente",
+                "success.cursoObtenidoCorrectamente",
                 service.getCourseById(id)
         );
     }
 
     @PostMapping("/courses/create")
-    public ApiResponse<UUID> createCourse(@RequestBody BibleCourseFormRequest request) {
+    public ApiResponse<UUID> createCourse(@Valid @RequestBody BibleCourseFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Curso registrado correctamente",
+                "success.cursoRegistradoCorrectamente",
                 service.createCourse(request)
         );
     }
 
     @PutMapping("/courses/update/{id}")
-    public ApiResponse<String> updateCourse(@PathVariable UUID id, @RequestBody BibleCourseFormRequest request) {
+    public ApiResponse<String> updateCourse(@PathVariable UUID id, @Valid @RequestBody BibleCourseFormRequest request) {
         service.updateCourse(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Curso actualizado correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.cursoActualizadoCorrectamente", "OK");
     }
 
     // =====================================================
@@ -142,7 +143,7 @@ public class BibleAcademyController {
     public ApiResponse<PageResponse<BibleClassSearchRowResponse>> searchClasses(@RequestBody BibleClassSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Dictados obtenidos correctamente",
+                "success.dictadosObtenidosCorrectamente",
                 service.searchClasses(request)
         );
     }
@@ -151,24 +152,24 @@ public class BibleAcademyController {
     public ApiResponse<BibleClassDetailResponse> getClassById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Dictado obtenido correctamente",
+                "success.dictadoObtenidoCorrectamente",
                 service.getClassById(id)
         );
     }
 
     @PostMapping("/classes/create")
-    public ApiResponse<UUID> createClass(@RequestBody BibleClassFormRequest request) {
+    public ApiResponse<UUID> createClass(@Valid @RequestBody BibleClassFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Dictado registrado correctamente",
+                "success.dictadoRegistradoCorrectamente",
                 service.createClass(request)
         );
     }
 
     @PutMapping("/classes/update/{id}")
-    public ApiResponse<String> updateClass(@PathVariable UUID id, @RequestBody BibleClassFormRequest request) {
+    public ApiResponse<String> updateClass(@PathVariable UUID id, @Valid @RequestBody BibleClassFormRequest request) {
         service.updateClass(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Dictado actualizado correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.dictadoActualizadoCorrectamente", "OK");
     }
 
     // =====================================================
@@ -182,7 +183,7 @@ public class BibleAcademyController {
     ) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrículas obtenidas correctamente",
+                "success.matriculasObtenidasCorrectamente",
                 service.searchEnrollments(classId, request)
         );
     }
@@ -190,11 +191,11 @@ public class BibleAcademyController {
     @PostMapping("/classes/{classId}/enrollments")
     public ApiResponse<UUID> createEnrollment(
             @PathVariable UUID classId,
-            @RequestBody BibleEnrollmentFormRequest request
+            @Valid @RequestBody BibleEnrollmentFormRequest request
     ) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrícula registrada correctamente",
+                "success.matriculaRegistradaCorrectamente",
                 service.createEnrollment(classId, request)
         );
     }
@@ -203,9 +204,9 @@ public class BibleAcademyController {
     public ApiResponse<String> updateEnrollmentStatus(
             @PathVariable UUID classId,
             @PathVariable UUID enrollmentId,
-            @RequestBody BibleEnrollmentStatusUpdateRequest request
+            @Valid @RequestBody BibleEnrollmentStatusUpdateRequest request
     ) {
         service.updateEnrollmentStatus(classId, enrollmentId, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Matrícula actualizada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.matriculaActualizadaCorrectamente", "OK");
     }
 }

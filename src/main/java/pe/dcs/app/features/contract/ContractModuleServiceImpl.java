@@ -49,7 +49,7 @@ public class ContractModuleServiceImpl implements ContractModuleService {
 
         if (!authContext.isSystem()) {
             throw new Exceptions(
-                    "Solo un administrador del sistema puede gestionar contratos.",
+                    "error.soloAdministradorSistemaPuedeGestionarContratos",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -119,11 +119,11 @@ public class ContractModuleServiceImpl implements ContractModuleService {
 
             response.setModuleId(module.getId());
             response.setCode(module.getCode());
-            response.setName(module.getName());
+            response.setName(module.getLocalizedName());
 
             if (module.getParent() != null) {
                 response.setParentId(module.getParent().getId());
-                response.setParentName(module.getParent().getName());
+                response.setParentName(module.getParent().getLocalizedName());
             }
 
             response.setAssigned(
@@ -242,7 +242,7 @@ public class ContractModuleServiceImpl implements ContractModuleService {
                         permissionRepository.findById(permissionId)
                                 .orElseThrow(() ->
                                         new Exceptions(
-                                                "Permiso no encontrado.",
+                                                "error.permisoNoEncontrado",
                                                 HttpStatus.NOT_FOUND
                                         )
                                 );
@@ -262,7 +262,7 @@ public class ContractModuleServiceImpl implements ContractModuleService {
 
         if (moduleId == null) {
             throw new Exceptions(
-                    "Módulo inválido.",
+                    "error.moduloInvalido",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -270,14 +270,14 @@ public class ContractModuleServiceImpl implements ContractModuleService {
         Module module = moduleRepository.findById(moduleId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Módulo no encontrado.",
+                                "error.moduloNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
 
         if (!module.isActive() || !module.getChildren().isEmpty()) {
             throw new Exceptions(
-                    "Solo se pueden asignar módulos hoja activos.",
+                    "error.soloPuedenAsignarModulosHojaActivos",
                     HttpStatus.BAD_REQUEST
             );
         }

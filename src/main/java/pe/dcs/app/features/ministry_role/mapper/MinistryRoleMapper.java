@@ -12,7 +12,10 @@ public class MinistryRoleMapper {
         MinistryRoleResponse dto = new MinistryRoleResponse();
 
         dto.setId(entity.getId());
-        dto.setName(entity.getName());
+        dto.setCode(entity.getCode());
+        dto.setNameEs(entity.getNameEs());
+        dto.setNameEn(entity.getNameEn());
+        dto.setName(entity.getLocalizedName());
         dto.setDescription(entity.getDescription());
         dto.setStatus(entity.getStatus());
 

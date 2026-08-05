@@ -32,7 +32,7 @@ public class DashboardAccessGuard {
                 || authContext.getCurrentBranchId() == null) {
 
             throw new Exceptions(
-                    "Debe tener una organización y sede seleccionadas para ver el dashboard.",
+                    "error.debeTenerOrganizacionSedeSeleccionadasVer",
                     HttpStatus.FORBIDDEN
             );
         }

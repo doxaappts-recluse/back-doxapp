@@ -48,7 +48,7 @@ public class OrganizationServiceImpl implements OrganizationService {
         if (!authContext.isSystem()) {
 
             throw new Exceptions(
-                    "Solo un administrador del sistema puede gestionar organizaciones.",
+                    "error.soloAdministradorSistemaPuedeGestionarOrganizaciones",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -230,7 +230,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     private Organization getOrganization(UUID id) {
         return repository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Organization not found", HttpStatus.NOT_FOUND));
+                        new Exceptions("error.organizationNotFound", HttpStatus.NOT_FOUND));
     }
 
     // =========================================
@@ -245,7 +245,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if (exists) {
             throw new Exceptions(
-                    "Ya existe una organización con el RUC ingresado",
+                    "error.existeOrganizacionRucIngresado",
                     HttpStatus.CONFLICT
             );
         }
@@ -264,7 +264,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 
         if (exists) {
             throw new Exceptions(
-                    "Ya existe una organización con el RUC ingresado",
+                    "error.existeOrganizacionRucIngresado",
                     HttpStatus.CONFLICT
             );
         }

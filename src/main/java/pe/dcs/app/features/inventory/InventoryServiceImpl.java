@@ -91,17 +91,17 @@ public class InventoryServiceImpl implements InventoryService {
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
-            throw new Exceptions("No tiene un contexto de organización activo.", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneContextoOrganizacionActivo", HttpStatus.FORBIDDEN);
         }
 
         if (dni == null || dni.isBlank()) {
-            throw new Exceptions("El DNI es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elDniEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         Person person =
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() -> new Exceptions(
-                                "No se encontró ninguna persona con ese DNI en la organización.",
+                                "error.noEncontroNingunaPersonaDniOrganizacion",
                                 HttpStatus.NOT_FOUND
                         ));
 
@@ -123,9 +123,9 @@ public class InventoryServiceImpl implements InventoryService {
 
         accessGuard.assertCanUse();
 
-        return ministryRepository.findAllByStatusOrderByNameAsc(StatusType.ACTIVE)
+        return ministryRepository.findAllByStatusOrderByNameEsAsc(StatusType.ACTIVE)
                 .stream()
-                .map(m -> new InventoryMinistryOptionResponse(m.getId(), m.getName()))
+                .map(m -> new InventoryMinistryOptionResponse(m.getId(), m.getLocalizedName()))
                 .toList();
     }
 
@@ -193,13 +193,13 @@ public class InventoryServiceImpl implements InventoryService {
         accessGuard.assertCanCreateItem();
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre del ítem es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreItemObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         UUID branchId = accessGuard.resolveBranchId(request.getBranchId());
 
         if (branchId == null) {
-            throw new Exceptions("Debe seleccionar la sede del ítem.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarSedeItem", HttpStatus.BAD_REQUEST);
         }
 
         InventoryItem item = new InventoryItem();
@@ -226,7 +226,7 @@ public class InventoryServiceImpl implements InventoryService {
         accessGuard.assertCanManageItem(item);
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre del ítem es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreItemObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         item.setName(request.getName());
@@ -305,15 +305,15 @@ public class InventoryServiceImpl implements InventoryService {
         accessGuard.assertCanCreateMovement();
 
         if (request.getItemId() == null) {
-            throw new Exceptions("Debe seleccionar el ítem.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarItem", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getType() == null) {
-            throw new Exceptions("Debe indicar si es una entrada o una salida.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarSiEntradaSalida", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getQuantity() == null || request.getQuantity() <= 0) {
-            throw new Exceptions("La cantidad debe ser mayor a cero.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.cantidadDebeSerMayorCero", HttpStatus.BAD_REQUEST);
         }
 
         InventoryItem item = findItemOrThrow(request.getItemId());
@@ -330,8 +330,9 @@ public class InventoryServiceImpl implements InventoryService {
 
         if (newQuantity < 0) {
             throw new Exceptions(
-                    "No hay stock suficiente para esta salida (stock actual: " + item.getCurrentQuantity() + ").",
-                    HttpStatus.BAD_REQUEST
+                    "error.noHayStockSuficienteSalida",
+                    HttpStatus.BAD_REQUEST,
+                    item.getCurrentQuantity()
             );
         }
 
@@ -463,7 +464,7 @@ public class InventoryServiceImpl implements InventoryService {
         accessGuard.assertCanCreateAssignment();
 
         if (request.getItemId() == null) {
-            throw new Exceptions("Debe seleccionar el ítem.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarItem", HttpStatus.BAD_REQUEST);
         }
 
         boolean hasPerson = request.getAssignedToPersonId() != null;
@@ -471,7 +472,7 @@ public class InventoryServiceImpl implements InventoryService {
 
         if (hasPerson == hasMinistry) {
             throw new Exceptions(
-                    "Debe asignar el ítem a una persona o a un ministerio (uno de los dos, no ambos).",
+                    "error.debeAsignarItemPersonaMinisterioUno",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -501,7 +502,7 @@ public class InventoryServiceImpl implements InventoryService {
         accessGuard.assertCanManageAssignment(assignment);
 
         if (assignment.getReturnedDate() != null) {
-            throw new Exceptions("Este ítem ya fue devuelto.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.itemFueDevuelto", HttpStatus.BAD_REQUEST);
         }
 
         assignment.setReturnedDate(
@@ -529,31 +530,31 @@ public class InventoryServiceImpl implements InventoryService {
 
     private InventoryItem findItemOrThrow(UUID id) {
         return itemRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Ítem no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.itemNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private InventoryMovement findMovementOrThrow(UUID id) {
         return movementRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Movimiento no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.movimientoNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private InventoryAssignment findAssignmentOrThrow(UUID id) {
         return assignmentRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Asignación no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.asignacionNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private Branch findBranchOrThrow(UUID id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Sede no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.sedeNoEncontrada2", HttpStatus.NOT_FOUND));
     }
 
     private Person findPersonOrThrow(UUID id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private Ministry findMinistryOrThrow(UUID id) {
         return ministryRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Ministerio no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.ministerioNoEncontrado2", HttpStatus.NOT_FOUND));
     }
 }

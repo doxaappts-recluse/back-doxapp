@@ -17,16 +17,16 @@ public class OrgAdminBranchCreateRequest {
     // PERSON
     // ============================
 
-    @NotBlank
+    @NotBlank(message = "{error.elNombreEsObligatorio}")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "{error.elApellidoEsObligatorio}")
     private String lastname;
 
-    @NotBlank
+    @NotBlank(message = "{error.sexoObligatorio}")
     private String sex;
 
-    @NotBlank
+    @NotBlank(message = "{error.elDniEsObligatorio}")
     private String dni;
 
     private String phone;
@@ -43,29 +43,29 @@ public class OrgAdminBranchCreateRequest {
     // CREDENTIAL
     // ============================
 
-    @NotBlank
+    @NotBlank(message = "{error.usernameObligatorio}")
     private String username;
 
-    @NotBlank
+    @NotBlank(message = "{error.passwordObligatorio}")
     private String password;
 
     // ============================
     // ACCESS
     // ============================
 
-    @NotNull
+    @NotNull(message = "{error.laOrganizacionEsObligatoria}")
     private UUID organizationId;
 
     private UUID branchId;
 
-    @NotNull
+    @NotNull(message = "{error.elRolEsObligatorio}")
     private UUID roleId;
 
     // ============================
     // PERSON BRANCH
     // ============================
 
-    @NotNull
+    @NotNull(message = "{error.fechaInicioObligatoria}")
     private LocalDate startDate;
 
 }

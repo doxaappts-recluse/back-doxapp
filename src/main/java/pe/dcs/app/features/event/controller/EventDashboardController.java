@@ -24,7 +24,7 @@ public class EventDashboardController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Dashboard fetched successfully",
+                "success.dashboardFetchedSuccessfully",
                 dashboardService.getDashboard(eventId)
         );
     }

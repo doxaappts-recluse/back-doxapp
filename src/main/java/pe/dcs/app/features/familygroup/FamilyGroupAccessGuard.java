@@ -46,7 +46,7 @@ public class FamilyGroupAccessGuard {
             return;
         }
 
-        throw forbidden("crear grupos familiares");
+        throw forbidden("action.crearGruposFamiliares");
     }
 
     /**
@@ -63,14 +63,14 @@ public class FamilyGroupAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a grupos familiares");
+        throw forbidden("action.accederGruposFamiliares");
     }
 
     public void assertCanManage(FamilyGroup group) {
 
         if (!canManage(group)) {
             throw new Exceptions(
-                    "Solo el administrador de la sede/organización o quien creó el grupo pueden gestionarlo",
+                    "error.soloAdministradorSedeOrganizacionQuienCreo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -107,7 +107,7 @@ public class FamilyGroupAccessGuard {
                 && !organizationId.equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este grupo familiar",
+                    "error.noTieneAccesoGrupoFamiliar",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -155,10 +155,14 @@ public class FamilyGroupAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

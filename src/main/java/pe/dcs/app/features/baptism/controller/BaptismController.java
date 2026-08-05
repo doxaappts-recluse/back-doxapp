@@ -1,5 +1,6 @@
 package pe.dcs.app.features.baptism.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class BaptismController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Bautizos obtenidos correctamente",
+                "success.bautizosObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -43,7 +44,7 @@ public class BaptismController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Bautizo obtenido correctamente",
+                "success.bautizoObtenidoCorrectamente",
                 service.getCurrent(userId)
         );
     }
@@ -51,14 +52,14 @@ public class BaptismController {
     @PostMapping("/create/{userId}")
     public ApiResponse<String> create(
             @PathVariable UUID userId,
-            @RequestBody BaptismFormRequest request
+            @Valid @RequestBody BaptismFormRequest request
     ) {
 
         service.create(userId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Bautizo registrado correctamente",
+                "success.bautizoRegistradoCorrectamente",
                 "OK"
         );
     }
@@ -67,14 +68,14 @@ public class BaptismController {
     public ApiResponse<String> update(
             @PathVariable UUID userId,
             @PathVariable UUID baptismId,
-            @RequestBody BaptismFormRequest request
+            @Valid @RequestBody BaptismFormRequest request
     ) {
 
         service.update(userId, baptismId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Bautizo actualizado correctamente",
+                "success.bautizoActualizadoCorrectamente",
                 "OK"
         );
     }

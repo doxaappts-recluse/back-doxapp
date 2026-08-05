@@ -85,7 +85,7 @@ public class FinancialMovementServiceImpl
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Sede no encontrada",
+                                "error.sedeNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -96,7 +96,7 @@ public class FinancialMovementServiceImpl
         return personRepository.findById(userId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Usuario no encontrado",
+                                "error.usuarioNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -112,7 +112,7 @@ public class FinancialMovementServiceImpl
         FinancialFund fund = financialFundRepository.findById(fundId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Fondo no encontrado",
+                                "error.fondoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -121,7 +121,7 @@ public class FinancialMovementServiceImpl
                 .equals(branch.getOrganization().getId())) {
 
             throw new Exceptions(
-                    "El fondo no pertenece a esta organización",
+                    "error.fondoNoPerteneceOrganizacion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -159,7 +159,7 @@ public class FinancialMovementServiceImpl
                     authContext.getCurrentBranchId()
             ).orElseThrow(() ->
                     new Exceptions(
-                            "Sede no encontrada",
+                            "error.sedeNoEncontrada",
                             HttpStatus.NOT_FOUND
                     )
             );
@@ -167,7 +167,7 @@ public class FinancialMovementServiceImpl
 
         if (request.getBranchId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del movimiento.",
+                    "error.debeSeleccionarSedeMovimiento",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -237,7 +237,7 @@ public class FinancialMovementServiceImpl
                 financialMovementRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -245,7 +245,7 @@ public class FinancialMovementServiceImpl
         if (movement.getStatus() == FinancialMovementStatus.APPROVED) {
 
             throw new Exceptions(
-                    "No se puede editar un movimiento aprobado",
+                    "error.noPuedeEditarMovimientoAprobado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -298,7 +298,7 @@ public class FinancialMovementServiceImpl
                 financialMovementRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -306,7 +306,7 @@ public class FinancialMovementServiceImpl
         if (!financialAccessGuard.canApprove(movement.getBranch())) {
 
             throw new Exceptions(
-                    "No tiene permisos para aprobar movimientos de esta sede",
+                    "error.noTienePermisosAprobarMovimientosSede",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -314,7 +314,7 @@ public class FinancialMovementServiceImpl
         if (movement.getStatus() != FinancialMovementStatus.PENDING) {
 
             throw new Exceptions(
-                    "Solo se pueden aprobar movimientos pendientes",
+                    "error.soloPuedenAprobarMovimientosPendientes",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -346,7 +346,7 @@ public class FinancialMovementServiceImpl
                 financialMovementRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -354,7 +354,7 @@ public class FinancialMovementServiceImpl
         if (!financialAccessGuard.canApprove(movement.getBranch())) {
 
             throw new Exceptions(
-                    "No tiene permisos para rechazar movimientos de esta sede",
+                    "error.noTienePermisosRechazarMovimientosSede",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -362,7 +362,7 @@ public class FinancialMovementServiceImpl
         if (movement.getStatus() != FinancialMovementStatus.PENDING) {
 
             throw new Exceptions(
-                    "Solo se pueden rechazar movimientos pendientes",
+                    "error.soloPuedenRechazarMovimientosPendientes",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -385,7 +385,7 @@ public class FinancialMovementServiceImpl
                 financialMovementRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Movimiento financiero no encontrado",
+                                        "error.movimientoFinancieroNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );

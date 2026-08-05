@@ -53,7 +53,7 @@ public class BibleAcademyAccessGuard {
 
     public void assertCanManageCurriculum() {
         if (!authContext.isCurrentOrganizationAdmin()) {
-            throw forbidden("gestionar la malla curricular (solo el administrador de la organización puede hacerlo)");
+            throw forbidden("action.gestionarMallaCurricularSoloAdministradorOrganizacion");
         }
     }
 
@@ -62,7 +62,7 @@ public class BibleAcademyAccessGuard {
         UUID organizationId = curriculum.getOrganization().getId();
 
         if (!organizationId.equals(authContext.getCurrentOrganizationId())) {
-            throw new Exceptions("No tiene acceso a esta malla curricular", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneAccesoMallaCurricular", HttpStatus.FORBIDDEN);
         }
     }
 
@@ -80,7 +80,7 @@ public class BibleAcademyAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a la Academia Bíblica");
+        throw forbidden("action.accederAcademiaBiblica");
     }
 
     // =========================================================
@@ -97,7 +97,7 @@ public class BibleAcademyAccessGuard {
             return;
         }
 
-        throw forbidden("crear cursos extra");
+        throw forbidden("action.crearCursosExtra");
     }
 
     /** Curso de malla: mismo criterio exclusivo que la malla. Curso extra: mismo criterio que un dictado de esa sede. */
@@ -127,7 +127,7 @@ public class BibleAcademyAccessGuard {
 
     public void assertCanManageCourse(BibleCourse course) {
         if (!canManageCourse(course)) {
-            throw forbidden("gestionar este curso");
+            throw forbidden("action.gestionarEsteCurso");
         }
     }
 
@@ -145,7 +145,7 @@ public class BibleAcademyAccessGuard {
             return;
         }
 
-        throw forbidden("abrir dictados");
+        throw forbidden("action.abrirDictados");
     }
 
     public boolean canManageClass(BibleClass bibleClass) {
@@ -170,7 +170,7 @@ public class BibleAcademyAccessGuard {
 
     public void assertCanManageClass(BibleClass bibleClass) {
         if (!canManageClass(bibleClass)) {
-            throw forbidden("gestionar este dictado");
+            throw forbidden("action.gestionarEsteDictado");
         }
     }
 
@@ -184,7 +184,7 @@ public class BibleAcademyAccessGuard {
 
     public void assertCanManageEnrollment(BibleEnrollment enrollment) {
         if (!canManageEnrollment(enrollment)) {
-            throw forbidden("gestionar esta matrícula");
+            throw forbidden("action.gestionarEstaMatricula");
         }
     }
 
@@ -209,7 +209,7 @@ public class BibleAcademyAccessGuard {
                         && targetClass.getBranch().getId().equals(currentBranchId);
 
         if (!isBranchAdminOfTarget) {
-            throw forbidden("saltar el prerequisito de matrícula (requiere un administrador)");
+            throw forbidden("action.saltarPrerequisitoMatriculaRequiereAdministrador");
         }
     }
 
@@ -273,10 +273,14 @@ public class BibleAcademyAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

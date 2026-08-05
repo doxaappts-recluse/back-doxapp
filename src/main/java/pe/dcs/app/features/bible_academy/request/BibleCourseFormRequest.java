@@ -1,5 +1,6 @@
 package pe.dcs.app.features.bible_academy.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.StatusType;
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class BibleCourseFormRequest {
 
+    @NotBlank(message = "{error.nombreCursoObligatorio}")
     private String name;
 
     private String description;

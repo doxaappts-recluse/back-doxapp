@@ -81,8 +81,12 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BibleAcademyServiceImpl implements BibleAcademyService {
 
-    private static final String TEACHER_MINISTRY_NAME = "Academia Bíblica";
-    private static final String TEACHER_ROLE_NAME = "Maestro de Academia Bíblica";
+    private static final String TEACHER_MINISTRY_CODE = "ACADEMIA_BIBLICA";
+    private static final String TEACHER_MINISTRY_NAME_ES = "Academia Bíblica";
+    private static final String TEACHER_MINISTRY_NAME_EN = "Bible Academy";
+    private static final String TEACHER_ROLE_CODE = "MAESTRO_ACADEMIA_BIBLICA";
+    private static final String TEACHER_ROLE_NAME_ES = "Maestro de Academia Bíblica";
+    private static final String TEACHER_ROLE_NAME_EN = "Bible Academy Teacher";
 
     private final BibleCurriculumRepository bibleCurriculumRepository;
     private final BibleCourseRepository bibleCourseRepository;
@@ -112,17 +116,17 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
-            throw new Exceptions("No tiene un contexto de organización activo.", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneContextoOrganizacionActivo", HttpStatus.FORBIDDEN);
         }
 
         if (dni == null || dni.isBlank()) {
-            throw new Exceptions("El DNI es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elDniEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         Person person =
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() -> new Exceptions(
-                                "No se encontró ninguna persona con ese DNI en la organización.",
+                                "error.noEncontroNingunaPersonaDniOrganizacion",
                                 HttpStatus.NOT_FOUND
                         ));
 
@@ -215,12 +219,12 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
-            throw new Exceptions("No tiene un contexto de organización activo.", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneContextoOrganizacionActivo", HttpStatus.FORBIDDEN);
         }
 
         Organization organization =
                 organizationRepository.findById(organizationId)
-                        .orElseThrow(() -> new Exceptions("Organización no encontrada.", HttpStatus.NOT_FOUND));
+                        .orElseThrow(() -> new Exceptions("error.organizacionNoEncontrada2", HttpStatus.NOT_FOUND));
 
         BibleCurriculum curriculum = new BibleCurriculum();
         curriculum.setOrganization(organization);
@@ -372,15 +376,16 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
             if (curriculum.getStatus() == BibleCurriculumStatus.RETIRED) {
                 throw new Exceptions(
-                        "No se pueden agregar niveles a una malla retirada.",
+                        "error.noPuedenAgregarNivelesMallaRetirada",
                         HttpStatus.BAD_REQUEST
                 );
             }
 
             if (bibleCourseRepository.existsByCurriculumIdAndOrder(curriculum.getId(), request.getOrder())) {
                 throw new Exceptions(
-                        "Ya existe un nivel " + request.getOrder() + " en esta malla.",
-                        HttpStatus.BAD_REQUEST
+                        "error.yaExisteNivelEnMalla",
+                        HttpStatus.BAD_REQUEST,
+                        request.getOrder()
                 );
             }
 
@@ -394,7 +399,7 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
             UUID branchId = accessGuard.resolveBranchId(request.getBranchId());
 
             if (branchId == null) {
-                throw new Exceptions("Debe seleccionar la sede del curso.", HttpStatus.BAD_REQUEST);
+                throw new Exceptions("error.debeSeleccionarSedeCurso", HttpStatus.BAD_REQUEST);
             }
 
             course.setBranch(findBranchOrThrow(branchId));
@@ -429,8 +434,9 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
             if (duplicated) {
                 throw new Exceptions(
-                        "Ya existe un nivel " + request.getOrder() + " en esta malla.",
-                        HttpStatus.BAD_REQUEST
+                        "error.yaExisteNivelEnMalla",
+                        HttpStatus.BAD_REQUEST,
+                        request.getOrder()
                 );
             }
 
@@ -507,7 +513,7 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
         UUID branchId = accessGuard.resolveBranchId(request.getBranchId());
 
         if (branchId == null) {
-            throw new Exceptions("Debe seleccionar la sede del dictado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarSedeDictado", HttpStatus.BAD_REQUEST);
         }
 
         BibleClass bibleClass = new BibleClass();
@@ -593,18 +599,18 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
         accessGuard.assertCanManageClass(bibleClass);
 
         if (request.getPersonId() == null) {
-            throw new Exceptions("Debe seleccionar la persona a matricular.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarPersonaMatricular", HttpStatus.BAD_REQUEST);
         }
 
         Person person = findPersonOrThrow(request.getPersonId());
 
         if (bibleEnrollmentRepository.existsByBibleClassIdAndPersonId(classId, person.getId())) {
-            throw new Exceptions("Esta persona ya está matriculada en este dictado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.personaMatriculadaDictado", HttpStatus.BAD_REQUEST);
         }
 
         if (bibleClass.getCapacity() != null
                 && bibleEnrollmentRepository.countByBibleClassId(classId) >= bibleClass.getCapacity()) {
-            throw new Exceptions("Este dictado ya alcanzó su cupo máximo.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.dictadoAlcanzoCupoMaximo", HttpStatus.BAD_REQUEST);
         }
 
         BibleEnrollment enrollment = new BibleEnrollment();
@@ -630,14 +636,14 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         BibleEnrollment enrollment =
                 bibleEnrollmentRepository.findById(enrollmentId)
-                        .orElseThrow(() -> new Exceptions("Matrícula no encontrada.", HttpStatus.NOT_FOUND));
+                        .orElseThrow(() -> new Exceptions("error.matriculaNoEncontrada", HttpStatus.NOT_FOUND));
 
         if (!enrollment.getBibleClass().getId().equals(classId)) {
-            throw new Exceptions("Esta matrícula no pertenece a este dictado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.matriculaNoPerteneceDictado", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getStatus() == null) {
-            throw new Exceptions("El estado es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elEstadoEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         boolean requiresReason =
@@ -646,7 +652,7 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         if (requiresReason && (request.getStatusReason() == null || request.getStatusReason().isBlank())) {
             throw new Exceptions(
-                    "Debe indicar el motivo cuando el estado es Reprobado o Retirado.",
+                    "error.debeIndicarMotivoCuandoEstadoReprobado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -665,14 +671,14 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
     private void validateCurriculumForm(BibleCurriculumFormRequest request) {
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre de la malla es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreMallaObligatorio", HttpStatus.BAD_REQUEST);
         }
     }
 
     private void validateCourseForm(BibleCourseFormRequest request) {
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre del curso es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreCursoObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         boolean isCurriculumCourse = request.getCurriculumId() != null;
@@ -680,35 +686,35 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         if (isCurriculumCourse == isExtraCourse) {
             throw new Exceptions(
-                    "El curso debe pertenecer a una malla (con su nivel) o ser un curso extra de una sede — nunca ambos ni ninguno.",
+                    "error.cursoDebePertenecerMallaNivelSer",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (isCurriculumCourse && (request.getOrder() == null || request.getOrder() < 1)) {
-            throw new Exceptions("El nivel (order) es obligatorio y debe ser mayor a cero.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nivelOrderObligatorioDebeSerMayor", HttpStatus.BAD_REQUEST);
         }
     }
 
     private void validateClassForm(BibleClassFormRequest request) {
 
         if (request.getCourseId() == null) {
-            throw new Exceptions("Debe seleccionar el curso del dictado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarCursoDictado", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getTeacherPersonId() == null
                 && (request.getTeacherName() == null || request.getTeacherName().isBlank())) {
 
-            throw new Exceptions("El maestro del dictado es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.maestroDictadoObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getStartDate() == null) {
-            throw new Exceptions("La fecha de inicio del dictado es obligatoria.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaInicioDictadoObligatoria", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getEndDate() != null && request.getEndDate().isBefore(request.getStartDate())) {
             throw new Exceptions(
-                    "La fecha de fin no puede ser anterior a la fecha de inicio.",
+                    "error.fechaFinNoPuedeSerAnterior",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -723,7 +729,7 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         if (course.getCurriculum().getStatus() != BibleCurriculumStatus.ACTIVE) {
             throw new Exceptions(
-                    "Solo se pueden abrir dictados de cursos que pertenezcan a una malla ACTIVA.",
+                    "error.soloPuedenAbrirDictadosCursosPertenezcan",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -773,8 +779,9 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         if (!request.isOverridePrerequisite()) {
             throw new Exceptions(
-                    "Esta persona debe aprobar primero \"" + prerequisiteCourse.getName() + "\" antes de matricularse en este nivel.",
-                    HttpStatus.BAD_REQUEST
+                    "error.debeAprobarPrimeroAntesMatricularse",
+                    HttpStatus.BAD_REQUEST,
+                    prerequisiteCourse.getName()
             );
         }
 
@@ -782,7 +789,7 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
         if (request.getOverrideReason() == null || request.getOverrideReason().isBlank()) {
             throw new Exceptions(
-                    "Debe indicar el motivo para saltar el prerequisito.",
+                    "error.debeIndicarMotivoSaltarPrerequisito",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -876,11 +883,13 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
     private Ministry findOrCreateTeacherMinistry() {
 
-        return ministryRepository.findByName(TEACHER_MINISTRY_NAME)
+        return ministryRepository.findByCode(TEACHER_MINISTRY_CODE)
                 .orElseGet(() -> {
 
                     Ministry ministry = new Ministry();
-                    ministry.setName(TEACHER_MINISTRY_NAME);
+                    ministry.setCode(TEACHER_MINISTRY_CODE);
+                    ministry.setNameEs(TEACHER_MINISTRY_NAME_ES);
+                    ministry.setNameEn(TEACHER_MINISTRY_NAME_EN);
                     ministry.setDescription(
                             "Generado automáticamente para registrar el servicio de los maestros de la Academia Bíblica."
                     );
@@ -893,11 +902,13 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
     private MinistryRole findOrCreateTeacherRole(Ministry ministry) {
 
-        return ministryRoleRepository.findByMinistryIdAndName(ministry.getId(), TEACHER_ROLE_NAME)
+        return ministryRoleRepository.findByMinistryIdAndCode(ministry.getId(), TEACHER_ROLE_CODE)
                 .orElseGet(() -> {
 
                     MinistryRole role = new MinistryRole();
-                    role.setName(TEACHER_ROLE_NAME);
+                    role.setCode(TEACHER_ROLE_CODE);
+                    role.setNameEs(TEACHER_ROLE_NAME_ES);
+                    role.setNameEn(TEACHER_ROLE_NAME_EN);
                     role.setMinistry(ministry);
                     role.setStatus(StatusType.ACTIVE);
                     role.setRequiresActiveMembership(false);
@@ -908,26 +919,26 @@ public class BibleAcademyServiceImpl implements BibleAcademyService {
 
     private BibleCurriculum findCurriculumOrThrow(UUID id) {
         return bibleCurriculumRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Malla curricular no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.mallaCurricularNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private BibleCourse findCourseOrThrow(UUID id) {
         return bibleCourseRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Curso no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.cursoNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private BibleClass findClassOrThrow(UUID id) {
         return bibleClassRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Dictado no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.dictadoNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private Branch findBranchOrThrow(UUID id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Sede no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.sedeNoEncontrada2", HttpStatus.NOT_FOUND));
     }
 
     private Person findPersonOrThrow(UUID id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND));
     }
 }

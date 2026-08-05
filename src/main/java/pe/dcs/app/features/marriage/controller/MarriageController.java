@@ -1,5 +1,6 @@
 package pe.dcs.app.features.marriage.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class MarriageController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrimonios obtenidos correctamente",
+                "success.matrimoniosObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -44,7 +45,7 @@ public class MarriageController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrimonio obtenido correctamente",
+                "success.matrimonioObtenidoCorrectamente",
                 service.getById(id)
         );
     }
@@ -56,21 +57,21 @@ public class MarriageController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findSpouseByDni(dni)
         );
     }
 
     @PostMapping("/create")
     public ApiResponse<String> create(
-            @RequestBody MarriageFormRequest request
+            @Valid @RequestBody MarriageFormRequest request
     ) {
 
         service.create(request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrimonio registrado correctamente",
+                "success.matrimonioRegistradoCorrectamente",
                 "OK"
         );
     }
@@ -78,14 +79,14 @@ public class MarriageController {
     @PutMapping("/update/{id}")
     public ApiResponse<String> update(
             @PathVariable UUID id,
-            @RequestBody MarriageFormRequest request
+            @Valid @RequestBody MarriageFormRequest request
     ) {
 
         service.update(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Matrimonio actualizado correctamente",
+                "success.matrimonioActualizadoCorrectamente",
                 "OK"
         );
     }

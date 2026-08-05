@@ -1,5 +1,7 @@
 package pe.dcs.app.features.contract.request;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.contract.ContractRenewalType;
@@ -19,8 +21,10 @@ public class ContractCreateRequest {
     // SCOPE
     // =========================================================
 
+    @NotNull(message = "{error.laOrganizacionEsObligatoria}")
     private UUID organizationId;
 
+    @NotNull(message = "{error.debeIndicarAlcanceContratoOrganizacionSede}")
     private ContractScope scope;
 
     /**
@@ -32,16 +36,21 @@ public class ContractCreateRequest {
     // PLAN
     // =========================================================
 
+    @NotBlank(message = "{error.elPlanEsObligatorio}")
     private String planName;
 
+    @NotNull(message = "{error.precioContratoObligatorio}")
     private BigDecimal price;
 
+    @NotBlank(message = "{error.monedaContratoObligatoria}")
     private String currency;
 
+    @NotNull(message = "{error.fechaInicioObligatoria}")
     private LocalDate startDate;
 
     private LocalDate endDate;
 
+    @NotNull(message = "{error.licenciasMaximasObligatorias}")
     private Integer maxLicenses;
 
     /**

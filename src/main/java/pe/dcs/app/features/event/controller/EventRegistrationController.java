@@ -1,5 +1,6 @@
 package pe.dcs.app.features.event.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.event.request.registration.EventPersonSearchRequest;
@@ -25,12 +26,12 @@ public class EventRegistrationController {
 
     @PostMapping("/create")
     public ApiResponse<EventRegistrationResponse> create(
-            @RequestBody EventRegistrationRequest request
+            @Valid @RequestBody EventRegistrationRequest request
     ) {
         service.create(request);
         return new ApiResponse<>(
                 200,
-                "Inscripción creada",
+                "success.inscripcionCreada",
                 null
         );
     }
@@ -38,12 +39,12 @@ public class EventRegistrationController {
     @PutMapping("/update/{id}")
     public ApiResponse<EventRegistrationResponse> update(
             @PathVariable UUID id,
-            @RequestBody EventRegistrationRequest request
+            @Valid @RequestBody EventRegistrationRequest request
     ) {
         service.update(id, request);
         return new ApiResponse<>(
                 200,
-                "Inscripción actualizada",
+                "success.inscripcionActualizada",
                 null
         );
     }
@@ -55,7 +56,7 @@ public class EventRegistrationController {
 
         return new ApiResponse<>(
                 200,
-                "Inscripción encontrada",
+                "success.inscripcionEncontrada",
                 service.getById(id)
         );
     }
@@ -67,7 +68,7 @@ public class EventRegistrationController {
 
         return new ApiResponse<>(
                 200,
-                "Inscripciones obtenidas",
+                "success.inscripcionesObtenidas",
                 service.search(request)
         );
     }
@@ -81,7 +82,7 @@ public class EventRegistrationController {
 
         return new ApiResponse<>(
                 200,
-                "Inscripción cancelada",
+                "success.inscripcionCancelada",
                 null
         );
     }
@@ -95,7 +96,7 @@ public class EventRegistrationController {
 
         return new ApiResponse<>(
                 200,
-                "Inscripción marcada como pagada",
+                "success.inscripcionMarcadaComoPagada",
                 null
         );
     }
@@ -107,7 +108,7 @@ public class EventRegistrationController {
 
         return new ApiResponse<>(
                 200,
-                "Personas obtenidas",
+                "success.personasObtenidas",
                 service.searchPersons(request)
         );
     }
@@ -124,11 +125,11 @@ public class EventRegistrationController {
 
         String message = hasFailures
                 ? String.format(
-                        "%d inscripción(es) registrada(s), %d no se pudieron registrar",
+                        pe.dcs.app.util.MessageSourceHolder.resolve("success.inscripcionesRegistradasParcial"),
                         result.getTotalProcessed(),
                         result.getTotalFailed()
                 )
-                : "Inscripciones registradas correctamente";
+                : "success.inscripcionesRegistradasCorrectamente";
 
         return new ApiResponse<>(
                 200,

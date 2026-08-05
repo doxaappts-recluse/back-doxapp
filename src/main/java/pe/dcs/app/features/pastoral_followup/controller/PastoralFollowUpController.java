@@ -1,5 +1,6 @@
 package pe.dcs.app.features.pastoral_followup.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -39,7 +40,7 @@ public class PastoralFollowUpController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Resumen de seguimiento pastoral obtenido correctamente",
+                "success.resumenSeguimientoPastoralObtenidoCorrectamente",
                 service.getSummary(personId)
         );
     }
@@ -54,7 +55,7 @@ public class PastoralFollowUpController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Líder de seguimiento asignado correctamente",
+                "success.liderSeguimientoAsignadoCorrectamente",
                 "OK"
         );
     }
@@ -67,7 +68,7 @@ public class PastoralFollowUpController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Historial de contactos obtenido correctamente",
+                "success.historialContactosObtenidoCorrectamente",
                 service.listContacts(personId, request)
         );
     }
@@ -75,14 +76,14 @@ public class PastoralFollowUpController {
     @PostMapping("/{personId}/contacts")
     public ApiResponse<String> createContact(
             @PathVariable UUID personId,
-            @RequestBody FollowUpContactFormRequest request
+            @Valid @RequestBody FollowUpContactFormRequest request
     ) {
 
         service.createContact(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Contacto registrado correctamente",
+                "success.contactoRegistradoCorrectamente",
                 "OK"
         );
     }
@@ -91,14 +92,14 @@ public class PastoralFollowUpController {
     public ApiResponse<String> updateContact(
             @PathVariable UUID personId,
             @PathVariable UUID contactId,
-            @RequestBody FollowUpContactFormRequest request
+            @Valid @RequestBody FollowUpContactFormRequest request
     ) {
 
         service.updateContact(personId, contactId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Contacto actualizado correctamente",
+                "success.contactoActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -111,7 +112,7 @@ public class PastoralFollowUpController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Peticiones de oración obtenidas correctamente",
+                "success.peticionesOracionObtenidasCorrectamente",
                 service.listPrayerRequests(personId, request)
         );
     }
@@ -119,14 +120,14 @@ public class PastoralFollowUpController {
     @PostMapping("/{personId}/prayer-requests")
     public ApiResponse<String> createPrayerRequest(
             @PathVariable UUID personId,
-            @RequestBody PrayerRequestFormRequest request
+            @Valid @RequestBody PrayerRequestFormRequest request
     ) {
 
         service.createPrayerRequest(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Petición de oración registrada correctamente",
+                "success.peticionOracionRegistradaCorrectamente",
                 "OK"
         );
     }
@@ -135,14 +136,14 @@ public class PastoralFollowUpController {
     public ApiResponse<String> updatePrayerRequest(
             @PathVariable UUID personId,
             @PathVariable UUID prayerRequestId,
-            @RequestBody PrayerRequestFormRequest request
+            @Valid @RequestBody PrayerRequestFormRequest request
     ) {
 
         service.updatePrayerRequest(personId, prayerRequestId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Petición de oración actualizada correctamente",
+                "success.peticionOracionActualizadaCorrectamente",
                 "OK"
         );
     }
@@ -160,7 +161,7 @@ public class PastoralFollowUpController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Miembros inactivos obtenidos correctamente",
+                "success.miembrosInactivosObtenidosCorrectamente",
                 service.searchInactiveMembers(request)
         );
     }

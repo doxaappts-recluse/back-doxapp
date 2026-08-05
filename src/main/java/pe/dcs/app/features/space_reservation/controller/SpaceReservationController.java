@@ -1,5 +1,6 @@
 package pe.dcs.app.features.space_reservation.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +34,7 @@ public class SpaceReservationController {
     public ApiResponse<SpaceReservationPersonSearchResponse> findPersonByDni(@RequestParam String dni) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
@@ -46,7 +47,7 @@ public class SpaceReservationController {
     public ApiResponse<PageResponse<ReservableSpaceResponse>> searchSpaces(@RequestBody ReservableSpaceSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Espacios obtenidos correctamente",
+                "success.espaciosObtenidosCorrectamente",
                 service.searchSpaces(request)
         );
     }
@@ -55,24 +56,24 @@ public class SpaceReservationController {
     public ApiResponse<ReservableSpaceResponse> getSpaceById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Espacio obtenido correctamente",
+                "success.espacioObtenidoCorrectamente",
                 service.getSpaceById(id)
         );
     }
 
     @PostMapping("/spaces/create")
-    public ApiResponse<UUID> createSpace(@RequestBody ReservableSpaceFormRequest request) {
+    public ApiResponse<UUID> createSpace(@Valid @RequestBody ReservableSpaceFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Espacio registrado correctamente",
+                "success.espacioRegistradoCorrectamente",
                 service.createSpace(request)
         );
     }
 
     @PutMapping("/spaces/update/{id}")
-    public ApiResponse<String> updateSpace(@PathVariable UUID id, @RequestBody ReservableSpaceFormRequest request) {
+    public ApiResponse<String> updateSpace(@PathVariable UUID id, @Valid @RequestBody ReservableSpaceFormRequest request) {
         service.updateSpace(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Espacio actualizado correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.espacioActualizadoCorrectamente", "OK");
     }
 
     // =====================================================
@@ -83,7 +84,7 @@ public class SpaceReservationController {
     public ApiResponse<PageResponse<SpaceReservationResponse>> searchReservations(@RequestBody SpaceReservationSearchRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Reservas obtenidas correctamente",
+                "success.reservasObtenidasCorrectamente",
                 service.searchReservations(request)
         );
     }
@@ -92,29 +93,29 @@ public class SpaceReservationController {
     public ApiResponse<SpaceReservationResponse> getReservationById(@PathVariable UUID id) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Reserva obtenida correctamente",
+                "success.reservaObtenidaCorrectamente",
                 service.getReservationById(id)
         );
     }
 
     @PostMapping("/reservations/create")
-    public ApiResponse<UUID> createReservation(@RequestBody SpaceReservationFormRequest request) {
+    public ApiResponse<UUID> createReservation(@Valid @RequestBody SpaceReservationFormRequest request) {
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Reserva registrada correctamente",
+                "success.reservaRegistradaCorrectamente",
                 service.createReservation(request)
         );
     }
 
     @PutMapping("/reservations/update/{id}")
-    public ApiResponse<String> updateReservation(@PathVariable UUID id, @RequestBody SpaceReservationFormRequest request) {
+    public ApiResponse<String> updateReservation(@PathVariable UUID id, @Valid @RequestBody SpaceReservationFormRequest request) {
         service.updateReservation(id, request);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Reserva actualizada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.reservaActualizadaCorrectamente", "OK");
     }
 
     @PostMapping("/reservations/{id}/cancel")
     public ApiResponse<String> cancelReservation(@PathVariable UUID id) {
         service.cancelReservation(id);
-        return new ApiResponse<>(HttpStatus.OK.value(), "Reserva cancelada correctamente", "OK");
+        return new ApiResponse<>(HttpStatus.OK.value(), "success.reservaCanceladaCorrectamente", "OK");
     }
 }

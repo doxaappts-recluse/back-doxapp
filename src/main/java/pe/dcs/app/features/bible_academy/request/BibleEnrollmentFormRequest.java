@@ -1,5 +1,6 @@
 package pe.dcs.app.features.bible_academy.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import java.util.UUID;
 @Setter
 public class BibleEnrollmentFormRequest {
 
+    @NotNull(message = "{error.debeSeleccionarPersonaMatricular}")
     private UUID personId;
 
     /** Si viene null se usa la fecha de hoy. */

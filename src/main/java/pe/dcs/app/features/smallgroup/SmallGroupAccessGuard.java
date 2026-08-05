@@ -47,7 +47,7 @@ public class SmallGroupAccessGuard {
             return;
         }
 
-        throw forbidden("crear grupos pequeños");
+        throw forbidden("action.crearGruposPequenos");
     }
 
     /**
@@ -64,14 +64,14 @@ public class SmallGroupAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a grupos pequeños");
+        throw forbidden("action.accederGruposPequenos");
     }
 
     public void assertCanManage(SmallGroup group) {
 
         if (!canManage(group)) {
             throw new Exceptions(
-                    "Solo el administrador de la sede/organización o quien creó el grupo pueden gestionarlo",
+                    "error.soloAdministradorSedeOrganizacionQuienCreo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -108,7 +108,7 @@ public class SmallGroupAccessGuard {
                 && !organizationId.equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este grupo",
+                    "error.noTieneAccesoGrupo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -156,10 +156,14 @@ public class SmallGroupAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

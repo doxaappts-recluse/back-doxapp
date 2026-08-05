@@ -1,5 +1,6 @@
 package pe.dcs.app.features.event.request.registration;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.events.PaymentStatus;
@@ -13,8 +14,10 @@ import java.util.UUID;
 @Setter
 public class EventRegistrationRequest {
 
+    @NotNull(message = "{error.elEventoEsRequerido}")
     private UUID eventId;
 
+    @NotNull(message = "{error.categoriaObligatoria}")
     private RegistrationCategory category;
 
     // MEMBER / STAFF / SCHOLARSHIP

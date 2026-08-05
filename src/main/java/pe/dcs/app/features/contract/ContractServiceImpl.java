@@ -208,7 +208,7 @@ public class ContractServiceImpl implements ContractService {
 
         if (request.getScope() == null) {
             throw new Exceptions(
-                    "Debe indicar el alcance del contrato (organización o sede).",
+                    "error.debeIndicarAlcanceContratoOrganizacionSede",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -346,7 +346,7 @@ public class ContractServiceImpl implements ContractService {
          */
         if (isCommercialChange(contract, request)) {
             throw new Exceptions(
-                    "Este contrato ya está vigente: para cambiar plan, precio, módulos o licencias hay que declararlo como Renovación, Upgrade o Downgrade.",
+                    "error.contratoVigenteCambiarPlanPrecioModulos",
                     HttpStatus.CONFLICT
             );
         }
@@ -482,7 +482,7 @@ public class ContractServiceImpl implements ContractService {
 
         if (request.getEndDate() == null) {
             throw new Exceptions(
-                    "La fecha de fin es obligatoria.",
+                    "error.fechaFinObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -619,7 +619,7 @@ public class ContractServiceImpl implements ContractService {
                 contractRepository.findByIdForUpdate(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Contrato no encontrado.",
+                                        "error.contratoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -691,7 +691,7 @@ public class ContractServiceImpl implements ContractService {
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe indicar la sede para un contrato de sede.",
+                    "error.debeIndicarSedeContratoSede",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -699,7 +699,7 @@ public class ContractServiceImpl implements ContractService {
         Branch branch = branchRepository.findById(branchId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Sede no encontrada.",
+                                "error.sedeNoEncontrada2",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -707,7 +707,7 @@ public class ContractServiceImpl implements ContractService {
         if (!branch.getOrganization().getId().equals(organization.getId())) {
 
             throw new Exceptions(
-                    "La sede no pertenece a la organización indicada.",
+                    "error.sedeNoPerteneceOrganizacionIndicada",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -729,21 +729,21 @@ public class ContractServiceImpl implements ContractService {
 
         if (planName == null || planName.isBlank()) {
             throw new Exceptions(
-                    "El plan es obligatorio.",
+                    "error.elPlanEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (startDate == null || endDate == null) {
             throw new Exceptions(
-                    "Las fechas de vigencia son obligatorias.",
+                    "error.fechasVigenciaSonObligatorias",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (renewalType == null) {
             throw new Exceptions(
-                    "El tipo de renovación es obligatorio.",
+                    "error.tipoRenovacionObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -796,7 +796,7 @@ public class ContractServiceImpl implements ContractService {
 
         if (hasConflict) {
             throw new Exceptions(
-                    "Ya existe un contrato activo, suspendido o pendiente que se solapa con estas fechas.",
+                    "error.existeContratoActivoSuspendidoPendienteSolapa",
                     HttpStatus.CONFLICT
             );
         }
@@ -831,21 +831,21 @@ public class ContractServiceImpl implements ContractService {
 
             if (req.getBranchId() == null) {
                 throw new Exceptions(
-                        "Sede inválida en el reparto de licencias.",
+                        "error.sedeInvalidaRepartoLicencias",
                         HttpStatus.BAD_REQUEST
                 );
             }
 
             if (!seenBranches.add(req.getBranchId())) {
                 throw new Exceptions(
-                        "No se puede repartir licencias dos veces a la misma sede.",
+                        "error.noPuedeRepartirLicenciasDosVeces",
                         HttpStatus.BAD_REQUEST
                 );
             }
 
             if (req.getAllocatedLicenses() == null || req.getAllocatedLicenses() < 0) {
                 throw new Exceptions(
-                        "La cantidad de licencias debe ser mayor o igual a cero.",
+                        "error.cantidadLicenciasDebeSerMayorIgual",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -853,7 +853,7 @@ public class ContractServiceImpl implements ContractService {
             Branch branch = branchRepository.findById(req.getBranchId())
                     .orElseThrow(() ->
                             new Exceptions(
-                                    "Sede no encontrada.",
+                                    "error.sedeNoEncontrada2",
                                     HttpStatus.NOT_FOUND
                             )
                     );
@@ -861,8 +861,9 @@ public class ContractServiceImpl implements ContractService {
             if (!branch.getOrganization().getId().equals(contract.getOrganization().getId())) {
 
                 throw new Exceptions(
-                        "La sede " + branch.getName() + " no pertenece a la organización del contrato.",
-                        HttpStatus.BAD_REQUEST
+                        "error.laSedeNoPerteneceOrganizacionContrato",
+                        HttpStatus.BAD_REQUEST,
+                        branch.getName()
                 );
             }
 
@@ -880,9 +881,9 @@ public class ContractServiceImpl implements ContractService {
         if (contract.getMaxLicenses() != null && total > contract.getMaxLicenses()) {
 
             throw new Exceptions(
-                    "El reparto de licencias por sede (" + total
-                            + ") supera el máximo del contrato (" + contract.getMaxLicenses() + ").",
-                    HttpStatus.BAD_REQUEST
+                    "error.repartoLicenciasSedeSuperaMaximo",
+                    HttpStatus.BAD_REQUEST,
+                    total, contract.getMaxLicenses()
             );
         }
     }
@@ -918,7 +919,7 @@ public class ContractServiceImpl implements ContractService {
         if (!authContext.isSystem()) {
 
             throw new Exceptions(
-                    "Solo un administrador del sistema puede gestionar contratos.",
+                    "error.soloAdministradorSistemaPuedeGestionarContratos",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -931,7 +932,7 @@ public class ContractServiceImpl implements ContractService {
                 || contract.getStatus() == ContractStatus.REPLACED) {
 
             throw new Exceptions(
-                    "No se puede editar un contrato cancelado, vencido o reemplazado.",
+                    "error.noPuedeEditarContratoCanceladoVencido",
                     HttpStatus.CONFLICT
             );
         }
@@ -942,7 +943,7 @@ public class ContractServiceImpl implements ContractService {
         return contractRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Contrato no encontrado.",
+                                "error.contratoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -952,7 +953,7 @@ public class ContractServiceImpl implements ContractService {
 
         if (id == null) {
             throw new Exceptions(
-                    "La organización es obligatoria.",
+                    "error.laOrganizacionEsObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -960,7 +961,7 @@ public class ContractServiceImpl implements ContractService {
         return organizationRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Organización no encontrada.",
+                                "error.organizacionNoEncontrada2",
                                 HttpStatus.NOT_FOUND
                         )
                 );

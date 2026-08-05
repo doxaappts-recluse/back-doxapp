@@ -34,7 +34,7 @@ public class AuthService {
 
         if (!user.hasOrganization(organizationId)) {
             throw new Exceptions(
-                    "Organization access denied",
+                    "error.organizationAccessDenied",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -46,7 +46,7 @@ public class AuthService {
                 !user.hasBranch(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "Branch access denied",
+                    "error.branchAccessDenied",
                     HttpStatus.FORBIDDEN
             );
         }

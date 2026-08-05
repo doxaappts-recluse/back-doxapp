@@ -56,7 +56,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
         }
 
         throw new Exceptions(
-                "Solo el administrador de la organización puede gestionar los presupuestos",
+                "error.soloAdministradorOrganizacionPuedeGestionarPresupuestos",
                 HttpStatus.FORBIDDEN
         );
     }
@@ -67,7 +67,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No se pudo determinar la organización actual",
+                    "error.noPudoDeterminarOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -81,7 +81,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
                 financialBudgetRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Presupuesto no encontrado",
+                                        "error.presupuestoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -90,7 +90,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
                 && !budget.getOrganization().getId().equals(currentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este presupuesto",
+                    "error.noTieneAccesoPresupuesto",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -104,14 +104,14 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
                 branchRepository.findById(branchId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede no encontrada",
+                                        "error.sedeNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
         if (!branch.getOrganization().getId().equals(organizationId)) {
             throw new Exceptions(
-                    "La sede no pertenece a la organización actual",
+                    "error.sedeNoPerteneceOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -125,14 +125,14 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
                 financialFundRepository.findById(fundId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Fondo no encontrado",
+                                        "error.fondoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
         if (!fund.getOrganization().getId().equals(organizationId)) {
             throw new Exceptions(
-                    "El fondo no pertenece a la organización actual",
+                    "error.fondoNoPerteneceOrganizacionActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -144,14 +144,14 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
 
         if (request.getPeriodYear() == null || request.getPeriodMonth() == null) {
             throw new Exceptions(
-                    "Debe indicar el período (año y mes) del presupuesto",
+                    "error.debeIndicarPeriodoAnoMesPresupuesto",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getPeriodMonth() < 1 || request.getPeriodMonth() > 12) {
             throw new Exceptions(
-                    "El mes del período debe estar entre 1 y 12",
+                    "error.mesPeriodoDebeEstarEntre1",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -170,7 +170,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
                 organizationRepository.findById(organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Organización no encontrada",
+                                        "error.organizacionNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -307,7 +307,7 @@ public class FinancialBudgetServiceImpl implements FinancialBudgetService {
 
         if (periodYear == null || periodMonth == null) {
             throw new Exceptions(
-                    "Debe indicar el período (año y mes)",
+                    "error.debeIndicarPeriodoAnoMes",
                     HttpStatus.BAD_REQUEST
             );
         }

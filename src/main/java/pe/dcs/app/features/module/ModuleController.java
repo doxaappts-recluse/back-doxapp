@@ -1,5 +1,6 @@
 package pe.dcs.app.features.module;
 
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.module.request.ModuleRequest;
@@ -36,7 +37,7 @@ public class ModuleController {
     ) {
 
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulos filtrados", moduleService.search(request)
+                new ApiResponse<>(200, "success.modulosFiltrados", moduleService.search(request)
                 )
         );
     }
@@ -49,7 +50,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Módulo encontrado",
+                        "success.moduloEncontrado",
                         moduleService.getById(id)
                 )
         );
@@ -63,7 +64,7 @@ public class ModuleController {
         return ResponseEntity.ok(
                 new ApiResponse<>(
                         200,
-                        "Módulos padres filtrados",
+                        "success.modulosPadresFiltrados",
                         moduleService.getParentModules(currentId)
                 )
         );
@@ -76,7 +77,7 @@ public class ModuleController {
 
         return new ApiResponse<>(
                 200,
-                "Módulos hijos",
+                "success.modulosHijos",
                 moduleService.getChildModules(currentId)
         );
     }
@@ -94,25 +95,25 @@ public class ModuleController {
 
         return new ApiResponse<>(
                 200,
-                "Módulos disponibles del contrato activo",
+                "success.modulosDisponiblesContratoActivo",
                 contractModuleAccessService.getAvailableModules(branchId)
         );
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<ModuleResponse>> create(@RequestBody ModuleRequest req) {
+    public ResponseEntity<ApiResponse<ModuleResponse>> create(@Valid @RequestBody ModuleRequest req) {
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulo creado", moduleService.create(req))
+                new ApiResponse<>(200, "success.moduloCreado", moduleService.create(req))
         );
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity<ApiResponse<ModuleResponse>> update(
             @PathVariable UUID id,
-            @RequestBody ModuleRequest req
+            @Valid @RequestBody ModuleRequest req
     ) {
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulo actualizado", moduleService.update(id, req))
+                new ApiResponse<>(200, "success.moduloActualizado", moduleService.update(id, req))
         );
     }
 
@@ -122,14 +123,14 @@ public class ModuleController {
     ) {
 
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulo habilitado", moduleService.enable(id))
+                new ApiResponse<>(200, "success.moduloHabilitado", moduleService.enable(id))
         );
     }
 
     @PatchMapping("/{id}/disable")
     public ResponseEntity<?> disable(@PathVariable UUID id) {
         return ResponseEntity.ok(
-                new ApiResponse<>(200, "Módulo deshabilitado", moduleService.disable(id))
+                new ApiResponse<>(200, "success.moduloDeshabilitado", moduleService.disable(id))
         );
     }
 

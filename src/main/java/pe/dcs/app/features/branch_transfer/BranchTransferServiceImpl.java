@@ -164,7 +164,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
 
         if (request.getTargetBranchId() == null) {
             throw new Exceptions(
-                    "Debe indicar la sede destino.",
+                    "error.debeIndicarSedeDestino",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -173,14 +173,14 @@ public class BranchTransferServiceImpl implements BranchTransferService {
                 branchRepository.findById(request.getTargetBranchId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede destino no encontrada.",
+                                        "error.sedeDestinoNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
         if (targetBranch.getId().equals(current.getBranch().getId())) {
             throw new Exceptions(
-                    "La persona ya pertenece a esa sede.",
+                    "error.personaPerteneceSede",
                     HttpStatus.CONFLICT
             );
         }
@@ -189,7 +189,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
                 .equals(current.getBranch().getOrganization().getId())) {
 
             throw new Exceptions(
-                    "La sede destino debe pertenecer a la misma organización.",
+                    "error.sedeDestinoDebePertenecerMismaOrganizacion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -220,7 +220,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
     // =====================================================
 
     private void assertCallerCanManage() {
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar traslados de sede.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarTrasladosSede");
     }
 
     private void validateAccess(PersonBranch currentBranch) {
@@ -231,7 +231,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
         if (!authContext.canAccess(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "No tiene permisos para trasladar a esta persona.",
+                    "error.noTienePermisosTrasladarPersona",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -242,7 +242,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
         return findActiveBranch(person)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "La persona no tiene una sede activa.",
+                                "error.personaNoTieneSedeActiva",
                                 HttpStatus.CONFLICT
                         )
                 );
@@ -261,7 +261,7 @@ public class BranchTransferServiceImpl implements BranchTransferService {
         return personRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Persona no encontrada.",
+                                "error.personaNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );

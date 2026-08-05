@@ -1,5 +1,6 @@
 package pe.dcs.app.features.visibility.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitudes obtenidas correctamente",
+                "success.solicitudesObtenidasCorrectamente",
                 service.searchIncoming(request)
         );
     }
@@ -47,7 +48,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitudes obtenidas correctamente",
+                "success.solicitudesObtenidasCorrectamente",
                 service.searchOutgoing(request)
         );
     }
@@ -59,7 +60,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada",
+                "success.personaEncontrada",
                 service.findPersonByDni(dni)
         );
     }
@@ -71,7 +72,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Sedes anteriores obtenidas correctamente",
+                "success.sedesAnterioresObtenidasCorrectamente",
                 service.getPersonBranches(personId)
         );
     }
@@ -79,14 +80,14 @@ public class VisibilityRequestController {
     @PostMapping("/request/{personId}")
     public ApiResponse<String> create(
             @PathVariable UUID personId,
-            @RequestBody VisibilityRequestCreateRequest request
+            @Valid @RequestBody VisibilityRequestCreateRequest request
     ) {
 
         service.create(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitud de visibilidad enviada correctamente",
+                "success.solicitudVisibilidadEnviadaCorrectamente",
                 "OK"
         );
     }
@@ -101,7 +102,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitud aprobada correctamente",
+                "success.solicitudAprobadaCorrectamente",
                 "OK"
         );
     }
@@ -115,7 +116,7 @@ public class VisibilityRequestController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Solicitud rechazada correctamente",
+                "success.solicitudRechazadaCorrectamente",
                 "OK"
         );
     }

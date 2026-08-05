@@ -1,5 +1,6 @@
 package pe.dcs.app.features.contract;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.contract.request.ContractCreateRequest;
@@ -36,7 +37,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contratos obtenidos correctamente",
+                "success.contratosObtenidosCorrectamente",
                 contractService.search(request)
         );
     }
@@ -48,7 +49,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contrato encontrado",
+                "success.contratoEncontrado",
                 contractService.getById(id)
         );
     }
@@ -66,7 +67,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Módulos contratados obtenidos correctamente",
+                "success.modulosContratadosObtenidosCorrectamente",
                 contractService.getActiveModuleCodesForCurrentContext()
         );
     }
@@ -83,19 +84,19 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Catálogo de módulos obtenido correctamente",
+                "success.catalogoModulosObtenidoCorrectamente",
                 contractModuleService.getCatalog(contractId)
         );
     }
 
     @PostMapping("/create")
     public ApiResponse<ContractResponse> create(
-            @RequestBody ContractCreateRequest request
+            @Valid @RequestBody ContractCreateRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Contrato creado correctamente",
+                "success.contratoCreadoCorrectamente",
                 contractService.create(request)
         );
     }
@@ -103,7 +104,7 @@ public class ContractController {
     @PutMapping("/update/{id}")
     public ApiResponse<ContractResponse> update(
             @PathVariable UUID id,
-            @RequestBody ContractUpdateRequest request
+            @Valid @RequestBody ContractUpdateRequest request
     ) {
 
         ContractResponse response = contractService.update(id, request);
@@ -116,8 +117,8 @@ public class ContractController {
          */
         String message =
                 response.getId().equals(id)
-                        ? "Contrato actualizado correctamente"
-                        : "Se generó un nuevo contrato con estos cambios; el anterior quedó conservado en el historial.";
+                        ? "success.contratoActualizadoCorrectamente"
+                        : "success.seGeneroNuevoContratoCambios";
 
         return new ApiResponse<>(
                 200,
@@ -134,7 +135,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Historial de la organización obtenido correctamente",
+                "success.historialOrganizacionObtenidoCorrectamente",
                 contractService.historyByOrganization(organizationId, request)
         );
     }
@@ -147,7 +148,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Historial de la sede obtenido correctamente",
+                "success.historialSedeObtenidoCorrectamente",
                 contractService.historyByBranch(branchId, request)
         );
     }
@@ -159,7 +160,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contrato activado correctamente",
+                "success.contratoActivadoCorrectamente",
                 null
         );
     }
@@ -171,7 +172,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contrato reactivado correctamente",
+                "success.contratoReactivadoCorrectamente",
                 null
         );
     }
@@ -183,7 +184,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contrato suspendido correctamente",
+                "success.contratoSuspendidoCorrectamente",
                 null
         );
     }
@@ -195,7 +196,7 @@ public class ContractController {
 
         return new ApiResponse<>(
                 200,
-                "Contrato cancelado correctamente",
+                "success.contratoCanceladoCorrectamente",
                 null
         );
     }

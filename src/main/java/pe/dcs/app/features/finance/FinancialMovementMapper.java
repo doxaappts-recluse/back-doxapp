@@ -47,7 +47,7 @@ public class FinancialMovementMapper {
         if (movement.getFund() != null) {
 
             response.setFundId(movement.getFund().getId());
-            response.setFundName(movement.getFund().getName());
+            response.setFundName(movement.getFund().getLocalizedName());
         }
 
         if (movement.getCreatedByUser() != null) {

@@ -45,7 +45,7 @@ public class ModuleServiceImpl implements ModuleService {
         if (!authContext.isSystem()) {
 
             throw new Exceptions(
-                    "Solo un administrador del sistema puede gestionar el catálogo de módulos.",
+                    "error.soloAdministradorSistemaPuedeGestionarCatalogo2",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -89,7 +89,7 @@ public class ModuleServiceImpl implements ModuleService {
         assertSystem();
 
         Module module = moduleRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Module not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.moduleNotFound", HttpStatus.NOT_FOUND));
 
         return moduleMapper.simple(module, authContext.canViewAudit());
     }
@@ -113,7 +113,7 @@ public class ModuleServiceImpl implements ModuleService {
                 .map(m ->
                         new ModuleOptionResponse(
                                 m.getId(),
-                                m.getName()
+                                m.getLocalizedName()
                         )
                 )
                 .toList();
@@ -138,7 +138,7 @@ public class ModuleServiceImpl implements ModuleService {
                 .map(m ->
                         new ModuleOptionResponse(
                                 m.getId(),
-                                m.getName()
+                                m.getLocalizedName()
                         )
                 )
                 .toList();
@@ -152,14 +152,15 @@ public class ModuleServiceImpl implements ModuleService {
 
         if(moduleRepository.existsByCodeIgnoreCase(request.getCode())){
             throw new Exceptions(
-                    "Module code already exists",
+                    "error.moduleCodeAlreadyExists",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         Module module = new Module();
 
-        module.setName(request.getName());
+        module.setNameEs(request.getNameEs());
+        module.setNameEn(request.getNameEn());
         module.setCode(request.getCode().trim().toUpperCase());
         module.setIcon(request.getIcon());
         module.setRoute(request.getRoute());
@@ -177,14 +178,14 @@ public class ModuleServiceImpl implements ModuleService {
                     moduleRepository.findById(request.getParentId())
                             .orElseThrow(() ->
                                     new Exceptions(
-                                            "Parent module not found",
+                                            "error.parentModuleNotFound",
                                             HttpStatus.NOT_FOUND
                                     )
                             );
 
             if(!parent.isActive()){
                 throw new Exceptions(
-                        "Parent module is inactive",
+                        "error.parentModuleInactive",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -196,7 +197,7 @@ public class ModuleServiceImpl implements ModuleService {
 
             if(parent.getParent() != null){
                 throw new Exceptions(
-                        "Only one nesting level is allowed",
+                        "error.onlyOneNestingLevelAllowed",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -222,7 +223,7 @@ public class ModuleServiceImpl implements ModuleService {
                 moduleRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Module not found",
+                                        "error.moduleNotFound",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -233,7 +234,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         if(!module.getCode().equalsIgnoreCase(request.getCode())){
             throw new Exceptions(
-                    "Module code cannot be modified.",
+                    "error.moduleCodeCannotModified",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -262,7 +263,7 @@ public class ModuleServiceImpl implements ModuleService {
 
                 if (hasActiveChildren) {
                     throw new Exceptions(
-                            "No se puede cambiar el módulo padre porque tiene módulos hijos activos.",
+                            "error.noPuedeCambiarModuloPadrePorque",
                             HttpStatus.BAD_REQUEST
                     );
                 }
@@ -271,7 +272,7 @@ public class ModuleServiceImpl implements ModuleService {
                 // (si quieres mantener la jerarquía fija)
                 if (newParentId != null) {
                     throw new Exceptions(
-                            "Un módulo padre no puede convertirse en módulo hijo.",
+                            "error.moduloPadreNoPuedeConvertirseModulo",
                             HttpStatus.BAD_REQUEST
                     );
                 }
@@ -282,7 +283,7 @@ public class ModuleServiceImpl implements ModuleService {
 
                 if (newParentId == null) {
                     throw new Exceptions(
-                            "Un módulo hijo no puede convertirse en módulo padre.",
+                            "error.moduloHijoNoPuedeConvertirseModulo",
                             HttpStatus.BAD_REQUEST
                     );
                 }
@@ -291,7 +292,7 @@ public class ModuleServiceImpl implements ModuleService {
                         moduleRepository.findById(newParentId)
                                 .orElseThrow(() ->
                                         new Exceptions(
-                                                "Módulo padre no encontrado.",
+                                                "error.moduloPadreNoEncontrado",
                                                 HttpStatus.NOT_FOUND
                                         )
                                 );
@@ -304,7 +305,8 @@ public class ModuleServiceImpl implements ModuleService {
         // UPDATE ALLOWED FIELDS
         // =====================================================
 
-        module.setName(request.getName());
+        module.setNameEs(request.getNameEs());
+        module.setNameEn(request.getNameEn());
         module.setIcon(request.getIcon());
         module.setRoute(request.getRoute());
         module.setOrderNum(request.getOrderNum());
@@ -338,7 +340,7 @@ public class ModuleServiceImpl implements ModuleService {
                 moduleRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Module not found",
+                                        "error.moduleNotFound",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -360,7 +362,7 @@ public class ModuleServiceImpl implements ModuleService {
                 moduleRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Module not found",
+                                        "error.moduleNotFound",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -377,7 +379,7 @@ public class ModuleServiceImpl implements ModuleService {
 
         if (hasActiveChildren) {
             throw new Exceptions(
-                    "Cannot deactivate a module that has active child modules.",
+                    "error.cannotDeactivateModuleThatHasActive",
                     HttpStatus.BAD_REQUEST
             );
         }

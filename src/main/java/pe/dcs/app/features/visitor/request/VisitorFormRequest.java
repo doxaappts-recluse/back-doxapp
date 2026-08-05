@@ -1,5 +1,6 @@
 package pe.dcs.app.features.visitor.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.visitor.VisitorConsolidationStage;
@@ -12,8 +13,10 @@ import java.util.UUID;
 @Setter
 public class VisitorFormRequest {
 
+    @NotNull(message = "{error.fechaPrimeraVisitaObligatoria}")
     private LocalDate firstVisitDate;
 
+    @NotNull(message = "{error.comoLlegoVisitanteObligatorio}")
     private VisitorHowArrived howArrived;
 
     /**
@@ -23,6 +26,7 @@ public class VisitorFormRequest {
      */
     private UUID invitedByPersonId;
 
+    @NotNull(message = "{error.etapaConsolidacionObligatoria}")
     private VisitorConsolidationStage consolidationStage;
 
     private String notes;

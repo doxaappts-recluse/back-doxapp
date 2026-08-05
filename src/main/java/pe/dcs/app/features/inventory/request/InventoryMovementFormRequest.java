@@ -1,5 +1,6 @@
 package pe.dcs.app.features.inventory.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.finance.FinancialMovementPaymentMethod;
@@ -14,9 +15,13 @@ import java.util.UUID;
 @Setter
 public class InventoryMovementFormRequest {
 
+    @NotNull(message = "{error.debeSeleccionarItem}")
     private UUID itemId;
+    @NotNull(message = "{error.debeIndicarSiEntradaSalida}")
     private InventoryMovementType type;
+    @NotNull(message = "{error.motivoMovimientoObligatorio}")
     private InventoryMovementReason reason;
+    @NotNull(message = "{error.cantidadDebeSerMayorCero}")
     private Integer quantity;
 
     /**
@@ -28,6 +33,7 @@ public class InventoryMovementFormRequest {
     private BigDecimal unitCost;
     private FinancialMovementPaymentMethod paymentMethod;
 
+    @NotNull(message = "{error.fechaTransaccionObligatoria}")
     private LocalDate movementDate;
     private String notes;
 }

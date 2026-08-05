@@ -163,7 +163,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
                         MinistryAssignmentGroupedResponse response = new MinistryAssignmentGroupedResponse();
 
                         response.setMinistryId(id);
-                        response.setMinistryName(assignment.getMinistry().getName());
+                        response.setMinistryName(assignment.getMinistry().getLocalizedName());
                         response.setAssignments(new ArrayList<>());
 
                         return response;
@@ -190,7 +190,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
     @Transactional(readOnly = true)
     public List<MinistrySimpleResponse> getAllMinistries() {
 
-        return ministryRepository.findAllByStatusOrderByNameAsc(StatusType.ACTIVE)
+        return ministryRepository.findAllByStatusOrderByNameEsAsc(StatusType.ACTIVE)
                 .stream()
                 .map(mapper::toMinistrySimple)
                 .toList();
@@ -200,7 +200,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
     @Transactional(readOnly = true)
     public List<MinistryRoleSimpleResponse> getAllRoles() {
 
-        return ministryRoleRepository.findAllByStatusOrderByNameAsc(StatusType.ACTIVE)
+        return ministryRoleRepository.findAllByStatusOrderByNameEsAsc(StatusType.ACTIVE)
                 .stream()
                 .map(mapper::toRoleSimple)
                 .toList();
@@ -247,7 +247,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
             if (overlaps) {
 
                 throw new Exceptions(
-                        "La persona ya sirve en este ministerio durante ese periodo. Solo puede haber un periodo por vez en el mismo ministerio.",
+                        "error.personaSirveMinisterioDurantePeriodoSolo",
                         HttpStatus.CONFLICT
                 );
             }
@@ -258,14 +258,14 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
 
         if (startDate == null) {
             throw new Exceptions(
-                    "La fecha de inicio es obligatoria.",
+                    "error.fechaInicioObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (endDate != null && endDate.isBefore(startDate)) {
             throw new Exceptions(
-                    "La fecha de fin no puede ser anterior a la fecha de inicio.",
+                    "error.fechaFinNoPuedeSerAnterior",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -277,7 +277,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
                 || !role.getMinistry().getId().equals(ministry.getId())) {
 
             throw new Exceptions(
-                    "El rol seleccionado no pertenece al ministerio seleccionado.",
+                    "error.rolSeleccionadoNoPerteneceMinisterioSeleccionado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -289,7 +289,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
                 || !assignment.getPerson().getId().equals(userId)) {
 
             throw new Exceptions(
-                    "El registro de servicio ministerial no pertenece a esta persona.",
+                    "error.registroServicioMinisterialNoPertenecePersona",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -311,7 +311,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
 
         if (activeBranch == null) {
             throw new Exceptions(
-                    "La persona no tiene una sede activa.",
+                    "error.personaNoTieneSedeActiva",
                     HttpStatus.CONFLICT
             );
         }
@@ -325,7 +325,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         if (!authContext.canManageOrgOrBranchOnly(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "Solo un administrador de organización o de sede puede gestionar el servicio ministerial de esta persona.",
+                    "error.soloAdministradorOrganizacionSedePuedeGestionar2",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -338,7 +338,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         return personRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Persona no encontrada.",
+                                "error.personaNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -349,7 +349,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         return ministryRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Ministerio no encontrado.",
+                                "error.ministerioNoEncontrado2",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -360,7 +360,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         return ministryRoleRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Rol de ministerio no encontrado.",
+                                "error.rolMinisterioNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -371,7 +371,7 @@ public class MinistryAssignmentServiceImpl implements MinistryAssignmentService 
         return ministryAssignmentRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Registro de servicio ministerial no encontrado.",
+                                "error.registroServicioMinisterialNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );

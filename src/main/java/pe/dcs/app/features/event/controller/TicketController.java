@@ -37,7 +37,7 @@ public class TicketController {
 
         return new ApiResponse<>(
                 200,
-                "OK",
+                "success.ok",
                 validationService.validate(qrToken)
         );
     }
@@ -48,7 +48,7 @@ public class TicketController {
     ) {
         return new ApiResponse<>(
                 200,
-                "OK",
+                "success.ok",
                 ticketService.getTicketTemplate(id)
         );
 

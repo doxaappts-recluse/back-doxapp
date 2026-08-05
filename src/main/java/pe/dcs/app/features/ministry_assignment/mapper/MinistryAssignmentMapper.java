@@ -22,14 +22,14 @@ public class MinistryAssignmentMapper {
         response.setMinistry(
                 new MinistryAssignmentRefResponse(
                         assignment.getMinistry().getId(),
-                        assignment.getMinistry().getName()
+                        assignment.getMinistry().getLocalizedName()
                 )
         );
 
         response.setRole(
                 new MinistryAssignmentRefResponse(
                         assignment.getMinistryRole().getId(),
-                        assignment.getMinistryRole().getName()
+                        assignment.getMinistryRole().getLocalizedName()
                 )
         );
 
@@ -56,7 +56,7 @@ public class MinistryAssignmentMapper {
             return item;
         }
 
-        item.setRole(assignment.getMinistryRole().getName());
+        item.setRole(assignment.getMinistryRole().getLocalizedName());
         item.setReason(assignment.getReason());
         item.setObservation(assignment.getObservation());
 
@@ -64,13 +64,13 @@ public class MinistryAssignmentMapper {
     }
 
     public MinistrySimpleResponse toMinistrySimple(Ministry ministry) {
-        return new MinistrySimpleResponse(ministry.getId(), ministry.getName());
+        return new MinistrySimpleResponse(ministry.getId(), ministry.getLocalizedName());
     }
 
     public MinistryRoleSimpleResponse toRoleSimple(MinistryRole role) {
         return new MinistryRoleSimpleResponse(
                 role.getId(),
-                role.getName(),
+                role.getLocalizedName(),
                 role.getMinistry() != null ? role.getMinistry().getId() : null
         );
     }

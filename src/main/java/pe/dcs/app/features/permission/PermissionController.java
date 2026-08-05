@@ -21,7 +21,7 @@ public class PermissionController {
 
         return new ApiResponse<>(
                 200,
-                "Permisos cargados correctamente",
+                "success.permisosCargadosCorrectamente",
                 permissionService.findAll()
         );
     }

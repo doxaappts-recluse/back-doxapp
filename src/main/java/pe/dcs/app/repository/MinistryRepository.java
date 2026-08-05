@@ -12,14 +12,19 @@ import java.util.UUID;
 
 @Repository
 public interface MinistryRepository extends JpaRepository<Ministry, UUID>, JpaSpecificationExecutor<Ministry> {
-    List<Ministry> findAllByStatusOrderByNameAsc(
+    List<Ministry> findAllByStatusOrderByNameEsAsc(
             StatusType status
     );
 
     /**
-     * Usado por SmallGroupServiceImpl para el find-or-create del
-     * ministerio de referencia "Grupos Pequeños" (uk_ministry_name
-     * garantiza unicidad global por nombre).
+     * Usado por SmallGroupServiceImpl/BibleAcademyServiceImpl para
+     * el find-or-create de ministerios de referencia (uk_ministry_code
+     * garantiza unicidad global por code, estable sin importar el
+     * idioma de nameEs/nameEn).
      */
-    Optional<Ministry> findByName(String name);
+    Optional<Ministry> findByCode(String code);
+
+    boolean existsByCodeIgnoreCase(String code);
+
+    boolean existsByCodeIgnoreCaseAndIdNot(String code, UUID id);
 }

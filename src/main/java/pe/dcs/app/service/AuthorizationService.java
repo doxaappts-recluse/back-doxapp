@@ -85,7 +85,7 @@ public class AuthorizationService {
 
 
         throw new Exceptions(
-                "Access denied",
+                "error.accessDenied",
                 HttpStatus.FORBIDDEN
         );
 
@@ -135,7 +135,7 @@ public class AuthorizationService {
                 organizationId
         )){
             throw new Exceptions(
-                    "Organization access denied",
+                    "error.organizationAccessDenied",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -153,7 +153,7 @@ public class AuthorizationService {
                 branchId
         )){
             throw new Exceptions(
-                    "Branch access denied",
+                    "error.branchAccessDenied",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -174,7 +174,7 @@ public class AuthorizationService {
                 targetOrganizationId
         )){
             throw new Exceptions(
-                    "Different organization",
+                    "error.differentOrganization",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -191,7 +191,7 @@ public class AuthorizationService {
                 targetBranchId
         )){
             throw new Exceptions(
-                    "Different branch",
+                    "error.differentBranch",
                     HttpStatus.FORBIDDEN
             );
         }

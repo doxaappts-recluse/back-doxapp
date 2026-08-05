@@ -47,7 +47,7 @@ public class MinistryServiceImpl implements MinistryService {
         if (!authContext.isSystem()) {
 
             throw new Exceptions(
-                    "Solo un administrador del sistema puede gestionar el catálogo de ministerios.",
+                    "error.soloAdministradorSistemaPuedeGestionarCatalogo",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -59,9 +59,20 @@ public class MinistryServiceImpl implements MinistryService {
 
         assertSystem();
 
+        String code = request.getCode().trim().toUpperCase();
+
+        if (ministryRepository.existsByCodeIgnoreCase(code)) {
+            throw new Exceptions(
+                    "error.ministryCodeAlreadyExists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         Ministry ministry = new Ministry();
 
-        ministry.setName(request.getName());
+        ministry.setCode(code);
+        ministry.setNameEs(request.getNameEs());
+        ministry.setNameEn(request.getNameEn());
         ministry.setDescription(request.getDescription());
 
         ministry.setStatus(
@@ -84,10 +95,19 @@ public class MinistryServiceImpl implements MinistryService {
                 ministryRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Ministerio no encontrado",
+                                        "error.ministerioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
+
+        if (request.getCode() != null
+                && ministryRepository.existsByCodeIgnoreCaseAndIdNot(request.getCode().trim().toUpperCase(), id)) {
+
+            throw new Exceptions(
+                    "error.ministryCodeAlreadyExists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
 
         ministryMapper.updateEntity(ministry, request);
 
@@ -105,7 +125,7 @@ public class MinistryServiceImpl implements MinistryService {
                 ministryRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Ministerio no encontrado",
+                                        "error.ministerioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -125,7 +145,7 @@ public class MinistryServiceImpl implements MinistryService {
                 ministryRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Ministerio no encontrado",
+                                        "error.ministerioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -146,7 +166,7 @@ public class MinistryServiceImpl implements MinistryService {
                 ministryRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Ministerio no encontrado",
+                                        "error.ministerioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -164,7 +184,7 @@ public class MinistryServiceImpl implements MinistryService {
         boolean showAudit = authContext.canViewAudit();
 
         return ministryRepository
-                .findAllByStatusOrderByNameAsc(
+                .findAllByStatusOrderByNameEsAsc(
                         StatusType.ACTIVE
                 )
                 .stream()

@@ -21,10 +21,13 @@ public class MinistrySpecification {
 
             if(name != null && !name.isBlank()){
 
+                String pattern = "%" + name.toLowerCase() + "%";
+
                 predicates.add(
-                        cb.like(
-                                cb.lower(root.get("name")),
-                                "%" + name.toLowerCase() + "%"
+                        cb.or(
+                                cb.like(cb.lower(root.get("nameEs")), pattern),
+                                cb.like(cb.lower(root.get("nameEn")), pattern),
+                                cb.like(cb.lower(root.get("code")), pattern)
                         )
                 );
 

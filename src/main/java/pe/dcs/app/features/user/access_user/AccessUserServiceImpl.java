@@ -309,7 +309,7 @@ public class AccessUserServiceImpl implements AccessUserService {
                         permissionRepository.findById(permissionId)
                                 .orElseThrow(() ->
                                         new Exceptions(
-                                                "Permiso no encontrado.",
+                                                "error.permisoNoEncontrado",
                                                 HttpStatus.NOT_FOUND
                                         )
                                 );
@@ -363,7 +363,7 @@ public class AccessUserServiceImpl implements AccessUserService {
         return moduleRepository.findById(moduleId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Módulo no encontrado.",
+                                "error.moduloNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -379,7 +379,7 @@ public class AccessUserServiceImpl implements AccessUserService {
                 && !authContext.isCurrentBranchAdmin()) {
 
             throw new Exceptions(
-                    "Solo un administrador de organización o de sede puede gestionar accesos.",
+                    "error.soloAdministradorOrganizacionSedePuedeGestionar",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -393,7 +393,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
         if (access.getActive() != StatusType.ACTIVE) {
             throw new Exceptions(
-                    "El acceso no está activo.",
+                    "error.accesoNoActivo",
                     HttpStatus.CONFLICT
             );
         }
@@ -410,7 +410,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
         if (!canManage) {
             throw new Exceptions(
-                    "No tiene permisos para administrar este usuario.",
+                    "error.noTienePermisosAdministrarUsuario",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -429,14 +429,14 @@ public class AccessUserServiceImpl implements AccessUserService {
                 userAccessRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Acceso no encontrado",
+                                        "error.accesoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
         if (!access.isOrganizationUser()) {
             throw new Exceptions(
-                    "El acceso no es de tipo usuario de organización.",
+                    "error.accesoNoTipoUsuarioOrganizacion",
                     HttpStatus.CONFLICT
             );
         }
@@ -488,14 +488,14 @@ public class AccessUserServiceImpl implements AccessUserService {
 
             if (moduleRequest.getModuleId() == null) {
                 throw new Exceptions(
-                        "Módulo inválido.",
+                        "error.moduloInvalido",
                         HttpStatus.BAD_REQUEST
                 );
             }
 
             if (!seenModules.add(moduleRequest.getModuleId())) {
                 throw new Exceptions(
-                        "El módulo está repetido en la solicitud.",
+                        "error.moduloRepetidoSolicitud",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -505,7 +505,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
             if (allowedPermissions == null) {
                 throw new Exceptions(
-                        "Solo se pueden asignar módulos hijos habilitados por el contrato activo de la sede.",
+                        "error.soloPuedenAsignarModulosHijosHabilitados",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -519,7 +519,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
                 if (!allowedPermissions.contains(permissionId)) {
                     throw new Exceptions(
-                            "El permiso no está disponible para este módulo en el contrato activo.",
+                            "error.permisoNoDisponibleModuloContratoActivo",
                             HttpStatus.BAD_REQUEST
                     );
                 }
@@ -535,7 +535,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
         if (credentialRepository.existsByUsernameAndIdNot(username, credentialId)) {
             throw new Exceptions(
-                    "El usuario ya existe.",
+                    "error.elUsuarioYaExiste",
                     HttpStatus.CONFLICT
             );
         }
@@ -547,7 +547,7 @@ public class AccessUserServiceImpl implements AccessUserService {
 
         if (credential == null) {
             throw new Exceptions(
-                    "El usuario no tiene credencial.",
+                    "error.usuarioNoTieneCredencial",
                     HttpStatus.CONFLICT
             );
         }

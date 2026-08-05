@@ -17,9 +17,14 @@ spring:
       minimum-idle: 1
       connection-timeout: 30000
 
-
   main:
     web-application-type: servlet
+
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+    always-use-message-format: false
 
   servlet:
     multipart:
@@ -29,8 +34,8 @@ spring:
   jpa:
     database: postgresql
     hibernate:
-      #ddl-auto: update
-      ddl-auto: create-drop
+      ddl-auto: update
+      #ddl-auto: create-drop
     properties:
       hibernate:
         order_inserts: true

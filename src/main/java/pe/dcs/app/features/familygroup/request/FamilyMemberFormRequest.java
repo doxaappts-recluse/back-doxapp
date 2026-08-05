@@ -1,5 +1,6 @@
 package pe.dcs.app.features.familygroup.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.FamilyRole;
@@ -17,6 +18,7 @@ public class FamilyMemberFormRequest {
      * Person que ya existe (encontrada por DNI, ver
      * FamilyGroupController.findPersonByDni).
      */
+    @NotNull(message = "{error.debeSeleccionarPersonaAgregar}")
     private UUID personId;
 
     private FamilyRole role;

@@ -105,7 +105,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 organizationRepository.findById(request.getOrganizationId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Organización no encontrada",
+                                        "error.organizacionNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -118,7 +118,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 roleRepository.findById(request.getRoleId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol no encontrado",
+                                        "error.rolNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -137,7 +137,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                     branchRepository.findById(request.getBranchId())
                             .orElseThrow(() ->
                                     new Exceptions(
-                                            "Sede no encontrada",
+                                            "error.sedeNoEncontrada",
                                             HttpStatus.NOT_FOUND
                                     ));
 
@@ -247,7 +247,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
 
         Person person = personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Usuario no encontrado", HttpStatus.NOT_FOUND));
+                        new Exceptions("error.usuarioNoEncontrado", HttpStatus.NOT_FOUND));
 
         validatePersonAccess(person);
 
@@ -263,7 +263,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         if(!authContext.hasOrganizationAccess(organizationId)){
 
             throw new Exceptions(
-                    "No tiene acceso a esta organización", HttpStatus.UNAUTHORIZED
+                    "error.noTieneAccesoOrganizacion", HttpStatus.UNAUTHORIZED
             );
 
         }
@@ -280,7 +280,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 personRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Usuario no encontrado",
+                                        "error.usuarioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -321,7 +321,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
 
         Person person = personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Usuario no encontrado", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.usuarioNoEncontrado", HttpStatus.NOT_FOUND)
                 );
 
         validatePersonAccess(person);
@@ -329,7 +329,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         Credential credential = person.getCredential();
 
         if (credential == null) {
-            throw new Exceptions("El usuario no tiene credencial.", HttpStatus.CONFLICT);
+            throw new Exceptions("error.usuarioNoTieneCredencial", HttpStatus.CONFLICT);
         }
 
         credential.setStatus(StatusType.ACTIVE);
@@ -345,7 +345,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
 
         Person person = personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Usuario no encontrado", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.usuarioNoEncontrado", HttpStatus.NOT_FOUND)
                 );
 
         validatePersonAccess(person);
@@ -353,7 +353,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         Credential credential = person.getCredential();
 
         if (credential == null) {
-            throw new Exceptions("El usuario no tiene credencial.", HttpStatus.CONFLICT);
+            throw new Exceptions("error.usuarioNoTieneCredencial", HttpStatus.CONFLICT);
         }
 
         credential.setStatus(StatusType.INACTIVE);
@@ -381,7 +381,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         List<UserAccess> accesses = person.getAccesses();
 
         if (accesses.isEmpty()) {
-            throw new Exceptions("El usuario no tiene ningún acceso registrado.", HttpStatus.CONFLICT);
+            throw new Exceptions("error.usuarioNoTieneNingunAccesoRegistrado", HttpStatus.CONFLICT);
         }
 
         boolean canManage =
@@ -398,27 +398,27 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                         );
 
         if (!canManage) {
-            throw new Exceptions("No tiene permisos para administrar este usuario.", HttpStatus.UNAUTHORIZED);
+            throw new Exceptions("error.noTienePermisosAdministrarUsuario", HttpStatus.UNAUTHORIZED);
         }
 
     }
 
     private void validateDniForUpdate(UUID personId, String dni) {
         if (personRepository.existsByDniAndIdNot(dni, personId)) {
-            throw new Exceptions("El DNI ya existe", HttpStatus.CONFLICT);
+            throw new Exceptions("error.elDniYaExiste", HttpStatus.CONFLICT);
         }
     }
 
     private void validateUsernameForUpdate(UUID credentialId, String username) {
         if (credentialRepository.existsByUsernameAndIdNot(username, credentialId)) {
-            throw new Exceptions("El username ya existe", HttpStatus.CONFLICT);
+            throw new Exceptions("error.elUsernameYaExiste", HttpStatus.CONFLICT);
         }
     }
 
     private void validateDni(String dni){
         if(personRepository.existsByDni(dni)){
             throw new Exceptions(
-                    "El DNI ya está registrado", HttpStatus.CONFLICT
+                    "error.elDniYaEstaRegistrado", HttpStatus.CONFLICT
             );
         }
     }
@@ -426,7 +426,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
     private void validateUsername(String username){
         if(credentialRepository.existsByUsername(username)){
             throw new Exceptions(
-                    "El username ya existe", HttpStatus.CONFLICT
+                    "error.elUsernameYaExiste", HttpStatus.CONFLICT
             );
         }
     }
@@ -440,7 +440,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
     private void validateRole(Role role){
         if(role.isSystemRole()){
             throw new Exceptions(
-                    "Rol no permitido", HttpStatus.CONFLICT
+                    "error.rolNoPermitido", HttpStatus.CONFLICT
             );
         }
     }
@@ -448,7 +448,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
     private void validateBranchOrganization(Branch branch, Organization organization){
         if(!branch.getOrganization().getId().equals(organization.getId())){
             throw new Exceptions(
-                    "La sede no pertenece a la organización", HttpStatus.BAD_REQUEST
+                    "error.sedeNoPerteneceOrganizacion", HttpStatus.BAD_REQUEST
             );
         }
     }
@@ -460,7 +460,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
     private void validateBranchRequired(Role role, Branch branch){
         if(role.isBranchRole() && branch == null){
             throw new Exceptions(
-                    "Este rol requiere una sede", HttpStatus.BAD_REQUEST
+                    "error.rolRequiereSede", HttpStatus.BAD_REQUEST
             );
         }
     }
@@ -480,7 +480,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 personRepository.findById(personId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Usuario no encontrado",
+                                        "error.usuarioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -489,7 +489,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         if (UserAccessHelper.hasActiveOrganizationAdminAccess(person)) {
 
             throw new Exceptions(
-                    "El usuario ya es administrador de organización (acceso global); no se le pueden asignar accesos adicionales.",
+                    "error.usuarioAdministradorOrganizacionAccesoGlobalNo",
                     HttpStatus.CONFLICT
             );
         }
@@ -498,7 +498,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 branchRepository.findById(request.getBranchId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Sede no encontrada",
+                                        "error.sedeNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -506,14 +506,14 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 roleRepository.findById(request.getRoleId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol no encontrado",
+                                        "error.rolNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 ));
 
         if (!role.isBranchRole()) {
 
             throw new Exceptions(
-                    "Solo se pueden agregar accesos con rol administrador de sede o usuario de organización.",
+                    "error.soloPuedenAgregarAccesosRolAdministrador",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -526,7 +526,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 && !personOrganizationId.equals(organization.getId())) {
 
             throw new Exceptions(
-                    "La sede debe pertenecer a la misma organización de los accesos existentes del usuario.",
+                    "error.sedeDebePertenecerMismaOrganizacionAccesos",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -534,7 +534,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         if (!authContext.canAccess(organization.getId(), branch.getId())) {
 
             throw new Exceptions(
-                    "No tiene permisos para administrar accesos en esta sede.",
+                    "error.noTienePermisosAdministrarAccesosSede",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -553,7 +553,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
             if (existing.getActive() == StatusType.ACTIVE) {
 
                 throw new Exceptions(
-                        "El usuario ya tiene ese acceso.",
+                        "error.usuarioTieneAcceso",
                         HttpStatus.CONFLICT
                 );
             }
@@ -596,7 +596,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 userAccessRepository.findById(accessId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Acceso no encontrado",
+                                        "error.accesoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 ));
 
@@ -610,7 +610,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         )) {
 
             throw new Exceptions(
-                    "No tiene permisos para administrar este acceso.",
+                    "error.noTienePermisosAdministrarAcceso",
                     HttpStatus.UNAUTHORIZED
             );
         }

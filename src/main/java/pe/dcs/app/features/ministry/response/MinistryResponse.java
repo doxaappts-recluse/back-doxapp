@@ -11,7 +11,10 @@ import java.util.UUID;
 @Setter
 public class MinistryResponse extends AuditableResponse {
     private UUID id;
+    private String code;
     private String name;
+    private String nameEs;
+    private String nameEn;
     private String description;
     private StatusType status;
 }

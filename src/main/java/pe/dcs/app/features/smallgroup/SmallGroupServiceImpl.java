@@ -69,8 +69,12 @@ public class SmallGroupServiceImpl implements SmallGroupService {
      * requiresActiveMembership=false porque, igual que el resto de
      * este feature, el líder no tiene por qué ser miembro.
      */
-    private static final String GROUP_MINISTRY_NAME = "Grupos Pequeños";
-    private static final String GROUP_LEADER_ROLE_NAME = "Líder de Grupo Pequeño";
+    private static final String GROUP_MINISTRY_CODE = "GRUPOS_PEQUENOS";
+    private static final String GROUP_MINISTRY_NAME_ES = "Grupos Pequeños";
+    private static final String GROUP_MINISTRY_NAME_EN = "Small Groups";
+    private static final String GROUP_LEADER_ROLE_CODE = "LIDER_GRUPO_PEQUENO";
+    private static final String GROUP_LEADER_ROLE_NAME_ES = "Líder de Grupo Pequeño";
+    private static final String GROUP_LEADER_ROLE_NAME_EN = "Small Group Leader";
 
     private final SmallGroupRepository smallGroupRepository;
     private final SmallGroupMemberRepository smallGroupMemberRepository;
@@ -163,14 +167,14 @@ public class SmallGroupServiceImpl implements SmallGroupService {
 
         if (organizationId == null) {
             throw new Exceptions(
-                    "No tiene un contexto de organización activo.",
+                    "error.noTieneContextoOrganizacionActivo",
                     HttpStatus.FORBIDDEN
             );
         }
 
         if (dni == null || dni.isBlank()) {
             throw new Exceptions(
-                    "El DNI es obligatorio.",
+                    "error.elDniEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -179,7 +183,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "No se encontró ninguna persona con ese DNI en la organización.",
+                                        "error.noEncontroNingunaPersonaDniOrganizacion",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -291,7 +295,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
                 )) {
 
             throw new Exceptions(
-                    "Esta persona ya es participante activo de este grupo.",
+                    "error.personaParticipanteActivoGrupo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -323,12 +327,12 @@ public class SmallGroupServiceImpl implements SmallGroupService {
         SmallGroupMember member =
                 smallGroupMemberRepository.findById(memberId)
                         .orElseThrow(() ->
-                                new Exceptions("Participante no encontrado.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.participanteNoEncontrado", HttpStatus.NOT_FOUND)
                         );
 
         if (!member.getGroup().getId().equals(groupId)) {
             throw new Exceptions(
-                    "Este participante no pertenece a este grupo.",
+                    "error.participanteNoPerteneceGrupo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -390,20 +394,20 @@ public class SmallGroupServiceImpl implements SmallGroupService {
             return branchRepository.findById(
                     authContext.getCurrentBranchId()
             ).orElseThrow(() ->
-                    new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                    new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
             );
         }
 
         if (branchId == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede del grupo.",
+                    "error.debeSeleccionarSedeGrupo",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
-                        new Exceptions("Sede no encontrada", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.sedeNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 
@@ -411,7 +415,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
 
         if (request.getName() == null || request.getName().isBlank()) {
             throw new Exceptions(
-                    "El nombre del grupo es obligatorio.",
+                    "error.nombreGrupoObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -420,14 +424,14 @@ public class SmallGroupServiceImpl implements SmallGroupService {
                 && (request.getLeaderName() == null || request.getLeaderName().isBlank())) {
 
             throw new Exceptions(
-                    "El líder del grupo es obligatorio.",
+                    "error.liderGrupoObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getStartDate() == null) {
             throw new Exceptions(
-                    "La fecha de inicio de la temporada es obligatoria.",
+                    "error.fechaInicioTemporadaObligatoria",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -436,7 +440,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
                 && request.getEndDate().isBefore(request.getStartDate())) {
 
             throw new Exceptions(
-                    "La fecha de fin de la temporada no puede ser anterior a la fecha de inicio.",
+                    "error.fechaFinTemporadaNoPuedeSer",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -448,7 +452,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
                 && (request.getGuestName() == null || request.getGuestName().isBlank())) {
 
             throw new Exceptions(
-                    "El nombre del participante es obligatorio.",
+                    "error.nombreParticipanteObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -530,11 +534,13 @@ public class SmallGroupServiceImpl implements SmallGroupService {
 
     private Ministry findOrCreateGroupMinistry() {
 
-        return ministryRepository.findByName(GROUP_MINISTRY_NAME)
+        return ministryRepository.findByCode(GROUP_MINISTRY_CODE)
                 .orElseGet(() -> {
 
                     Ministry ministry = new Ministry();
-                    ministry.setName(GROUP_MINISTRY_NAME);
+                    ministry.setCode(GROUP_MINISTRY_CODE);
+                    ministry.setNameEs(GROUP_MINISTRY_NAME_ES);
+                    ministry.setNameEn(GROUP_MINISTRY_NAME_EN);
                     ministry.setDescription(
                             "Generado automáticamente para registrar el liderazgo de Grupos Pequeños / Células como servicio ministerial."
                     );
@@ -547,11 +553,13 @@ public class SmallGroupServiceImpl implements SmallGroupService {
 
     private MinistryRole findOrCreateLeaderRole(Ministry ministry) {
 
-        return ministryRoleRepository.findByMinistryIdAndName(ministry.getId(), GROUP_LEADER_ROLE_NAME)
+        return ministryRoleRepository.findByMinistryIdAndCode(ministry.getId(), GROUP_LEADER_ROLE_CODE)
                 .orElseGet(() -> {
 
                     MinistryRole role = new MinistryRole();
-                    role.setName(GROUP_LEADER_ROLE_NAME);
+                    role.setCode(GROUP_LEADER_ROLE_CODE);
+                    role.setNameEs(GROUP_LEADER_ROLE_NAME_ES);
+                    role.setNameEn(GROUP_LEADER_ROLE_NAME_EN);
                     role.setMinistry(ministry);
                     role.setStatus(StatusType.ACTIVE);
                     role.setRequiresActiveMembership(false);
@@ -565,7 +573,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
         return smallGroupRepository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Grupo pequeño no encontrado.",
+                                "error.grupoPequenoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -575,7 +583,7 @@ public class SmallGroupServiceImpl implements SmallGroupService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 }

@@ -30,7 +30,7 @@ public class BranchController {
 
         return new ApiResponse<>(
                 200,
-                "Sedes Obtenidas",
+                "success.sedesObtenidas",
                 service.findByOrganization(
                     organizationId,
                     request
@@ -50,7 +50,7 @@ public class BranchController {
 
         return new ApiResponse<>(
                 200,
-                "Sede creada",
+                "success.sedeCreada",
                 service.create(
                         organizationId,
                         request
@@ -69,7 +69,7 @@ public class BranchController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Sede creada",
+                "success.sedeCreada",
                 service.update(
                         id,
                         request
@@ -90,7 +90,7 @@ public class BranchController {
         service.enable(id);
         return new ApiResponse<>(
                 200,
-                "Sede habilitada",
+                "success.sedeHabilitada",
                 null
         );
 
@@ -109,7 +109,7 @@ public class BranchController {
         service.disable(id);
         return new ApiResponse<>(
                 200,
-                "Sede deshabilitada",
+                "success.sedeDeshabilitada",
                 null
         );
 
@@ -129,7 +129,7 @@ public class BranchController {
 
         return new ApiResponse<>(
                 200,
-                "Sede principal cambiada",
+                "success.sedePrincipalCambiada",
                 null
         );
     }
@@ -144,7 +144,7 @@ public class BranchController {
 
         return new ApiResponse<>(
                 200,
-                "Lista de sedes obtenida",
+                "success.listaSedesObtenida",
                 service.findByOrganization(organizationId)
         );
 

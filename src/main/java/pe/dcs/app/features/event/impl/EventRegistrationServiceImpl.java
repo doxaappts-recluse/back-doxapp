@@ -80,7 +80,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         if (request.getFilters().getEventId() == null) {
             throw new Exceptions(
-                    "El evento es requerido",
+                    "error.elEventoEsRequerido",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -90,7 +90,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                         filter.getEventId()
                 ).orElseThrow(() ->
                         new Exceptions(
-                                "Evento no encontrado",
+                                "error.eventoNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -164,7 +164,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 && request.getCategory() != RegistrationCategory.STAFF) {
 
             throw new Exceptions(
-                    "Solo se puede buscar personas para las categorías Miembro o Staff",
+                    "error.soloPuedeBuscarPersonasCategoriasMiembro",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -173,7 +173,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 eventRepository.findById(request.getEventId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -242,7 +242,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 request.getEventId()
         ).orElseThrow(() ->
                 new Exceptions(
-                        "Evento no encontrado",
+                        "error.eventoNoEncontrado",
                         HttpStatus.NOT_FOUND
                 )
         );
@@ -312,7 +312,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 request.getEventId()
         ).orElseThrow(() ->
                 new Exceptions(
-                        "Evento no encontrado",
+                        "error.eventoNoEncontrado",
                         HttpStatus.NOT_FOUND
                 )
         );
@@ -459,7 +459,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == RegistrationStatus.CANCELLED) {
 
             throw new Exceptions(
-                    "No se puede editar una inscripción cancelada",
+                    "error.noPuedeEditarInscripcionCancelada",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -518,7 +518,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == RegistrationStatus.CANCELLED) {
 
             throw new Exceptions(
-                    "No se puede marcar como pagada una inscripción cancelada",
+                    "error.noPuedeMarcarComoPagadaInscripcion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -527,7 +527,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == PaymentStatus.PAID) {
 
             throw new Exceptions(
-                    "La inscripción ya se encuentra pagada",
+                    "error.inscripcionEncuentraPagada",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -551,7 +551,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == RegistrationStatus.CANCELLED) {
 
             throw new Exceptions(
-                    "La inscripción ya se encuentra cancelada",
+                    "error.inscripcionEncuentraCancelada",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -665,7 +665,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 eventRegistrationRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Inscripción no encontrada",
+                                        "error.inscripcionNoEncontrada2",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -689,7 +689,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == EventStatus.CANCELLED) {
 
             throw new Exceptions(
-                    "El evento fue cancelado",
+                    "error.eventoFueCancelado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -698,7 +698,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 == EventStatus.FINISHED) {
 
             throw new Exceptions(
-                    "El evento ya finalizó",
+                    "error.elEventoYaFinalizo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -707,7 +707,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 != EventStatus.PUBLISHED) {
 
             throw new Exceptions(
-                    "Solo se permiten inscripciones en eventos publicados",
+                    "error.soloPermitenInscripcionesEventosPublicados",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -727,7 +727,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         if (current >= event.getCapacity()) {
 
             throw new Exceptions(
-                    "El evento alcanzó su capacidad máxima",
+                    "error.eventoAlcanzoCapacidadMaxima",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -743,7 +743,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 )) {
 
             throw new Exceptions(
-                    "La inscripción ya registra asistencia",
+                    "error.inscripcionRegistraAsistencia",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -780,7 +780,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         if (userId == null) {
 
             throw new Exceptions(
-                    "Debe seleccionar un miembro",
+                    "error.debeSeleccionarMiembro",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -788,7 +788,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         Person user = userRepository.findById(userId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Usuario no encontrado",
+                                "error.usuarioNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -800,7 +800,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                         .findFirst()
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "El usuario no tiene una sede activa",
+                                        "error.usuarioNoTieneSedeActiva",
                                         HttpStatus.CONFLICT
                                 )
                         );
@@ -811,7 +811,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "El usuario no pertenece a la organización",
+                    "error.usuarioNoPerteneceOrganizacion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -826,7 +826,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
 
         if (existsActive) {
             throw new Exceptions(
-                    "El usuario ya se encuentra inscrito",
+                    "error.usuarioEncuentraInscrito",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -855,7 +855,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 request.getName().isBlank()) {
 
             throw new Exceptions(
-                    "El nombre es obligatorio",
+                    "error.elNombreEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -864,7 +864,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
                 request.getLastname().isBlank()) {
 
             throw new Exceptions(
-                    "El apellido es obligatorio",
+                    "error.elApellidoEsObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -922,7 +922,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         if (discount.compareTo(BigDecimal.ZERO) < 0) {
 
             throw new Exceptions(
-                    "El descuento no puede ser negativo",
+                    "error.descuentoNoPuedeSerNegativo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -930,7 +930,7 @@ public class EventRegistrationServiceImpl implements EventRegistrationService {
         if (discount.compareTo(price) > 0) {
 
             throw new Exceptions(
-                    "El descuento no puede ser mayor al precio",
+                    "error.descuentoNoPuedeSerMayorPrecio",
                     HttpStatus.BAD_REQUEST
             );
         }

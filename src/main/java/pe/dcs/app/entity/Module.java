@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.context.i18n.LocaleContextHolder;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.StatusType;
 
@@ -46,8 +47,19 @@ public class Module extends Auditable {
     // INFORMATION
     // =========================
 
-    @Column(nullable = false)
-    private String name;
+    /*
+     * Igual patrón que Ministry/FinancialFund: nameEs/nameEn son
+     * solo para visualización, getLocalizedName() resuelve cuál
+     * mostrar según el locale de la request. El sidebar (ver
+     * SidebarMapper/ModuleResponse) manda AMBOS al frontend para
+     * que el cambio de idioma se refleje ahí sin llamar de nuevo
+     * al backend.
+     */
+    @Column(name = "name_es", nullable = false)
+    private String nameEs;
+
+    @Column(name = "name_en", nullable = false)
+    private String nameEn;
 
     @Column(
             nullable = false,
@@ -139,6 +151,24 @@ public class Module extends Auditable {
 
     public boolean isRoot(){
         return parent == null;
+    }
+
+    /**
+     * Nombre a mostrar según el idioma de la request actual. En
+     * inglés cae a nameEs si nameEn no está cargado (y viceversa)
+     * para no mostrar vacío ante datos legado incompletos.
+     */
+    public String getLocalizedName() {
+
+        boolean english =
+                LocaleContextHolder.getLocale() != null
+                        && "en".equalsIgnoreCase(LocaleContextHolder.getLocale().getLanguage());
+
+        if (english) {
+            return nameEn != null ? nameEn : nameEs;
+        }
+
+        return nameEs != null ? nameEs : nameEn;
     }
 
 }

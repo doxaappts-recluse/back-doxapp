@@ -1,5 +1,6 @@
 package pe.dcs.app.features.finance;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.finance.request.FinancialFundRequest;
@@ -18,12 +19,12 @@ public class FinancialFundController {
 
     @PostMapping("/create")
     public ApiResponse<FinancialFundResponse> create(
-            @RequestBody FinancialFundRequest request
+            @Valid @RequestBody FinancialFundRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Fondo creado correctamente",
+                "success.fondoCreadoCorrectamente",
                 financialFundService.create(request)
         );
     }
@@ -31,12 +32,12 @@ public class FinancialFundController {
     @PutMapping("/update/{id}")
     public ApiResponse<FinancialFundResponse> update(
             @PathVariable UUID id,
-            @RequestBody FinancialFundRequest request
+            @Valid @RequestBody FinancialFundRequest request
     ) {
 
         return new ApiResponse<>(
                 200,
-                "Fondo actualizado correctamente",
+                "success.fondoActualizadoCorrectamente",
                 financialFundService.update(id, request)
         );
     }
@@ -48,7 +49,7 @@ public class FinancialFundController {
 
         return new ApiResponse<>(
                 200,
-                "Fondo habilitado correctamente",
+                "success.fondoHabilitadoCorrectamente",
                 financialFundService.enable(id)
         );
     }
@@ -60,7 +61,7 @@ public class FinancialFundController {
 
         return new ApiResponse<>(
                 200,
-                "Fondo inhabilitado correctamente",
+                "success.fondoInhabilitadoCorrectamente",
                 financialFundService.disable(id)
         );
     }
@@ -72,7 +73,7 @@ public class FinancialFundController {
 
         return new ApiResponse<>(
                 200,
-                "Fondo obtenido correctamente",
+                "success.fondoObtenidoCorrectamente",
                 financialFundService.getById(id)
         );
     }
@@ -82,7 +83,7 @@ public class FinancialFundController {
 
         return new ApiResponse<>(
                 200,
-                "Fondos activos obtenidos correctamente",
+                "success.fondosActivosObtenidosCorrectamente",
                 financialFundService.listActive()
         );
     }
@@ -92,7 +93,7 @@ public class FinancialFundController {
 
         return new ApiResponse<>(
                 200,
-                "Fondos obtenidos correctamente",
+                "success.fondosObtenidosCorrectamente",
                 financialFundService.listAll()
         );
     }

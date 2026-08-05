@@ -1,5 +1,6 @@
 package pe.dcs.app.features.familygroup.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +36,7 @@ public class FamilyGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupos familiares obtenidos correctamente",
+                "success.gruposFamiliaresObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -47,7 +48,7 @@ public class FamilyGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo familiar obtenido correctamente",
+                "success.grupoFamiliarObtenidoCorrectamente",
                 service.getById(id)
         );
     }
@@ -59,19 +60,19 @@ public class FamilyGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
 
     @PostMapping("/create")
     public ApiResponse<UUID> create(
-            @RequestBody FamilyGroupFormRequest request
+            @Valid @RequestBody FamilyGroupFormRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo familiar registrado correctamente",
+                "success.grupoFamiliarRegistradoCorrectamente",
                 service.create(request)
         );
     }
@@ -79,14 +80,14 @@ public class FamilyGroupController {
     @PutMapping("/update/{id}")
     public ApiResponse<String> update(
             @PathVariable UUID id,
-            @RequestBody FamilyGroupFormRequest request
+            @Valid @RequestBody FamilyGroupFormRequest request
     ) {
 
         service.update(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo familiar actualizado correctamente",
+                "success.grupoFamiliarActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -98,7 +99,7 @@ public class FamilyGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Miembros obtenidos correctamente",
+                "success.miembrosObtenidosCorrectamente",
                 service.listMembers(id)
         );
     }
@@ -106,14 +107,14 @@ public class FamilyGroupController {
     @PostMapping("/{id}/members")
     public ApiResponse<String> addMember(
             @PathVariable UUID id,
-            @RequestBody FamilyMemberFormRequest request
+            @Valid @RequestBody FamilyMemberFormRequest request
     ) {
 
         service.addMember(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Miembro agregado correctamente",
+                "success.miembroAgregadoCorrectamente",
                 "OK"
         );
     }
@@ -122,14 +123,14 @@ public class FamilyGroupController {
     public ApiResponse<String> updateMemberRole(
             @PathVariable UUID id,
             @PathVariable UUID memberId,
-            @RequestBody FamilyMemberFormRequest request
+            @Valid @RequestBody FamilyMemberFormRequest request
     ) {
 
         service.updateMemberRole(id, memberId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Miembro actualizado correctamente",
+                "success.miembroActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -144,7 +145,7 @@ public class FamilyGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Miembro removido correctamente",
+                "success.miembroRemovidoCorrectamente",
                 "OK"
         );
     }

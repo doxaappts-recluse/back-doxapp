@@ -1,5 +1,6 @@
 package pe.dcs.app.features.branch_transfer.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class BranchTransferController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Personas obtenidas correctamente",
+                "success.personasObtenidasCorrectamente",
                 service.search(request)
         );
     }
@@ -46,7 +47,7 @@ public class BranchTransferController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Sede actual obtenida correctamente",
+                "success.sedeActualObtenidaCorrectamente",
                 service.getCurrent(personId)
         );
     }
@@ -59,7 +60,7 @@ public class BranchTransferController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Historial de sedes obtenido correctamente",
+                "success.historialSedesObtenidoCorrectamente",
                 service.history(personId, request)
         );
     }
@@ -67,14 +68,14 @@ public class BranchTransferController {
     @PostMapping("/transfer/{personId}")
     public ApiResponse<String> transfer(
             @PathVariable UUID personId,
-            @RequestBody BranchTransferRequest request
+            @Valid @RequestBody BranchTransferRequest request
     ) {
 
         service.transfer(personId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona trasladada correctamente",
+                "success.personaTrasladadaCorrectamente",
                 "OK"
         );
     }

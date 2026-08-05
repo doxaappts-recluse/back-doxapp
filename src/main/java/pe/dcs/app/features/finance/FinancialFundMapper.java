@@ -16,7 +16,10 @@ public class FinancialFundMapper {
 
         response.setId(fund.getId());
         response.setOrganizationId(fund.getOrganization().getId());
-        response.setName(fund.getName());
+        response.setCode(fund.getCode());
+        response.setNameEs(fund.getNameEs());
+        response.setNameEn(fund.getNameEn());
+        response.setName(fund.getLocalizedName());
         response.setDescription(fund.getDescription());
         response.setStatus(fund.getStatus().name());
 

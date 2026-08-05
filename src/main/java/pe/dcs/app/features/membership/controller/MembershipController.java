@@ -1,5 +1,6 @@
 package pe.dcs.app.features.membership.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -34,7 +35,7 @@ public class MembershipController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Membresías obtenidas correctamente",
+                "success.membresiasObtenidasCorrectamente",
                 service.search(request)
         );
     }
@@ -46,7 +47,7 @@ public class MembershipController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Membresía vigente obtenida correctamente",
+                "success.membresiaVigenteObtenidaCorrectamente",
                 service.getCurrent(userId)
         );
     }
@@ -54,14 +55,14 @@ public class MembershipController {
     @PostMapping("/create/{userId}")
     public ApiResponse<String> create(
             @PathVariable UUID userId,
-            @RequestBody MembershipFormRequest request
+            @Valid @RequestBody MembershipFormRequest request
     ) {
 
         service.create(userId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Membresía creada correctamente",
+                "success.membresiaCreadaCorrectamente",
                 "OK"
         );
     }
@@ -70,14 +71,14 @@ public class MembershipController {
     public ApiResponse<String> update(
             @PathVariable UUID userId,
             @PathVariable UUID membershipId,
-            @RequestBody MembershipFormRequest request
+            @Valid @RequestBody MembershipFormRequest request
     ) {
 
         service.update(userId, membershipId, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Membresía actualizada correctamente",
+                "success.membresiaActualizadaCorrectamente",
                 "OK"
         );
     }
@@ -90,7 +91,7 @@ public class MembershipController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Historial de membresías obtenido correctamente",
+                "success.historialMembresiasObtenidoCorrectamente",
                 service.history(userId, request)
         );
     }

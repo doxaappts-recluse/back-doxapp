@@ -31,6 +31,23 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final CredentialDetailsService credentialDetailsService;
     private final OrganizationContext organizationContext;
 
+    /*
+     * Rutas públicas: deben coincidir con el permitAll() de
+     * SecurityConfig. Este filtro corre ANTES de authorizeHttpRequests
+     * (addFilterBefore), así que si no se excluyen acá explícitamente,
+     * se rechazan con 401 sin importar lo que diga permitAll — el
+     * permitAll de Spring Security nunca llega a evaluarse.
+     */
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getRequestURI();
+        return path.equals("/auth/login")
+                || path.equals("/swagger-ui.html")
+                || path.startsWith("/swagger-ui/")
+                || path.equals("/v3/api-docs")
+                || path.startsWith("/v3/api-docs/");
+    }
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
@@ -41,17 +58,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         try {
 
             String path = request.getRequestURI();
-
-            /*
-             * Endpoint público
-             */
-            if(path.equals("/auth/login")){
-                filterChain.doFilter(
-                        request,
-                        response
-                );
-                return;
-            }
 
             String jwt =  parseJwt(request);
 

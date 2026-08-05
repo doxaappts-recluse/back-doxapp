@@ -52,7 +52,7 @@ public class SpaceReservationAccessGuard {
             return;
         }
 
-        throw forbidden("acceder a Reservas de Espacios");
+        throw forbidden("action.accederReservasEspacios");
     }
 
     // =========================================================
@@ -77,13 +77,13 @@ public class SpaceReservationAccessGuard {
 
     public void assertCanManageSpace(ReservableSpace space) {
         if (!canManageSpace(space)) {
-            throw forbidden("gestionar este espacio");
+            throw forbidden("action.gestionarEsteEspacio");
         }
     }
 
     public void assertCanCreateSpace() {
         if (!isAdmin()) {
-            throw forbidden("crear espacios reservables");
+            throw forbidden("action.crearEspaciosReservables");
         }
     }
 
@@ -101,7 +101,7 @@ public class SpaceReservationAccessGuard {
             return;
         }
 
-        throw forbidden("crear reservas");
+        throw forbidden("action.crearReservas");
     }
 
     public boolean canManageReservation(SpaceReservation reservation) {
@@ -127,7 +127,7 @@ public class SpaceReservationAccessGuard {
 
     public void assertCanManageReservation(SpaceReservation reservation) {
         if (!canManageReservation(reservation)) {
-            throw forbidden("gestionar esta reserva");
+            throw forbidden("action.gestionarEstaReserva");
         }
     }
 
@@ -187,10 +187,14 @@ public class SpaceReservationAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

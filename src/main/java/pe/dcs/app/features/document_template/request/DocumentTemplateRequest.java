@@ -1,6 +1,8 @@
 package pe.dcs.app.features.document_template.request;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.DocumentTemplateType;
@@ -11,8 +13,10 @@ import java.util.UUID;
 @Setter
 public class DocumentTemplateRequest {
 
+    @NotNull(message = "{error.tipoDocumentoObligatorio}")
     private DocumentTemplateType documentType;
 
+    @NotBlank(message = "{error.elNombreEsObligatorio}")
     private String name;
 
     /**

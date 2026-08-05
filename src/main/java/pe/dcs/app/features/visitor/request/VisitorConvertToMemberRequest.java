@@ -1,5 +1,6 @@
 package pe.dcs.app.features.visitor.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.membership.MembershipReason;
@@ -16,6 +17,7 @@ import java.time.LocalDate;
 @Setter
 public class VisitorConvertToMemberRequest {
 
+    @NotNull(message = "{error.fechaInicioMembresiaObligatoria}")
     private LocalDate startDate;
 
     /**

@@ -14,11 +14,19 @@ public class ModuleSpecification {
             Predicate p = cb.conjunction();
 
             if (name != null && !name.isBlank()) {
+
+                String term = "%" + name.toLowerCase() + "%";
+
+                /*
+                 * El buscador es un solo campo de texto, pero ahora
+                 * el nombre vive en dos columnas (nameEs/nameEn) —
+                 * matchea si aparece en cualquiera de las dos.
+                 */
                 p = cb.and(
                         p,
-                        cb.like(
-                                cb.lower(root.get("name")),
-                                "%" + name.toLowerCase() + "%"
+                        cb.or(
+                                cb.like(cb.lower(root.get("nameEs")), term),
+                                cb.like(cb.lower(root.get("nameEn")), term)
                         )
                 );
             }

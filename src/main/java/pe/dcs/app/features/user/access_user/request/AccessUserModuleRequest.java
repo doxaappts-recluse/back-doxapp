@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 public class AccessUserModuleRequest {
 
-    @NotNull
+    @NotNull(message = "{error.accessUserModuloObligatorio}")
     private UUID moduleId;
 
     private List<UUID> permissionIds = new ArrayList<>();

@@ -51,7 +51,7 @@ public class FinancialAccessGuard {
             return;
         }
 
-        throw forbidden("registrar movimientos financieros de esta sede");
+        throw forbidden("action.registrarMovimientosFinancierosSede");
     }
 
     /**
@@ -91,7 +91,7 @@ public class FinancialAccessGuard {
     public void assertCanManage(FinancialMovement movement) {
 
         if (!canManage(movement)) {
-            throw forbidden("gestionar este movimiento financiero");
+            throw forbidden("action.gestionarMovimientoFinanciero");
         }
     }
 
@@ -103,7 +103,7 @@ public class FinancialAccessGuard {
                 && !organizationId.equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a esta sede",
+                    "error.noTieneAccesoSede",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -159,10 +159,14 @@ public class FinancialAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

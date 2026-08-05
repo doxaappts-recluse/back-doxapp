@@ -46,7 +46,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
         return branchRepository.findById(branchId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Sede no encontrada",
+                                "error.sedeNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -58,7 +58,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
         if (userId == null) {
             throw new Exceptions(
-                    "No se pudo determinar el usuario actual",
+                    "error.noPudoDeterminarUsuarioActual",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -66,7 +66,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
         return personRepository.findById(userId)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Usuario no encontrado",
+                                "error.usuarioNoEncontrado",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -78,7 +78,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
                 financialCashRegisterRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Caja no encontrada",
+                                        "error.cajaNoEncontrada",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -94,14 +94,14 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
         if (request.getBranchId() == null) {
             throw new Exceptions(
-                    "Debe indicar la sede",
+                    "error.debeIndicarSede",
                     HttpStatus.BAD_REQUEST
             );
         }
 
         if (request.getOpeningBalance() == null) {
             throw new Exceptions(
-                    "Debe indicar el monto de apertura",
+                    "error.debeIndicarMontoApertura",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -121,7 +121,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
                 FinancialCashRegisterStatus.OPEN
         )) {
             throw new Exceptions(
-                    "Ya existe una caja abierta para esta sede. Debe cerrarla antes de abrir una nueva.",
+                    "error.existeCajaAbiertaSedeDebeCerrarla",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -149,7 +149,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
         if (request.getClosingBalance() == null) {
             throw new Exceptions(
-                    "Debe indicar el monto de cierre",
+                    "error.debeIndicarMontoCierre",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -160,7 +160,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
         if (register.getStatus() != FinancialCashRegisterStatus.OPEN) {
             throw new Exceptions(
-                    "Esta caja ya está cerrada",
+                    "error.estaCajaYaEstaCerrada",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -250,7 +250,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
             if (organizationId == null) {
                 throw new Exceptions(
-                        "No se pudo determinar la organización actual",
+                        "error.noPudoDeterminarOrganizacionActual",
                         HttpStatus.BAD_REQUEST
                 );
             }
@@ -265,7 +265,7 @@ public class FinancialCashRegisterServiceImpl implements FinancialCashRegisterSe
 
             if (branchId == null) {
                 throw new Exceptions(
-                        "No se pudo determinar la sede actual",
+                        "error.noPudoDeterminarSedeActual",
                         HttpStatus.BAD_REQUEST
                 );
             }

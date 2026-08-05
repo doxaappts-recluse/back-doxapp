@@ -36,7 +36,7 @@ public class OrgUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Personas obtenidas correctamente",
+                "success.personasObtenidasCorrectamente",
                 service.search(request)
         );
     }
@@ -48,7 +48,7 @@ public class OrgUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona creada correctamente",
+                "success.personaCreadaCorrectamente",
                 service.create(request)
         );
     }
@@ -61,7 +61,7 @@ public class OrgUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona actualizada correctamente",
+                "success.personaActualizadaCorrectamente",
                 service.update(id, request)
         );
     }
@@ -73,7 +73,7 @@ public class OrgUserController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada",
+                "success.personaEncontrada",
                 service.getById(id)
         );
     }

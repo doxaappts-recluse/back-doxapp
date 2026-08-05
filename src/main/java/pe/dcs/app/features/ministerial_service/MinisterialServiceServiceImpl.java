@@ -70,7 +70,7 @@ public class MinisterialServiceServiceImpl implements MinisterialServiceService 
     }
 
     private void assertCallerCanManage() {
-        authContext.assertCanManageCurrent("No tiene permisos para gestionar el servicio ministerial.");
+        authContext.assertCanManageCurrent("error.noTienePermisosGestionarServicioMinisterial");
     }
 
 }

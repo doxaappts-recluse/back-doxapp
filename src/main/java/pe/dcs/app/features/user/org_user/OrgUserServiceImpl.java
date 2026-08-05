@@ -104,7 +104,7 @@ public class OrgUserServiceImpl implements OrgUserService {
         Branch branch =
                 branchRepository.findById(authContext.getCurrentBranchId())
                         .orElseThrow(() ->
-                                new Exceptions("Sede no encontrada.", HttpStatus.NOT_FOUND)
+                                new Exceptions("error.sedeNoEncontrada2", HttpStatus.NOT_FOUND)
                         );
 
         Person person = new Person();
@@ -201,7 +201,7 @@ public class OrgUserServiceImpl implements OrgUserService {
                 && !authContext.isCurrentBranchAdmin()) {
 
             throw new Exceptions(
-                    "Solo un administrador de organización o de sede puede gestionar personas.",
+                    "error.soloAdministradorOrganizacionSedePuedeGestionar3",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -211,7 +211,7 @@ public class OrgUserServiceImpl implements OrgUserService {
 
         if (maritalStatus == null) {
             throw new Exceptions(
-                    "El estado civil es obligatorio.",
+                    "error.estadoCivilObligatorio",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -225,13 +225,13 @@ public class OrgUserServiceImpl implements OrgUserService {
      */
     private void validateDni(String dni, UUID organizationId) {
         if (personRepository.existsByDniInOrganization(dni, organizationId)) {
-            throw new Exceptions("El DNI ya está registrado en esta organización.", HttpStatus.CONFLICT);
+            throw new Exceptions("error.dniRegistradoOrganizacion", HttpStatus.CONFLICT);
         }
     }
 
     private void validateDniForUpdate(UUID personId, String dni, UUID organizationId) {
         if (personRepository.existsByDniInOrganizationAndIdNot(dni, organizationId, personId)) {
-            throw new Exceptions("El DNI ya está registrado en esta organización.", HttpStatus.CONFLICT);
+            throw new Exceptions("error.dniRegistradoOrganizacion", HttpStatus.CONFLICT);
         }
     }
 
@@ -245,7 +245,7 @@ public class OrgUserServiceImpl implements OrgUserService {
         if (!authContext.canAccess(organizationId, branchId)) {
 
             throw new Exceptions(
-                    "No tiene permisos para administrar esta persona.",
+                    "error.noTienePermisosAdministrarPersona",
                     HttpStatus.UNAUTHORIZED
             );
         }
@@ -267,7 +267,7 @@ public class OrgUserServiceImpl implements OrgUserService {
                 || !contextBranchId.equals(activeBranch.getBranch().getId())) {
 
             throw new Exceptions(
-                    "Solo puede editar personas de su sede activa actual.",
+                    "error.soloPuedeEditarPersonasSedeActiva",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -281,7 +281,7 @@ public class OrgUserServiceImpl implements OrgUserService {
                 .findFirst()
                 .orElseThrow(() ->
                         new Exceptions(
-                                "La persona no tiene una sede activa.",
+                                "error.personaNoTieneSedeActiva",
                                 HttpStatus.CONFLICT
                         )
                 );
@@ -291,7 +291,7 @@ public class OrgUserServiceImpl implements OrgUserService {
 
         return personRepository.findById(id)
                 .orElseThrow(() ->
-                        new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND)
+                        new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND)
                 );
     }
 

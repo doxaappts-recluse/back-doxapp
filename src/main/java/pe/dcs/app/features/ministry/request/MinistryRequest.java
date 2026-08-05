@@ -9,8 +9,15 @@ import pe.dcs.app.util.enums.StatusType;
 @Setter
 public class MinistryRequest {
 
-    @NotBlank
-    private String name;
+    @NotBlank(message = "{error.codigoMinisterioObligatorio}")
+    private String code;
+
+    @NotBlank(message = "{error.nombreEsMinisterioObligatorio}")
+    private String nameEs;
+
+    @NotBlank(message = "{error.nombreEnMinisterioObligatorio}")
+    private String nameEn;
+
     private String description;
     private StatusType status = StatusType.ACTIVE;
 

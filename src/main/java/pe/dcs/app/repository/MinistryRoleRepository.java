@@ -12,12 +12,16 @@ import java.util.UUID;
 
 @Repository
 public interface MinistryRoleRepository extends JpaRepository<MinistryRole, UUID>, JpaSpecificationExecutor<MinistryRole> {
-    List<MinistryRole> findAllByStatusOrderByNameAsc(StatusType status);
+    List<MinistryRole> findAllByStatusOrderByNameEsAsc(StatusType status);
 
     /**
-     * Usado por SmallGroupServiceImpl para el find-or-create del rol
-     * "Líder de Grupo Pequeño" dentro del ministerio de referencia
-     * (uk_ministry_role_name garantiza unicidad por ministerio+nombre).
+     * Usado por SmallGroupServiceImpl/BibleAcademyServiceImpl para
+     * el find-or-create de roles de referencia (uk_ministry_role_code
+     * garantiza unicidad por ministerio+code).
      */
-    Optional<MinistryRole> findByMinistryIdAndName(UUID ministryId, String name);
+    Optional<MinistryRole> findByMinistryIdAndCode(UUID ministryId, String code);
+
+    boolean existsByMinistryIdAndCodeIgnoreCase(UUID ministryId, String code);
+
+    boolean existsByMinistryIdAndCodeIgnoreCaseAndIdNot(UUID ministryId, String code, UUID id);
 }

@@ -72,17 +72,17 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
-            throw new Exceptions("No tiene un contexto de organización activo.", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneContextoOrganizacionActivo", HttpStatus.FORBIDDEN);
         }
 
         if (dni == null || dni.isBlank()) {
-            throw new Exceptions("El DNI es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elDniEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         Person person =
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() -> new Exceptions(
-                                "No se encontró ninguna persona con ese DNI en la organización.",
+                                "error.noEncontroNingunaPersonaDniOrganizacion",
                                 HttpStatus.NOT_FOUND
                         ));
 
@@ -161,13 +161,13 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
         accessGuard.assertCanCreateSpace();
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre del espacio es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreEspacioObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         UUID branchId = accessGuard.resolveBranchId(request.getBranchId());
 
         if (branchId == null) {
-            throw new Exceptions("Debe seleccionar la sede del espacio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarSedeEspacio", HttpStatus.BAD_REQUEST);
         }
 
         ReservableSpace space = new ReservableSpace();
@@ -191,7 +191,7 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
         accessGuard.assertCanManageSpace(space);
 
         if (request.getName() == null || request.getName().isBlank()) {
-            throw new Exceptions("El nombre del espacio es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.nombreEspacioObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         space.setName(request.getName());
@@ -294,7 +294,7 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
         accessGuard.assertCanManageReservation(reservation);
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            throw new Exceptions("Esta reserva ya está cancelada.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.estaReservaYaEstaCancelada", HttpStatus.BAD_REQUEST);
         }
 
         validateReservationForm(request);
@@ -333,19 +333,19 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
     private void validateReservationForm(SpaceReservationFormRequest request) {
 
         if (request.getSpaceId() == null) {
-            throw new Exceptions("Debe seleccionar el espacio a reservar.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarEspacioReservar", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getStartDateTime() == null || request.getEndDateTime() == null) {
-            throw new Exceptions("La fecha/hora de inicio y fin son obligatorias.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaHoraInicioFinSonObligatorias", HttpStatus.BAD_REQUEST);
         }
 
         if (!request.getEndDateTime().isAfter(request.getStartDateTime())) {
-            throw new Exceptions("La fecha/hora de fin debe ser posterior al inicio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaHoraFinDebeSerPosterior", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getPurpose() == null || request.getPurpose().isBlank()) {
-            throw new Exceptions("El motivo/actividad de la reserva es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.motivoActividadReservaObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         ReservationSourceType sourceType =
@@ -353,7 +353,7 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
 
         if (sourceType != ReservationSourceType.OTHER && request.getSourceId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar el registro vinculado (Evento/Grupo Pequeño/Dictado).",
+                    "error.debeSeleccionarRegistroVinculadoEventoGrupo",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -372,7 +372,7 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
 
         if (overlap) {
             throw new Exceptions(
-                    "Este espacio ya tiene una reserva confirmada que cruza con ese horario.",
+                    "error.espacioTieneReservaConfirmadaCruzaHorario",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -404,21 +404,21 @@ public class SpaceReservationServiceImpl implements SpaceReservationService {
 
     private ReservableSpace findSpaceOrThrow(UUID id) {
         return reservableSpaceRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Espacio no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.espacioNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private SpaceReservation findReservationOrThrow(UUID id) {
         return spaceReservationRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Reserva no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.reservaNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private Branch findBranchOrThrow(UUID id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Sede no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.sedeNoEncontrada2", HttpStatus.NOT_FOUND));
     }
 
     private Person findPersonOrThrow(UUID id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND));
     }
 }

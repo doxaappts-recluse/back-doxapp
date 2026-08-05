@@ -23,7 +23,7 @@ public class EventAttendanceController {
     ) {
         return new ApiResponse<>(
                 200,
-                "Asistencia registrada correctamente",
+                "success.asistenciaRegistradaCorrectamente",
                 attendanceService.checkIn(request)
         );
     }

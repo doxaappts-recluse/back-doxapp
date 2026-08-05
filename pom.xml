@@ -122,6 +122,13 @@
             <version>2.0.3</version>
         </dependency>
 
+        <!-- Documentación automática de la API (OpenAPI/Swagger) -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -1,5 +1,6 @@
 package pe.dcs.app.features.pastoral_followup.request;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import pe.dcs.app.util.enums.followup.FollowUpContactMethod;
@@ -12,10 +13,13 @@ import java.util.UUID;
 @Setter
 public class FollowUpContactFormRequest {
 
+    @NotNull(message = "{error.fechaContactoObligatoria}")
     private LocalDate contactDate;
 
+    @NotNull(message = "{error.medioContactoObligatorio}")
     private FollowUpContactMethod contactMethod;
 
+    @NotNull(message = "{error.resultadoContactoObligatorio}")
     private FollowUpContactResult result;
 
     private String notes;

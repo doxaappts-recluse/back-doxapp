@@ -11,16 +11,16 @@ import java.time.LocalDate;
 @Setter
 public class OrgAdminBranchUpdateRequest {
 
-    @NotBlank
+    @NotBlank(message = "{error.elNombreEsObligatorio}")
     private String name;
 
-    @NotBlank
+    @NotBlank(message = "{error.elApellidoEsObligatorio}")
     private String lastname;
 
-    @NotBlank
+    @NotBlank(message = "{error.sexoObligatorio}")
     private String sex;
 
-    @NotBlank
+    @NotBlank(message = "{error.elDniEsObligatorio}")
     private String dni;
 
     private String phone;
@@ -33,7 +33,7 @@ public class OrgAdminBranchUpdateRequest {
 
     private Integer children;
 
-    @NotBlank
+    @NotBlank(message = "{error.usernameObligatorio}")
     private String username;
 
 }

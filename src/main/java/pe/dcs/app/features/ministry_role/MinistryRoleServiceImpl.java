@@ -42,14 +42,25 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                 ministryRepository.findById(request.getMinistryId())
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Ministerio no encontrado",
+                                        "error.ministerioNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
+        String code = request.getCode().trim().toUpperCase();
+
+        if (repository.existsByMinistryIdAndCodeIgnoreCase(ministry.getId(), code)) {
+            throw new Exceptions(
+                    "error.ministryRoleCodeAlreadyExists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
         MinistryRole role = new MinistryRole();
 
-        role.setName(request.getName());
+        role.setCode(code);
+        role.setNameEs(request.getNameEs());
+        role.setNameEn(request.getNameEn());
         role.setDescription(request.getDescription());
         role.setMinistry(ministry);
         role.setStatus(StatusType.ACTIVE);
@@ -72,12 +83,41 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                 repository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol ministerial no encontrado",
+                                        "error.rolMinisterialNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
 
-        role.setName(request.getName());
+        UUID targetMinistryId =
+                request.getMinistryId() != null
+                        ? request.getMinistryId()
+                        : role.getMinistry().getId();
+
+        if (request.getCode() != null
+                && repository.existsByMinistryIdAndCodeIgnoreCaseAndIdNot(
+                        targetMinistryId,
+                        request.getCode().trim().toUpperCase(),
+                        id
+                )) {
+
+            throw new Exceptions(
+                    "error.ministryRoleCodeAlreadyExists",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (request.getCode() != null) {
+            role.setCode(request.getCode().trim().toUpperCase());
+        }
+
+        if (request.getNameEs() != null) {
+            role.setNameEs(request.getNameEs());
+        }
+
+        if (request.getNameEn() != null) {
+            role.setNameEn(request.getNameEn());
+        }
+
         role.setDescription(request.getDescription());
 
         if(request.getMinistryId()!=null){
@@ -88,7 +128,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                             )
                             .orElseThrow(() ->
                                     new Exceptions(
-                                            "Ministerio no encontrado",
+                                            "error.ministerioNoEncontrado",
                                             HttpStatus.NOT_FOUND
                                     )
                             );
@@ -112,7 +152,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                 repository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol ministerial no encontrado",
+                                        "error.rolMinisterialNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -131,7 +171,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                 repository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol ministerial no encontrado",
+                                        "error.rolMinisterialNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -147,7 +187,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
     public List<MinistryRoleResponse> findAll(){
 
         return repository
-                .findAllByStatusOrderByNameAsc(
+                .findAllByStatusOrderByNameEsAsc(
                         StatusType.ACTIVE
                 )
                 .stream()
@@ -164,7 +204,7 @@ public class MinistryRoleServiceImpl implements MinistryRoleService {
                 repository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Rol ministerial no encontrado",
+                                        "error.rolMinisterialNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );

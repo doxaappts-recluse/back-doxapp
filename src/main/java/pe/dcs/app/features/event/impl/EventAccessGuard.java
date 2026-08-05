@@ -64,7 +64,7 @@ public class EventAccessGuard {
             return;
         }
 
-        throw forbidden("crear eventos");
+        throw forbidden("action.crearEventos");
     }
 
     /**
@@ -84,7 +84,7 @@ public class EventAccessGuard {
             return;
         }
 
-        throw forbidden("gestionar eventos");
+        throw forbidden("action.gestionarEventos");
     }
 
     // =========================================================
@@ -97,7 +97,7 @@ public class EventAccessGuard {
                 eventRepository.findById(eventId)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -114,7 +114,7 @@ public class EventAccessGuard {
         if (!canManage(event)) {
 
             throw new Exceptions(
-                    "Solo la sede coordinadora, quien creó el evento, o el administrador de la organización pueden gestionarlo",
+                    "error.soloSedeCoordinadoraQuienCreoEvento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -127,7 +127,7 @@ public class EventAccessGuard {
         if (!canAccess(event)) {
 
             throw new Exceptions(
-                    "No tiene acceso a este evento",
+                    "error.noTieneAccesoEvento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -140,7 +140,7 @@ public class EventAccessGuard {
                 .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "No tiene acceso a este evento",
+                    "error.noTieneAccesoEvento",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -236,7 +236,7 @@ public class EventAccessGuard {
         if (!canManageRegistration(registration)) {
 
             throw new Exceptions(
-                    "Solo quien gestiona el evento o la sede que registró esta inscripción puede modificarla",
+                    "error.soloQuienGestionaEventoSedeRegistro",
                     HttpStatus.FORBIDDEN
             );
         }
@@ -290,10 +290,14 @@ public class EventAccessGuard {
         );
     }
 
-    private Exceptions forbidden(String action) {
-        return new Exceptions(
-                "No tiene permisos para " + action + ".",
-                HttpStatus.FORBIDDEN
-        );
+    private Exceptions forbidden(String actionKey) {
+
+        org.springframework.context.MessageSource messageSource = pe.dcs.app.util.MessageSourceHolder.get();
+
+        String action = messageSource != null
+                ? messageSource.getMessage(actionKey, null, actionKey, org.springframework.context.i18n.LocaleContextHolder.getLocale())
+                : actionKey;
+
+        return new Exceptions("error.noTienePermisosPara", HttpStatus.FORBIDDEN, action);
     }
 }

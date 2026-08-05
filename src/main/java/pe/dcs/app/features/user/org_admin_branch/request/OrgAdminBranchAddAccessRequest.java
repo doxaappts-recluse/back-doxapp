@@ -15,9 +15,9 @@ import java.util.UUID;
 @Setter
 public class OrgAdminBranchAddAccessRequest {
 
-    @NotNull
+    @NotNull(message = "{error.debeIndicarSede2}")
     private UUID branchId;
 
-    @NotNull
+    @NotNull(message = "{error.elRolEsObligatorio}")
     private UUID roleId;
 }

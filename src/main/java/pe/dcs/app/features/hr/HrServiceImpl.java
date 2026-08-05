@@ -85,17 +85,17 @@ public class HrServiceImpl implements HrService {
         UUID organizationId = authContext.getCurrentOrganizationId();
 
         if (organizationId == null) {
-            throw new Exceptions("No tiene un contexto de organización activo.", HttpStatus.FORBIDDEN);
+            throw new Exceptions("error.noTieneContextoOrganizacionActivo", HttpStatus.FORBIDDEN);
         }
 
         if (dni == null || dni.isBlank()) {
-            throw new Exceptions("El DNI es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elDniEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         Person person =
                 personRepository.findByDniInOrganization(dni, organizationId)
                         .orElseThrow(() -> new Exceptions(
-                                "No se encontró ninguna persona con ese DNI en la organización.",
+                                "error.noEncontroNingunaPersonaDniOrganizacion",
                                 HttpStatus.NOT_FOUND
                         ));
 
@@ -175,25 +175,25 @@ public class HrServiceImpl implements HrService {
         accessGuard.assertCanCreateStaff();
 
         if (request.getPersonId() == null) {
-            throw new Exceptions("Debe seleccionar la persona a vincular.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarPersonaVincular", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getPosition() == null || request.getPosition().isBlank()) {
-            throw new Exceptions("El cargo es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elCargoEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getContractType() == null) {
-            throw new Exceptions("Debe indicar el tipo de contrato.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarTipoContrato", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getHireDate() == null) {
-            throw new Exceptions("La fecha de ingreso es obligatoria.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaIngresoObligatoria", HttpStatus.BAD_REQUEST);
         }
 
         UUID branchId = accessGuard.resolveBranchId(request.getBranchId());
 
         if (branchId == null) {
-            throw new Exceptions("Debe seleccionar la sede del empleado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarSedeEmpleado", HttpStatus.BAD_REQUEST);
         }
 
         StaffMember staff = new StaffMember();
@@ -221,11 +221,11 @@ public class HrServiceImpl implements HrService {
         accessGuard.assertCanManageStaff(staff);
 
         if (request.getPosition() == null || request.getPosition().isBlank()) {
-            throw new Exceptions("El cargo es obligatorio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.elCargoEsObligatorio", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getContractType() == null) {
-            throw new Exceptions("Debe indicar el tipo de contrato.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarTipoContrato", HttpStatus.BAD_REQUEST);
         }
 
         staff.setPosition(request.getPosition());
@@ -301,19 +301,19 @@ public class HrServiceImpl implements HrService {
         accessGuard.assertCanCreateLeaveRequest();
 
         if (request.getStaffId() == null) {
-            throw new Exceptions("Debe seleccionar el empleado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarEmpleado", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getType() == null) {
-            throw new Exceptions("Debe indicar el tipo de solicitud.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarTipoSolicitud", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getStartDate() == null || request.getEndDate() == null) {
-            throw new Exceptions("Debe indicar el rango de fechas.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarRangoFechas", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getEndDate().isBefore(request.getStartDate())) {
-            throw new Exceptions("La fecha de fin no puede ser anterior a la fecha de inicio.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.fechaFinNoPuedeSerAnterior", HttpStatus.BAD_REQUEST);
         }
 
         StaffMember staff = findStaffOrThrow(request.getStaffId());
@@ -360,7 +360,7 @@ public class HrServiceImpl implements HrService {
         assertPending(leaveRequest);
 
         if (request == null || request.getObservations() == null || request.getObservations().isBlank()) {
-            throw new Exceptions("Debe indicar el motivo del rechazo.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarMotivoRechazo", HttpStatus.BAD_REQUEST);
         }
 
         leaveRequest.setStatus(HrApprovalStatus.REJECTED);
@@ -373,7 +373,7 @@ public class HrServiceImpl implements HrService {
 
     private void assertPending(LeaveRequest leaveRequest) {
         if (leaveRequest.getStatus() != HrApprovalStatus.PENDING) {
-            throw new Exceptions("Esta solicitud ya fue resuelta.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.solicitudFueResuelta", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -434,15 +434,15 @@ public class HrServiceImpl implements HrService {
         accessGuard.assertCanCreatePayroll();
 
         if (request.getStaffId() == null) {
-            throw new Exceptions("Debe seleccionar el empleado.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeSeleccionarEmpleado", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getPeriodMonth() == null || request.getPeriodMonth() < 1 || request.getPeriodMonth() > 12) {
-            throw new Exceptions("Debe indicar un mes válido (1-12).", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarMesValido112", HttpStatus.BAD_REQUEST);
         }
 
         if (request.getPeriodYear() == null) {
-            throw new Exceptions("Debe indicar el año del periodo.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.debeIndicarAnoPeriodo", HttpStatus.BAD_REQUEST);
         }
 
         StaffMember staff = findStaffOrThrow(request.getStaffId());
@@ -451,7 +451,7 @@ public class HrServiceImpl implements HrService {
 
         if (baseSalary == null) {
             throw new Exceptions(
-                    "El empleado no tiene un salario base definido; debe indicarlo manualmente.",
+                    "error.empleadoNoTieneSalarioBaseDefinido",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -461,7 +461,7 @@ public class HrServiceImpl implements HrService {
         BigDecimal netAmount = baseSalary.add(bonuses).subtract(deductions);
 
         if (netAmount.signum() < 0) {
-            throw new Exceptions("El monto neto no puede ser negativo.", HttpStatus.BAD_REQUEST);
+            throw new Exceptions("error.montoNetoNoPuedeSerNegativo", HttpStatus.BAD_REQUEST);
         }
 
         LocalDate paymentDate = request.getPaymentDate() != null ? request.getPaymentDate() : LocalDate.now();
@@ -538,26 +538,26 @@ public class HrServiceImpl implements HrService {
 
     private StaffMember findStaffOrThrow(UUID id) {
         return staffRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Ficha de empleado no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.fichaEmpleadoNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private LeaveRequest findLeaveRequestOrThrow(UUID id) {
         return leaveRequestRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Solicitud no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.solicitudNoEncontrada", HttpStatus.NOT_FOUND));
     }
 
     private PayrollRecord findPayrollOrThrow(UUID id) {
         return payrollRecordRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Pago de planilla no encontrado.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.pagoPlanillaNoEncontrado", HttpStatus.NOT_FOUND));
     }
 
     private Branch findBranchOrThrow(UUID id) {
         return branchRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Sede no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.sedeNoEncontrada2", HttpStatus.NOT_FOUND));
     }
 
     private Person findPersonOrThrow(UUID id) {
         return personRepository.findById(id)
-                .orElseThrow(() -> new Exceptions("Persona no encontrada.", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new Exceptions("error.personaNoEncontrada", HttpStatus.NOT_FOUND));
     }
 }

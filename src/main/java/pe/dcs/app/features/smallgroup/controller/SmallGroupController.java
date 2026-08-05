@@ -1,5 +1,6 @@
 package pe.dcs.app.features.smallgroup.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -36,7 +37,7 @@ public class SmallGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupos pequeños obtenidos correctamente",
+                "success.gruposPequenosObtenidosCorrectamente",
                 service.search(request)
         );
     }
@@ -48,7 +49,7 @@ public class SmallGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo pequeño obtenido correctamente",
+                "success.grupoPequenoObtenidoCorrectamente",
                 service.getById(id)
         );
     }
@@ -60,19 +61,19 @@ public class SmallGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Persona encontrada correctamente",
+                "success.personaEncontradaCorrectamente",
                 service.findPersonByDni(dni)
         );
     }
 
     @PostMapping("/create")
     public ApiResponse<UUID> create(
-            @RequestBody SmallGroupFormRequest request
+            @Valid @RequestBody SmallGroupFormRequest request
     ) {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo pequeño registrado correctamente",
+                "success.grupoPequenoRegistradoCorrectamente",
                 service.create(request)
         );
     }
@@ -80,14 +81,14 @@ public class SmallGroupController {
     @PutMapping("/update/{id}")
     public ApiResponse<String> update(
             @PathVariable UUID id,
-            @RequestBody SmallGroupFormRequest request
+            @Valid @RequestBody SmallGroupFormRequest request
     ) {
 
         service.update(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Grupo pequeño actualizado correctamente",
+                "success.grupoPequenoActualizadoCorrectamente",
                 "OK"
         );
     }
@@ -99,7 +100,7 @@ public class SmallGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Participantes obtenidos correctamente",
+                "success.participantesObtenidosCorrectamente",
                 service.listMembers(id)
         );
     }
@@ -107,14 +108,14 @@ public class SmallGroupController {
     @PostMapping("/{id}/members")
     public ApiResponse<String> addMember(
             @PathVariable UUID id,
-            @RequestBody SmallGroupMemberFormRequest request
+            @Valid @RequestBody SmallGroupMemberFormRequest request
     ) {
 
         service.addMember(id, request);
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Participante agregado correctamente",
+                "success.participanteAgregadoCorrectamente",
                 "OK"
         );
     }
@@ -129,7 +130,7 @@ public class SmallGroupController {
 
         return new ApiResponse<>(
                 HttpStatus.OK.value(),
-                "Participante removido correctamente",
+                "success.participanteRemovidoCorrectamente",
                 "OK"
         );
     }

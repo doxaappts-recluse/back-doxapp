@@ -137,14 +137,14 @@ public class UserSystemServiceImpl implements UserSystemService {
 
         if (repository.existsByDni(request.getDni())) {
             throw new Exceptions(
-                    "A user with this DNI already exists.",
+                    "error.userWithDniAlreadyExists",
                     HttpStatus.CONFLICT
             );
         }
 
         if (credentialRepository.existsByUsername(request.getUsername())) {
             throw new Exceptions(
-                    "Username already exists.",
+                    "error.usernameAlreadyExists",
                     HttpStatus.CONFLICT
             );
         }
@@ -152,14 +152,14 @@ public class UserSystemServiceImpl implements UserSystemService {
         Role role = roleRepository.findById(request.getRoleId())
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Role not found.",
+                                "error.roleNotFound",
                                 HttpStatus.NOT_FOUND
                         )
                 );
 
         if (!role.isSystemRole()) {
             throw new Exceptions(
-                    "The selected role is not a system role.",
+                    "error.selectedRoleNotSystemRole",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -230,7 +230,7 @@ public class UserSystemServiceImpl implements UserSystemService {
 
         if (repository.existsByDniAndIdNot(request.getDni(), id)) {
             throw new Exceptions(
-                    "A user with this DNI already exists.",
+                    "error.userWithDniAlreadyExists",
                     HttpStatus.CONFLICT
             );
         }
@@ -238,14 +238,14 @@ public class UserSystemServiceImpl implements UserSystemService {
         Role role = roleRepository.findById(request.getRoleId())
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Role not found.",
+                                "error.roleNotFound",
                                 HttpStatus.NOT_FOUND
                         )
                 );
 
         if (!role.isSystemRole()) {
             throw new Exceptions(
-                    "The selected role is not a system role.",
+                    "error.selectedRoleNotSystemRole",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -267,7 +267,7 @@ public class UserSystemServiceImpl implements UserSystemService {
                 .findFirst()
                 .orElseThrow(() ->
                         new Exceptions(
-                                "Active access not found.",
+                                "error.activeAccessNotFound",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -372,7 +372,7 @@ public class UserSystemServiceImpl implements UserSystemService {
         return repository.findById(id)
                 .orElseThrow(() ->
                         new Exceptions(
-                                "User not found.",
+                                "error.userNotFound",
                                 HttpStatus.NOT_FOUND
                         )
                 );

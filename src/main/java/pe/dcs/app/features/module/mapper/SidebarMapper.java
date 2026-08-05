@@ -80,7 +80,9 @@ public class SidebarMapper {
         ModuleResponse dto = new ModuleResponse();
 
         dto.setId(node.getId());
-        dto.setName(node.getName());
+        dto.setName(node.getLocalizedName());
+        dto.setNameEs(node.getNameEs());
+        dto.setNameEn(node.getNameEn());
         dto.setCode(node.getCode());
         dto.setIcon(node.getIcon());
         dto.setRoute(node.getRoute());
@@ -188,7 +190,9 @@ public class SidebarMapper {
         ModuleResponse dto = new ModuleResponse();
 
         dto.setId(node.getId());
-        dto.setName(node.getName());
+        dto.setName(node.getLocalizedName());
+        dto.setNameEs(node.getNameEs());
+        dto.setNameEn(node.getNameEn());
         dto.setCode(node.getCode());
         dto.setIcon(node.getIcon());
         dto.setRoute(node.getRoute());

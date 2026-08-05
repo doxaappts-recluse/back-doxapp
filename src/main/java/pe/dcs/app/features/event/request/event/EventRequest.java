@@ -17,26 +17,30 @@ import java.util.UUID;
 @Setter
 public class EventRequest {
 
-    @NotBlank
+    @NotBlank(message = "{error.elNombreEsObligatorio}")
     private String name;
 
     private String description;
 
-    @NotNull
+    @NotNull(message = "{error.fechaInicioObligatoria}")
     private LocalDateTime startDateTime;
 
-    @NotNull
+    @NotNull(message = "{error.fechaFinObligatoria}")
     private LocalDateTime endDateTime;
 
-    @NotBlank
+    @NotBlank(message = "{error.ubicacionObligatoria}")
     private String location;
 
+    @NotNull(message = "{error.precioEntradaObligatorio}")
     private BigDecimal price;
 
+    @NotNull(message = "{error.capacidadEventoObligatoria}")
     private Integer capacity;
 
+    @NotNull(message = "{error.metaEventoObligatoria}")
     private Integer goal;
 
+    @NotNull(message = "{error.presupuestoEsperadoObligatorio}")
     private BigDecimal expectedBudget;
 
     private JsonNode templateConfig;

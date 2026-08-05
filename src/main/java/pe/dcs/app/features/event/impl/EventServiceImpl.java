@@ -288,7 +288,7 @@ public class EventServiceImpl implements EventService {
                             authContext.getCurrentBranchId()
                     ).orElseThrow(() ->
                             new Exceptions(
-                                    "Sede no encontrada",
+                                    "error.sedeNoEncontrada",
                                     HttpStatus.NOT_FOUND
                             )
                     );
@@ -299,7 +299,7 @@ public class EventServiceImpl implements EventService {
 
         if (request.getBranchId() == null) {
             throw new Exceptions(
-                    "Debe seleccionar la sede coordinadora del evento.",
+                    "error.debeSeleccionarSedeCoordinadoraEvento",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -309,7 +309,7 @@ public class EventServiceImpl implements EventService {
                         request.getBranchId()
                 ).orElseThrow(() ->
                         new Exceptions(
-                                "Sede no encontrada",
+                                "error.sedeNoEncontrada",
                                 HttpStatus.NOT_FOUND
                         )
                 );
@@ -319,7 +319,7 @@ public class EventServiceImpl implements EventService {
                 .equals(authContext.getCurrentOrganizationId())) {
 
             throw new Exceptions(
-                    "La sede no pertenece a la organización",
+                    "error.sedeNoPerteneceOrganizacion",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -353,7 +353,7 @@ public class EventServiceImpl implements EventService {
                 eventRepository.findById(id)
                         .orElseThrow(() ->
                                 new Exceptions(
-                                        "Evento no encontrado",
+                                        "error.eventoNoEncontrado",
                                         HttpStatus.NOT_FOUND
                                 )
                         );
@@ -387,7 +387,7 @@ public class EventServiceImpl implements EventService {
         if (event.getStatus() == EventStatus.CANCELLED) {
 
             throw new Exceptions(
-                    "No se puede publicar un evento cancelado",
+                    "error.noPuedePublicarEventoCancelado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -395,7 +395,7 @@ public class EventServiceImpl implements EventService {
         if (event.getStatus() == EventStatus.FINISHED) {
 
             throw new Exceptions(
-                    "No se puede publicar un evento finalizado",
+                    "error.noPuedePublicarEventoFinalizado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -421,7 +421,7 @@ public class EventServiceImpl implements EventService {
         if (event.getStatus() == EventStatus.FINISHED) {
 
             throw new Exceptions(
-                    "No se puede cancelar un evento finalizado",
+                    "error.noPuedeCancelarEventoFinalizado",
                     HttpStatus.BAD_REQUEST
             );
         }
@@ -455,7 +455,7 @@ public class EventServiceImpl implements EventService {
         ) {
 
             throw new Exceptions(
-                    "La fecha fin debe ser mayor a la fecha inicio",
+                    "error.fechaFinDebeSerMayorFecha",
                     HttpStatus.BAD_REQUEST
             );
         }

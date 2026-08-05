@@ -1,5 +1,6 @@
 package pe.dcs.app.features.ministry;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import pe.dcs.app.features.ministry.request.MinistryRequest;
@@ -20,35 +21,35 @@ public class MinistryController {
     private final MinistryService ministryService;
 
     @PostMapping("/create")
-    public ApiResponse<MinistryResponse> create(@RequestBody MinistryRequest request) {
-        return new ApiResponse<>(200, "Ministry created", ministryService.create(request));
+    public ApiResponse<MinistryResponse> create(@Valid @RequestBody MinistryRequest request) {
+        return new ApiResponse<>(200, "success.ministryCreated", ministryService.create(request));
     }
 
     @PutMapping("/update/{id}")
     public ApiResponse<MinistryResponse> update(
             @PathVariable UUID id,
-            @RequestBody MinistryRequest request
+            @Valid @RequestBody MinistryRequest request
     ) {
-        return new ApiResponse<>(200, "Ministry updated", ministryService.update(id, request));
+        return new ApiResponse<>(200, "success.ministryUpdated", ministryService.update(id, request));
     }
 
     @PostMapping("/enable/{id}")
     public ApiResponse<Void> enable(@PathVariable UUID id) {
         ministryService.enable(id);
-        return new ApiResponse<>(200, "Ministry active", null);
+        return new ApiResponse<>(200, "success.ministryActive", null);
     }
 
     @PostMapping("/disable/{id}")
     public ApiResponse<Void> disable(@PathVariable UUID id) {
         ministryService.disable(id);
-        return new ApiResponse<>(200, "Ministry desactive", null);
+        return new ApiResponse<>(200, "success.ministryDesactive", null);
     }
 
     @PostMapping("/search")
     public ApiResponse<PageResponse<MinistryResponse>> search(
             @RequestBody MinistrySearchRequest request
     ) {
-        return new ApiResponse<>(200, "Ministries fetched", ministryService.search(request));
+        return new ApiResponse<>(200, "success.ministriesFetched", ministryService.search(request));
     }
 
     @GetMapping("/all")
@@ -56,7 +57,7 @@ public class MinistryController {
 
         return new ApiResponse<>(
                 200,
-                "Ministries fetched successfully",
+                "success.ministriesFetchedSuccessfully",
                 ministryService.findAll()
         );
     }
@@ -66,7 +67,7 @@ public class MinistryController {
 
         return new ApiResponse<>(
                 200,
-                "Ministerio obtenido correctamente",
+                "success.ministerioObtenidoCorrectamente",
                 ministryService.getById(id)
         );
     }
