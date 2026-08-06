@@ -19,8 +19,14 @@ public class OrgAdminBranchMapper {
 
     public OrgAdminBranchResponse toResponse(Person person, boolean showAudit){
 
+        /*
+         * getDisplayAccess (no getActiveAccess): si la persona tiene
+         * TODOS sus accesos deshabilitados, igual debe mostrarse
+         * organización/sede/rol de referencia en la tabla (no vacío)
+         * para poder ubicarla y reactivarle un acceso.
+         */
         UserAccess access =
-                UserAccessHelper.getActiveAccess(person);
+                UserAccessHelper.getDisplayAccess(person);
 
         Credential credential = person.getCredential();
 
