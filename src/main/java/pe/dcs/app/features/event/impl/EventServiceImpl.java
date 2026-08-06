@@ -178,7 +178,10 @@ public class EventServiceImpl implements EventService {
                 saved.setTemplatePath(path);
 
             } catch (IOException e) {
-                throw new RuntimeException("Error uploading event image", e);
+                throw new Exceptions(
+                        "error.errorSubiendoImagenEvento",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                );
             }
         }
 
@@ -230,7 +233,10 @@ public class EventServiceImpl implements EventService {
                 event.setTemplatePath(path);
 
             } catch (IOException e) {
-                throw new RuntimeException("Error updating event image", e);
+                throw new Exceptions(
+                        "error.errorActualizandoImagenEvento",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                );
             }
         }
 

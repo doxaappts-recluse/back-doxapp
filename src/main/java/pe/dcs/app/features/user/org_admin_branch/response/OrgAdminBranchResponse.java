@@ -41,4 +41,9 @@ public class OrgAdminBranchResponse extends AuditableResponse {
     private String branchName;
     private Boolean branchMain;
 
+    // Rol
+
+    private UUID roleId;
+    private String roleName;
+
 }

@@ -1,8 +1,10 @@
 package pe.dcs.app.features.event.service.ticket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pe.dcs.app.service.supabase.SupabaseStorageService;
+import pe.dcs.app.util.Exceptions;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -52,7 +54,10 @@ public class TicketTemplateService {
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("Error building ticket image", e);
+            throw new Exceptions(
+                    "error.errorGenerandoImagenTicket",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

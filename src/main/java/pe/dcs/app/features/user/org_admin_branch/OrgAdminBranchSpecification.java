@@ -39,46 +39,50 @@ public class OrgAdminBranchSpecification {
 
             /*
              * =====================================
-             * PERSON BRANCH ACTUAL
+             * ACCESO ACTIVO (organización / sede)
              * =====================================
              *
              * Person
              *    |
-             * PersonBranch(active)
-             *    |
-             * Branch
-             *    |
-             * Organization
+             * UserAccess(active)
+             *    |___ Organization
+             *    |___ Branch (NULL para ORG_ADMIN: acceso global)
              *
+             * OJO: antes esto se resolvía vía branchHistory
+             * (Person -> PersonBranch(active) -> Branch -> Organization)
+             * con INNER JOIN. Un ORG_ADMIN no tiene sede (es acceso
+             * global) y por lo tanto nunca tiene un PersonBranch, así
+             * que ese INNER JOIN lo excluía SIEMPRE de este listado
+             * (bug: un ORG_ADMIN recién creado no aparecía). Se
+             * resuelve organización/sede a través del propio
+             * UserAccess (ya usado también por el mapper), que sí
+             * existe para todos los roles de este módulo.
              */
 
-            Join<Person, PersonBranch> personBranch =
+            Join<Person, UserAccess> orgAccess =
                     root.join(
-                            "branchHistory",
+                            "accesses",
                             JoinType.INNER
                     );
 
-            Join<PersonBranch, Branch> branch =
-                    personBranch.join(
-                            "branch",
-                            JoinType.INNER
-                    );
-
-            Join<Branch, Organization> organization =
-                    branch.join(
-                            "organization",
-                            JoinType.INNER
-                    );
-
-            /*
-             * Solo sede actual
-             */
             predicates.add(
                     cb.equal(
-                            personBranch.get("status"),
+                            orgAccess.get("active"),
                             StatusType.ACTIVE
                     )
             );
+
+            Join<UserAccess, Organization> organization =
+                    orgAccess.join(
+                            "organization",
+                            JoinType.LEFT
+                    );
+
+            Join<UserAccess, Branch> branch =
+                    orgAccess.join(
+                            "branch",
+                            JoinType.LEFT
+                    );
 
             /*
              * =====================================

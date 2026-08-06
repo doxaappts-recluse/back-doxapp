@@ -25,8 +25,9 @@ public class AuthContext {
                         .getPrincipal();
 
         if(!(principal instanceof CredentialDetailsImpl)){
-            throw new IllegalStateException(
-                    "No authenticated user"
+            throw new Exceptions(
+                    "error.usuarioNoAutenticado",
+                    HttpStatus.UNAUTHORIZED
             );
         }
 

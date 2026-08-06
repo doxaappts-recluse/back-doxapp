@@ -5,9 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.buffer.DataBufferUtils;
 import org.springframework.core.io.buffer.DefaultDataBufferFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import pe.dcs.app.util.Exceptions;
 import reactor.core.publisher.Flux;
 
 import org.springframework.core.io.buffer.DataBuffer;
@@ -82,14 +84,18 @@ public class SupabaseStorageService {
                 .onStatus(
                         status -> status.isError(),
                         response -> response.bodyToMono(String.class)
-                                .map(body -> new RuntimeException("Supabase error: " + body))
+                                .map(body -> new Exceptions(
+                                        "error.errorEnAlmacenamientoExterno",
+                                        HttpStatus.BAD_GATEWAY
+                                ))
                 )
                 .bodyToMono(byte[].class)
                 .block();
 
         if (fileBytes == null || fileBytes.length == 0) {
-            throw new RuntimeException(
-                    "File not found or empty in Supabase: " + bucket + "/" + path
+            throw new Exceptions(
+                    "error.errorEnAlmacenamientoExterno",
+                    HttpStatus.BAD_GATEWAY
             );
         }
 
@@ -160,7 +166,11 @@ public class SupabaseStorageService {
         String bucket = props.getStorage().getBuckets().get(key);
 
         if (bucket == null) {
-            throw new IllegalArgumentException("Bucket not found for key: " + key);
+            throw new Exceptions(
+                    "error.bucketNoConfigurado",
+                    HttpStatus.BAD_REQUEST,
+                    key
+            );
         }
 
         return bucket;
@@ -175,7 +185,10 @@ public class SupabaseStorageService {
             JsonNode node = mapper.readTree(json);
             return node.get("signedURL").asText();
         } catch (Exception e) {
-            throw new RuntimeException("Error parsing signed URL", e);
+            throw new Exceptions(
+                    "error.errorEnAlmacenamientoExterno",
+                    HttpStatus.BAD_GATEWAY
+            );
         }
     }
 

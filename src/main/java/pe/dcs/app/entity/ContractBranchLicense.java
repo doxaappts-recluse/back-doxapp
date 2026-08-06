@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.http.HttpStatus;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.auditable.Auditable;
 
 import java.util.UUID;
@@ -80,22 +82,25 @@ public class ContractBranchLicense extends Auditable {
     private void validate() {
 
         if (allocatedLicenses == null || allocatedLicenses < 0) {
-            throw new IllegalStateException(
-                    "Allocated licenses must be greater than or equal to zero."
+            throw new Exceptions(
+                    "error.licenciasAsignadasMayorIgualCero",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
         if (!contract.isOrganizationScope()) {
-            throw new IllegalStateException(
-                    "License distribution is only allowed for organization contracts."
+            throw new Exceptions(
+                    "error.distribucionLicenciasSoloContratoOrganizacion",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
         if (!branch.getOrganization().getId()
                 .equals(contract.getOrganization().getId())) {
 
-            throw new IllegalStateException(
-                    "Branch does not belong to the contract organization."
+            throw new Exceptions(
+                    "error.sedeNoPerteneceOrganizacion",
+                    HttpStatus.BAD_REQUEST
             );
         }
     }

@@ -4,7 +4,9 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import pe.dcs.app.util.Exceptions;
 
 import java.awt.image.BufferedImage;
 
@@ -27,7 +29,10 @@ public class TicketQrService {
             return MatrixToImageWriter.toBufferedImage(matrix);
 
         } catch (Exception e) {
-            throw new RuntimeException("Error generating QR", e);
+            throw new Exceptions(
+                    "error.errorGenerandoQr",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

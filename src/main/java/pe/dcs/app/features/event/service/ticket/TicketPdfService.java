@@ -3,7 +3,9 @@ package pe.dcs.app.features.event.service.ticket;
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
 import com.lowagie.text.pdf.PdfWriter;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import pe.dcs.app.util.Exceptions;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -44,7 +46,10 @@ public class TicketPdfService {
             return out.toByteArray();
 
         } catch (Exception e) {
-            throw new RuntimeException("Error generating PDF", e);
+            throw new Exceptions(
+                    "error.errorGenerandoPdf",
+                    HttpStatus.INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

@@ -1,8 +1,10 @@
 package pe.dcs.app.features.event.service.ticket;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import pe.dcs.app.entity.Event;
+import pe.dcs.app.util.Exceptions;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -19,11 +21,17 @@ public class TicketGeneratorService {
         try {
 
             if (event.getTemplatePath() == null) {
-                throw new RuntimeException("Template path is null");
+                throw new Exceptions(
+                        "error.plantillaTicketNoConfigurada",
+                        HttpStatus.BAD_REQUEST
+                );
             }
 
             if (token == null || token.isBlank()) {
-                throw new RuntimeException("QR token is invalid");
+                throw new Exceptions(
+                        "error.tokenQrInvalido",
+                        HttpStatus.BAD_REQUEST
+                );
             }
             BufferedImage image =
                     templateService.buildTicketImage(
@@ -33,11 +41,13 @@ public class TicketGeneratorService {
 
             return pdfService.generatePdf(image);
 
+        } catch (Exceptions e) {
+            throw e;
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException(
-                    "Error generating ticket PDF: " + e.getMessage(),
-                    e
+            throw new Exceptions(
+                    "error.errorGenerandoTicketPdf",
+                    HttpStatus.INTERNAL_SERVER_ERROR
             );
         }
     }

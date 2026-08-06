@@ -1,12 +1,14 @@
 package pe.dcs.app.util.auditable;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import pe.dcs.app.entity.Branch;
 import pe.dcs.app.entity.Organization;
 import pe.dcs.app.repository.BranchRepository;
 import pe.dcs.app.repository.OrganizationRepository;
 import pe.dcs.app.security.service.AuthContext;
+import pe.dcs.app.util.Exceptions;
 
 import java.util.UUID;
 
@@ -29,8 +31,9 @@ public class BranchAuditHelper {
         }
 
         if(organizationId == null || branchId == null){
-            throw new IllegalStateException(
-                    "Debe existir organización y sede"
+            throw new Exceptions(
+                    "error.debeExistirOrganizacionYSede",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
@@ -39,8 +42,9 @@ public class BranchAuditHelper {
         Branch branch = branchRepository.getReferenceById(branchId);
 
         if(!branch.getOrganization().getId().equals(organizationId)){
-            throw new IllegalArgumentException(
-                    "La sede no pertenece a la organización"
+            throw new Exceptions(
+                    "error.sedeNoPerteneceOrganizacion",
+                    HttpStatus.BAD_REQUEST
             );
         }
 

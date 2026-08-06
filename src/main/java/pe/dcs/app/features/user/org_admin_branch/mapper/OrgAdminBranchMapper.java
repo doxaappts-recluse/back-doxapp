@@ -86,6 +86,22 @@ public class OrgAdminBranchMapper {
                                 : null
                 )
 
+                /*
+                 * ROL
+                 */
+                .roleId(
+                        access != null &&
+                                access.getRole() != null
+                                ? access.getRole().getId()
+                                : null
+                )
+                .roleName(
+                        access != null &&
+                                access.getRole() != null
+                                ? access.getRole().getName()
+                                : null
+                )
+
                 .build();
 
         BaseMapper.mapAudit(person, response, showAudit);

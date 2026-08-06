@@ -132,7 +132,10 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                 saved.setTemplatePath(path);
 
             } catch (IOException e) {
-                throw new RuntimeException("Error uploading document template image", e);
+                throw new Exceptions(
+                        "error.errorSubiendoImagenPlantilla",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                );
             }
         }
 
@@ -177,7 +180,10 @@ public class DocumentTemplateServiceImpl implements DocumentTemplateService {
                 template.setTemplatePath(path);
 
             } catch (IOException e) {
-                throw new RuntimeException("Error updating document template image", e);
+                throw new Exceptions(
+                        "error.errorActualizandoImagenPlantilla",
+                        HttpStatus.INTERNAL_SERVER_ERROR
+                );
             }
         }
 

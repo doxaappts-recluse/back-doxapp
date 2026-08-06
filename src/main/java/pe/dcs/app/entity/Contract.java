@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
+import org.springframework.http.HttpStatus;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.contract.ContractRenewalType;
 import pe.dcs.app.util.enums.contract.ContractScope;
@@ -206,8 +208,9 @@ public class Contract extends Auditable {
         }
 
         if (status == ContractStatus.EXPIRED) {
-            throw new IllegalStateException(
-                    "Cannot cancel expired contract."
+            throw new Exceptions(
+                    "error.contratoExpiradoNoCancelable",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
@@ -255,16 +258,18 @@ public class Contract extends Auditable {
     private void validateScope() {
 
         if (organization == null) {
-            throw new IllegalStateException(
-                    "Organization is required."
+            throw new Exceptions(
+                    "error.organizacionObligatoriaContrato",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
         if (isOrganizationScope()) {
 
             if (branch != null) {
-                throw new IllegalStateException(
-                        "Organization contract cannot have branch."
+                throw new Exceptions(
+                        "error.contratoOrganizacionNoDebeTenerSede",
+                        HttpStatus.BAD_REQUEST
                 );
             }
 
@@ -272,8 +277,9 @@ public class Contract extends Auditable {
         }
 
         if (branch == null) {
-            throw new IllegalStateException(
-                    "Branch is required."
+            throw new Exceptions(
+                    "error.sedeObligatoriaContrato",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
@@ -281,8 +287,9 @@ public class Contract extends Auditable {
                 .getId()
                 .equals(organization.getId())) {
 
-            throw new IllegalStateException(
-                    "Branch does not belong to organization."
+            throw new Exceptions(
+                    "error.sedeNoPerteneceOrganizacion",
+                    HttpStatus.BAD_REQUEST
             );
         }
     }
@@ -291,8 +298,9 @@ public class Contract extends Auditable {
 
         if (endDate.isBefore(startDate)) {
 
-            throw new IllegalStateException(
-                    "End date cannot be before start date."
+            throw new Exceptions(
+                    "error.fechaFinAnteriorFechaInicio",
+                    HttpStatus.BAD_REQUEST
             );
         }
     }
@@ -301,8 +309,9 @@ public class Contract extends Auditable {
 
         if (maxLicenses <= 0) {
 
-            throw new IllegalStateException(
-                    "Max users must be greater than zero."
+            throw new Exceptions(
+                    "error.maximoUsuariosMayorCero",
+                    HttpStatus.BAD_REQUEST
             );
         }
     }
@@ -311,15 +320,17 @@ public class Contract extends Auditable {
 
         if (status == ContractStatus.CANCELLED) {
 
-            throw new IllegalStateException(
-                    "Contract is cancelled."
+            throw new Exceptions(
+                    "error.contratoCancelado",
+                    HttpStatus.BAD_REQUEST
             );
         }
 
         if (status == ContractStatus.EXPIRED) {
 
-            throw new IllegalStateException(
-                    "Contract is expired."
+            throw new Exceptions(
+                    "error.contratoExpirado",
+                    HttpStatus.BAD_REQUEST
             );
         }
     }

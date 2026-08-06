@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpStatus;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.auditable.Auditable;
 import pe.dcs.app.util.enums.StatusType;
 
@@ -101,8 +103,9 @@ public class Organization extends Auditable {
         }
 
         if(hasActiveContracts){
-            throw new IllegalStateException(
-                    "No se puede deshabilitar la organización porque posee sedes con contratos activos."
+            throw new Exceptions(
+                    "error.organizacionConSedesContratosActivos",
+                    HttpStatus.BAD_REQUEST
             );
         }
 

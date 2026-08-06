@@ -578,27 +578,84 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
         person.getAccesses().add(access);
     }
 
+    /**
+     * ORG_ADMIN es un acceso global (acceso completo a la
+     * organización) y no debería convivir con otros accesos
+     * activos de la misma persona (ORG_BRANCH_ADMIN/ORG_USER en
+     * sedes puntuales) — si conviven, la resolución de contexto al
+     * loguear (getAvailableContexts) no tiene forma de priorizar
+     * un rol sobre otro. Se valida en ambas direcciones:
+     * - No se puede activar un acceso puntual si ya hay un
+     *   ORG_ADMIN activo (mismo chequeo que ya existía en
+     *   addAccess()).
+     * - No se puede activar el acceso ORG_ADMIN si la persona
+     *   tiene otros accesos activos (deben desactivarse antes).
+     */
     @Override
     @Transactional
     public void enableAccess(UUID accessId) {
-        setAccessStatus(accessId, StatusType.ACTIVE);
+
+        UserAccess access = findAccessOrThrow(accessId);
+
+        validateAccessManagePermission(access);
+
+        Person person = access.getPerson();
+
+        if (access.isOrganizationAdmin()) {
+
+            boolean hasOtherActiveAccess =
+                    person.getAccesses()
+                            .stream()
+                            .anyMatch(a ->
+                                    !a.getId().equals(access.getId())
+                                            && a.getActive() == StatusType.ACTIVE
+                            );
+
+            if (hasOtherActiveAccess) {
+
+                throw new Exceptions(
+                        "error.debeDesactivarOtrosAccesosAntesDeActivarAdminOrganizacion",
+                        HttpStatus.CONFLICT
+                );
+            }
+
+        } else if (UserAccessHelper.hasActiveOrganizationAdminAccess(person)) {
+
+            throw new Exceptions(
+                    "error.usuarioAdministradorOrganizacionAccesoGlobalNo",
+                    HttpStatus.CONFLICT
+            );
+        }
+
+        access.setActive(StatusType.ACTIVE);
+
+        userAccessRepository.save(access);
     }
 
     @Override
     @Transactional
     public void disableAccess(UUID accessId) {
-        setAccessStatus(accessId, StatusType.INACTIVE);
+
+        UserAccess access = findAccessOrThrow(accessId);
+
+        validateAccessManagePermission(access);
+
+        access.setActive(StatusType.INACTIVE);
+
+        userAccessRepository.save(access);
     }
 
-    private void setAccessStatus(UUID accessId, StatusType status) {
+    private UserAccess findAccessOrThrow(UUID accessId) {
 
-        UserAccess access =
-                userAccessRepository.findById(accessId)
-                        .orElseThrow(() ->
-                                new Exceptions(
-                                        "error.accesoNoEncontrado",
-                                        HttpStatus.NOT_FOUND
-                                ));
+        return userAccessRepository.findById(accessId)
+                .orElseThrow(() ->
+                        new Exceptions(
+                                "error.accesoNoEncontrado",
+                                HttpStatus.NOT_FOUND
+                        ));
+    }
+
+    private void validateAccessManagePermission(UserAccess access) {
 
         if (!authContext.canAccess(
                 access.getOrganization() != null
@@ -614,10 +671,6 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                     HttpStatus.UNAUTHORIZED
             );
         }
-
-        access.setActive(status);
-
-        userAccessRepository.save(access);
     }
 
     /**
