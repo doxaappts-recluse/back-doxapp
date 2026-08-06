@@ -624,7 +624,7 @@ public class ContractServiceImpl implements ContractService {
                                 )
                         );
 
-        validateNoOverlap(contract, contract.getId());
+        validateNoOverlapForActivation(contract, contract.getId());
 
         applyTransition(contract::activate);
     }
@@ -767,13 +767,54 @@ public class ContractServiceImpl implements ContractService {
     // HELPERS - OVERLAP
     // =====================================================
 
-    private static final Set<ContractStatus> OCCUPYING_STATUSES = Set.of(
+    /**
+     * Un contrato SUSPENDED está, por definición, apagado: no
+     * está rigiendo esas fechas ahora mismo, así que no debería
+     * bloquear la creación de uno nuevo que las use. Solo ACTIVE
+     * (rige ahora) y PENDING (va a regir en el futuro) representan
+     * fechas realmente "ocupadas".
+     */
+    private static final Set<ContractStatus> OCCUPYING_STATUSES_ON_SAVE = Set.of(
             ContractStatus.ACTIVE,
-            ContractStatus.PENDING,
-            ContractStatus.SUSPENDED
+            ContractStatus.PENDING
+    );
+
+    /**
+     * Al ACTIVAR (manual, desde PENDING o SUSPENDED) solo importa
+     * no pisar un contrato que HOY está ACTIVE — no tiene sentido
+     * bloquear la activación por otro PENDING/SUSPENDED que ni
+     * siquiera está rigiendo.
+     */
+    private static final Set<ContractStatus> OCCUPYING_STATUSES_ON_ACTIVATION = Set.of(
+            ContractStatus.ACTIVE
     );
 
     private void validateNoOverlap(Contract contract, UUID excludedContractId) {
+
+        validateNoOverlap(
+                contract,
+                excludedContractId,
+                OCCUPYING_STATUSES_ON_SAVE,
+                "error.existeContratoActivoPendienteSolapa"
+        );
+    }
+
+    private void validateNoOverlapForActivation(Contract contract, UUID excludedContractId) {
+
+        validateNoOverlap(
+                contract,
+                excludedContractId,
+                OCCUPYING_STATUSES_ON_ACTIVATION,
+                "error.existeContratoActivoSolapaActivacion"
+        );
+    }
+
+    private void validateNoOverlap(
+            Contract contract,
+            UUID excludedContractId,
+            Set<ContractStatus> occupyingStatuses,
+            String errorKey
+    ) {
 
         List<Contract> candidates =
                 contract.isBranchScope()
@@ -791,12 +832,12 @@ public class ContractServiceImpl implements ContractService {
         boolean hasConflict =
                 candidates.stream()
                         .filter(c -> excludedContractId == null || !c.getId().equals(excludedContractId))
-                        .filter(c -> OCCUPYING_STATUSES.contains(c.getStatus()))
+                        .filter(c -> occupyingStatuses.contains(c.getStatus()))
                         .anyMatch(contract::overlapsWith);
 
         if (hasConflict) {
             throw new Exceptions(
-                    "error.existeContratoActivoSuspendidoPendienteSolapa",
+                    errorKey,
                     HttpStatus.CONFLICT
             );
         }

@@ -8,6 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.*;
+import pe.dcs.app.features.contract.LicenseGuard;
 import pe.dcs.app.features.user.org_admin_branch.mapper.OrgAdminBranchMapper;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchAddAccessRequest;
 import pe.dcs.app.features.user.org_admin_branch.request.OrgAdminBranchCreateRequest;
@@ -44,6 +45,7 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
     private final PasswordEncoder passwordEncoder;
     private final OrgAdminBranchMapper mapper;
     private final AuthContext authContext;
+    private final LicenseGuard licenseGuard;
 
     @Override
     @Transactional(readOnly = true)
@@ -151,6 +153,8 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 role,
                 branch
         );
+
+        licenseGuard.assertLicenseAvailable(organization, branch);
 
         /*
          * =============================
@@ -558,12 +562,16 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 );
             }
 
+            licenseGuard.assertLicenseAvailable(organization, branch);
+
             existing.setActive(StatusType.ACTIVE);
 
             userAccessRepository.save(existing);
 
             return;
         }
+
+        licenseGuard.assertLicenseAvailable(organization, branch);
 
         UserAccess access = new UserAccess();
 
@@ -626,6 +634,11 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                     HttpStatus.CONFLICT
             );
         }
+
+        licenseGuard.assertLicenseAvailable(
+                access.getOrganization(),
+                access.getBranch()
+        );
 
         access.setActive(StatusType.ACTIVE);
 
