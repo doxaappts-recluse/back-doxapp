@@ -329,20 +329,31 @@ public class ContractServiceImpl implements ContractService {
             /*
              * El contrato todavía no vivió ni un día bajo sus
              * términos actuales (recién arrancó hoy): no hay nada
-             * real que preservar como historial, así que en este
-             * caso puntual se sigue como corrección normal abajo.
+             * real que preservar como historial, así que no se crea
+             * un contrato nuevo. PERO el admin SÍ declaró
+             * explícitamente la transición (Renovación/Upgrade/
+             * Downgrade) en este mismo request, así que se aplica
+             * directo en el mismo registro, con el renewalType
+             * nuevo. Antes esto caía en la validación de "cambio
+             * comercial silencioso" de abajo (isCommercialChange),
+             * que rechazaba el guardado con
+             * error.contratoVigenteCambiarPlanPrecioModulos aun
+             * cuando el usuario SÍ había elegido Upgrade/Downgrade
+             * — esa validación es para detectar cuando NO se
+             * declaró ninguna transición, no aplica acá.
              */
+            return applyInPlaceUpdate(contract, request, request.getRenewalType());
         }
 
         /*
-         * Corrección normal sobre un contrato YA vigente: el
-         * renewalType es el "origen" de este contrato (cómo llegó a
-         * existir) y no se pisa con lo que venga en el request salvo
-         * que arriba se haya detectado una transición real; se
-         * preserva tal cual. Y no se permite cambiar plan/precio/
-         * moneda/licencias/módulos calladamente: si el contrato ya
-         * está vigente, eso es un cambio comercial y tiene que
-         * declararse como Renovación/Upgrade/Downgrade.
+         * Corrección normal sobre un contrato YA vigente: no se
+         * declaró ninguna transición de renewalType en este
+         * request, así que el renewalType se preserva tal cual (es
+         * el "origen" de este contrato, cómo llegó a existir). Y no
+         * se permite cambiar plan/precio/moneda/licencias/módulos
+         * calladamente: si el contrato ya está vigente y no se
+         * declaró Renovación/Upgrade/Downgrade, eso es un cambio
+         * comercial no declarado.
          */
         if (isCommercialChange(contract, request)) {
             throw new Exceptions(
