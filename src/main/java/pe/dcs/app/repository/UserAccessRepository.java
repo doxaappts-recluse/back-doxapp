@@ -44,4 +44,28 @@ public interface UserAccessRepository extends JpaRepository<UserAccess, UUID>, J
     List<UserAccess> findByPersonId(
             UUID personId
     );
+
+    // =========================================================
+    // LICENCIAS: conteo de accesos activos por org/sede
+    // =========================================================
+
+    /**
+     * Accesos activos de TODA la organización, sin importar
+     * sede (incluye ORG_ADMIN con branch null). Usado contra
+     * el maxLicenses de un contrato scope=ORGANIZATION.
+     */
+    long countByOrganizationIdAndActive(
+            UUID organizationId,
+            StatusType status
+    );
+
+    /**
+     * Accesos activos de UNA sede puntual. Usado contra el
+     * maxLicenses de un contrato scope=BRANCH, o contra el
+     * allocatedLicenses de esa sede en modo ALLOCATED.
+     */
+    long countByBranchIdAndActive(
+            UUID branchId,
+            StatusType status
+    );
 }

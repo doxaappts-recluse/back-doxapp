@@ -185,6 +185,8 @@ public class Contract extends Auditable {
             return;
         }
 
+        assertWithinValidityRange();
+
         status = ContractStatus.ACTIVE;
         activatedAt = Instant.now();
     }
@@ -330,6 +332,27 @@ public class Contract extends Auditable {
 
             throw new Exceptions(
                     "error.contratoExpirado",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+    }
+
+    /**
+     * Un contrato PENDING o SUSPENDED solo puede pasar a ACTIVE si
+     * hoy cae dentro de [startDate, endDate]. Evita dos escenarios:
+     * activar a mano un PENDING que todavía no arrancó, y
+     * reactivar un SUSPENDED cuya vigencia ya venció mientras
+     * estaba suspendido (el job de expiración solo mira
+     * status=ACTIVE, así que un SUSPENDED nunca expira solo).
+     */
+    private void assertWithinValidityRange() {
+
+        LocalDate today = LocalDate.now();
+
+        if (today.isBefore(startDate) || today.isAfter(endDate)) {
+
+            throw new Exceptions(
+                    "error.contratoFueraDeRangoFechasActivacion",
                     HttpStatus.BAD_REQUEST
             );
         }

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import pe.dcs.app.entity.Contract;
 import pe.dcs.app.repository.ContractRepository;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.contract.ContractStatus;
 
 import java.time.LocalDate;
@@ -128,8 +129,17 @@ public class ContractScheduler {
                     replacedPredecessors.add(previous);
                 }
 
-            } catch (IllegalStateException ex) {
+            } catch (Exceptions ex) {
 
+                /*
+                 * Contract.activate() ahora también exige que hoy
+                 * esté dentro de [startDate, endDate] (ver
+                 * assertWithinValidityRange). Un PENDING encontrado
+                 * acá cumple startDate<=today por la query, pero si
+                 * endDate ya pasó (dato corrido/backdated) igual
+                 * lanza acá — se loguea y se salta, sin abortar el
+                 * resto del batch.
+                 */
                 log.warn(
                         "Could not activate contract {}: {}",
                         contract.getId(),
