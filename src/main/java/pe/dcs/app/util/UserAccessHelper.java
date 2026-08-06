@@ -117,4 +117,34 @@ public class UserAccessHelper {
                 .anyMatch(UserAccess::isOrganizationAdmin);
     }
 
+    /**
+     * Acceso "de referencia" para mostrar en pantallas de listado
+     * (organización/sede/rol), aunque la persona no tenga ningún
+     * acceso ACTIVO (p.ej. le deshabilitaron todos). Sin esto, una
+     * persona totalmente deshabilitada mostraría esas columnas
+     * vacías en vez de la última asignación que tuvo.
+     *
+     * Prioridad: acceso activo > acceso ORG_ADMIN (activo o no) >
+     * primer acceso registrado.
+     */
+    public static UserAccess getDisplayAccess(Person person){
+
+        UserAccess active = getActiveAccess(person);
+
+        if(active != null){
+            return active;
+        }
+
+        return person.getAccesses()
+                .stream()
+                .filter(UserAccess::isOrganizationAdmin)
+                .findFirst()
+                .orElseGet(() ->
+                        person.getAccesses()
+                                .stream()
+                                .findFirst()
+                                .orElse(null)
+                );
+    }
+
 }

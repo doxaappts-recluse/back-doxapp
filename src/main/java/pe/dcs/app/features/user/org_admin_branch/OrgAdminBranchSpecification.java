@@ -39,12 +39,12 @@ public class OrgAdminBranchSpecification {
 
             /*
              * =====================================
-             * ACCESO ACTIVO (organización / sede)
+             * ACCESO (organización / sede)
              * =====================================
              *
              * Person
              *    |
-             * UserAccess(active)
+             * UserAccess (activo O inactivo)
              *    |___ Organization
              *    |___ Branch (NULL para ORG_ADMIN: acceso global)
              *
@@ -57,6 +57,12 @@ public class OrgAdminBranchSpecification {
              * resuelve organización/sede a través del propio
              * UserAccess (ya usado también por el mapper), que sí
              * existe para todos los roles de este módulo.
+             *
+             * Deliberadamente NO se filtra por active=ACTIVE acá: si
+             * se deshabilitan TODOS los accesos de una persona, igual
+             * debe seguir apareciendo en este listado (si no, no hay
+             * forma de encontrarla desde la UI para reactivarle un
+             * acceso, p.ej. volver a activarla como ORG_ADMIN).
              */
 
             Join<Person, UserAccess> orgAccess =
@@ -64,13 +70,6 @@ public class OrgAdminBranchSpecification {
                             "accesses",
                             JoinType.INNER
                     );
-
-            predicates.add(
-                    cb.equal(
-                            orgAccess.get("active"),
-                            StatusType.ACTIVE
-                    )
-            );
 
             Join<UserAccess, Organization> organization =
                     orgAccess.join(
@@ -83,6 +82,22 @@ public class OrgAdminBranchSpecification {
                             "branch",
                             JoinType.LEFT
                     );
+
+            /*
+             * Este módulo es solo para roles de organización
+             * (ORG_ADMIN / ORG_BRANCH_ADMIN / ORG_USER). SYSTEM_ADMIN
+             * y SYSTEM_SUPPORT tienen organization = null en su
+             * UserAccess (ver javadoc de UserAccess.organization), así
+             * que se excluyen acá. Antes quedaban afuera "de rebote"
+             * por el INNER JOIN a branchHistory que también excluía
+             * (incorrectamente) a los ORG_ADMIN; al resolver eso hay
+             * que filtrar explícitamente los accesos de SISTEMA.
+             */
+            predicates.add(
+                    cb.isNotNull(
+                            organization.get("id")
+                    )
+            );
 
             /*
              * =====================================
