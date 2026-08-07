@@ -47,4 +47,17 @@ public class ContractUpdateRequest {
     private List<ContractModuleRequest> modules;
 
     private List<ContractBranchLicenseRequest> branchLicenses;
+
+    /**
+     * Corrección administrativa: permite editar in-place un campo
+     * "comercial" (plan/precio/moneda/licencias/módulos) de un
+     * contrato ya vigente SIN pasar por el versionado de Renovación/
+     * Upgrade/Downgrade — pensado para arreglar un error de tipeo,
+     * no para un cambio de negocio real. Solo tiene efecto cuando NO
+     * se declaró una transición de renewalType en este mismo request
+     * (ver ContractServiceImpl.update(): isVersioningTransition
+     * siempre tiene prioridad). No se persiste como tal; el rastro
+     * de auditoría es el updatedBy/updatedAt heredado de Auditable.
+     */
+    private Boolean isCorrection;
 }
