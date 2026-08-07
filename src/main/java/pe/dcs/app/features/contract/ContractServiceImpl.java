@@ -310,10 +310,20 @@ public class ContractServiceImpl implements ContractService {
          * esos términos) quede intacto en el historial. Ver
          * contract-status-rules.config en el front y el comentario
          * de ContractStatus.REPLACED.
+         *
+         * "distinto al que ya traía" NO alcanza como única condición:
+         * bloquea declarar el MISMO tipo de transición dos veces
+         * seguidas (ej. un segundo Upgrade el mismo día para agregar
+         * más licencias), porque contract.getRenewalType() ya quedó
+         * en UPGRADE desde la vez anterior. Por eso también se acepta
+         * sameTypeTransition=true, que el front solo manda cuando el
+         * admin confirmó explícitamente que quiere repetir el mismo
+         * tipo (ver ContractUpdateRequest.sameTypeTransition).
          */
         boolean isVersioningTransition =
                 request.getRenewalType() != null
-                        && request.getRenewalType() != contract.getRenewalType()
+                        && (request.getRenewalType() != contract.getRenewalType()
+                                || Boolean.TRUE.equals(request.getSameTypeTransition()))
                         && (request.getRenewalType() == ContractRenewalType.RENEWAL
                                 || request.getRenewalType() == ContractRenewalType.UPGRADE
                                 || request.getRenewalType() == ContractRenewalType.DOWNGRADE);
