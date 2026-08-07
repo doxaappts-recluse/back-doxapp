@@ -44,6 +44,7 @@ import pe.dcs.app.util.pagination.PaginationResponse;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -353,9 +354,17 @@ public class ContractServiceImpl implements ContractService {
          * se permite cambiar plan/precio/moneda/licencias/módulos
          * calladamente: si el contrato ya está vigente y no se
          * declaró Renovación/Upgrade/Downgrade, eso es un cambio
-         * comercial no declarado.
+         * comercial no declarado — SALVO que el admin haya marcado
+         * request.isCorrection=true (checkbox "corrección
+         * administrativa" en el front), pensado para arreglar un
+         * error de tipeo sin que eso genere un contrato nuevo en el
+         * historial. Sigue exigiendo assertSystemUser() (ya
+         * evaluado al inicio de este método) y queda igual de
+         * auditado que cualquier otra edición vía updatedBy/
+         * updatedAt (Auditable) — no se agrega un registro aparte.
          */
-        if (isCommercialChange(contract, request)) {
+        if (!Boolean.TRUE.equals(request.getIsCorrection())
+                && isCommercialChange(contract, request)) {
             throw new Exceptions(
                     "error.contratoVigenteCambiarPlanPrecioModulos",
                     HttpStatus.CONFLICT
@@ -522,6 +531,25 @@ public class ContractServiceImpl implements ContractService {
                         : (today.isAfter(oldContract.getStartDate())
                                 ? today
                                 : oldContract.getStartDate());
+
+        /*
+         * Mensaje específico ANTES de tocar nada (el front no deja
+         * editar la fecha de inicio en este flujo, así que el único
+         * campo que el usuario controla acá es endDate; el error
+         * genérico de Contract.validateDates() -"fecha fin anterior
+         * a fecha inicio"- referencia una fecha de inicio que el
+         * usuario ni siquiera ve en pantalla, porque ve la del
+         * contrato viejo, no esta newStart calculada). Se valida
+         * antes de cerrar oldContract para no dejar un
+         * saveAndFlush() de por medio sin necesidad.
+         */
+        if (request.getEndDate().isBefore(newStart)) {
+            throw new Exceptions(
+                    "error.fechaFinDebeSerPosteriorInicioNuevoPeriodo",
+                    HttpStatus.BAD_REQUEST,
+                    newStart.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            );
+        }
 
         LocalDate closingDate = newStart.minusDays(1);
 

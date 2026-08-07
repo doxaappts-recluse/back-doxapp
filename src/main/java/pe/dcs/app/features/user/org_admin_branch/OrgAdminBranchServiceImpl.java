@@ -459,12 +459,28 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
 
     /**
      * ORG_BRANCH_ADMIN y ORG_USER aplican a una sede puntual;
-     * solo ORG_ADMIN es global (sin sede).
+     * solo ORG_ADMIN es global (sin sede). Se valida en ambos
+     * sentidos: antes solo se rechazaba "rol de sede sin sede", pero
+     * no el caso inverso (ORG_ADMIN CON sede) — eso permitía que un
+     * front con un bug (branchId con un valor viejo seleccionado
+     * antes de cambiar el rol a ORG_ADMIN) creara un UserAccess de
+     * ORG_ADMIN con sede, que después ni matchea
+     * hasOrganizationAdminAccess() (exige branchId nulo) ni
+     * hasBranchAdminAccess() (exige rol ORG_BRANCH_ADMIN): ese
+     * usuario terminaba en RoleType.UNKNOWN con el sidebar vacío al
+     * loguear, sin ningún error visible al crearlo.
      */
     private void validateBranchRequired(Role role, Branch branch){
+
         if(role.isBranchRole() && branch == null){
             throw new Exceptions(
                     "error.rolRequiereSede", HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if(role.isOrganizationAdmin() && branch != null){
+            throw new Exceptions(
+                    "error.rolOrgAdminNoDebeTenerSede", HttpStatus.BAD_REQUEST
             );
         }
     }
