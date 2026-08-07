@@ -60,4 +60,18 @@ public class ContractUpdateRequest {
      * de auditoría es el updatedBy/updatedAt heredado de Auditable.
      */
     private Boolean isCorrection;
+
+    /**
+     * Confirma que se quiere registrar OTRA transición del mismo tipo
+     * que ya tiene el contrato (ej. un segundo Upgrade seguido, para
+     * agregar más licencias el mismo día). Sin este flag,
+     * ContractServiceImpl.update() no puede distinguir "el admin
+     * volvió a elegir Upgrade a propósito" de "el combo simplemente
+     * sigue mostrando el valor con el que ya venía el contrato" — ver
+     * isVersioningTransition. Solo importa cuando renewalType es
+     * igual al contract.getRenewalType() actual; si el admin elige un
+     * tipo distinto (ej. estaba en RENEWAL y ahora elige UPGRADE) no
+     * hace falta, ese cambio ya se detecta solo.
+     */
+    private Boolean sameTypeTransition;
 }
