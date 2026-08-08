@@ -154,6 +154,28 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
                 branch
         );
 
+        /*
+         * =============================
+         * SEDE DE LA PERSONA (distinta de la sede del acceso)
+         * =============================
+         * Siempre obligatoria y siempre validada, sin importar el
+         * rol: un ORG_ADMIN también es una persona real que necesita
+         * pertenecer a una sede para el resto de módulos (Membresía,
+         * Bautizo, RRHH, etc.) que exigen "persona con sede activa".
+         */
+        Branch personBranch =
+                branchRepository.findById(request.getPersonBranchId())
+                        .orElseThrow(() ->
+                                new Exceptions(
+                                        "error.sedeNoEncontrada",
+                                        HttpStatus.NOT_FOUND
+                                ));
+
+        validateBranchOrganization(
+                personBranch,
+                organization
+        );
+
         licenseGuard.assertLicenseAvailable(organization, branch);
 
         /*
@@ -210,25 +232,27 @@ public class OrgAdminBranchServiceImpl implements OrgAdminBranchService {
          * =============================
          * PERSON BRANCH
          * =============================
+         * Siempre se crea (antes solo se creaba "if (branch != null)",
+         * usando la sede del ACCESO — lo que dejaba a todo ORG_ADMIN
+         * sin ningún PersonBranch, porque su acceso es global y
+         * branch venía null). Ahora usa personBranch, que es
+         * obligatorio sin importar el rol.
          */
-        if (branch != null) {
+        PersonBranch personBranchEntity = new PersonBranch();
 
-            PersonBranch personBranch = new PersonBranch();
+        personBranchEntity.setPerson(person);
+        personBranchEntity.setBranch(personBranch);
+        personBranchEntity.setStatus(StatusType.ACTIVE);
+        personBranchEntity.setStartDate(request.getStartDate());
+        personBranchEntity.setEndDate(null);
+        personBranchEntity.setTransferReason(null);
 
-            personBranch.setPerson(person);
-            personBranch.setBranch(branch);
-            personBranch.setStatus(StatusType.ACTIVE);
-            personBranch.setStartDate(request.getStartDate());
-            personBranch.setEndDate(null);
-            personBranch.setTransferReason(null);
+        personBranchRepository.save(personBranchEntity);
 
-            personBranchRepository.save(personBranch);
-
-            /*
-             * Mantener sincronizada la relación
-             */
-            person.getBranchHistory().add(personBranch);
-        }
+        /*
+         * Mantener sincronizada la relación
+         */
+        person.getBranchHistory().add(personBranchEntity);
 
         /*
          * =============================
