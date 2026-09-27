@@ -1,0 +1,15 @@
+-- M13→M16 · Quinto punto de la lista de deudas de integración tras M24: cierra la mitad de M13 del [D1] documentado en el
+-- encabezado de V27__spaces_inventory_m16.sql ("las reservas automáticas desde M14/M10/M13 vía sourceType/sourceId quedan
+-- pendientes"). M14 (eventos) ya se enlazó en V33; M10 (grupos) sigue pendiente porque group_meeting no tiene hora de fin ni
+-- duración en su esquema (decisión de diseño propia, todavía no tomada).
+--
+-- A diferencia de M14 (una sola reserva por evento), un dictado (course_class) es una serie semanal de hasta 80 sesiones
+-- (day_of_week + start_date/end_date + start_time/end_time en una sola fila) — por eso la integración no reutiliza
+-- ReservationService.createLinked() (una reserva puntual) sino un método nuevo, createLinkedSeries(), que repite la misma
+-- lógica de "generar ocurrencias y saltar las que chocan" que ReservationService.submit() ya usa para la reserva manual
+-- recurrente. Un choque puntual en una sola fecha de la serie no bloquea el dictado completo (no tendría sentido impedir un
+-- curso de varios meses por un solo día ocupado) — esa fecha simplemente queda sin espacio reservado.
+--
+-- Configurar el espacio siempre se permite (para que quede listo cuando se contrate Instalaciones); solo se generan reservas
+-- reales si SPACES está contratado, mismo criterio que M14→M15/M14→M16.
+alter table course_class add column space_id uuid references space (id);

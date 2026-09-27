@@ -1,28 +1,25 @@
 server:
-  #port: ${PORT:8080}
-  port: 8080
+  port: ${PORT:8080}
+  # detrás de un proxy (Render, nginx): la IP real del cliente para límites y auditoría
+  forward-headers-strategy: framework
 
 spring:
   datasource:
-    #url: ${DB_URL}
-    #username: ${DB_USER}
-    #password: ${DB_PASSWORD}
-    url: jdbc:postgresql://localhost:5432/RJ_DoxApp_v1
-    username: postgres
-    password: Clannad
-    #url: jdbc:postgresql://aws-1-us-east-2.pooler.supabase.com:6543/postgres?sslmode=require&prepareThreshold=0
-    #username: postgres.eehevpofwzkhmfetldyz
-    #password: :XY>Xwp;Pj/5NM4k
-
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/doxapp_v2}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:}
     hikari:
       auto-commit: false
       maximum-pool-size: 5
       minimum-idle: 1
       connection-timeout: 30000
 
-
   main:
     web-application-type: servlet
+
+  autoconfigure:
+    # no hay usuarios en memoria: la autenticación es JWT propia (evita la contraseña generada en el log)
+    exclude: org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
 
   messages:
     basename: messages
@@ -33,37 +30,94 @@ spring:
   servlet:
     multipart:
       max-file-size: 50MB
-      max-request-size: 50MB
+      max-request-size: 60MB
+
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
 
   jpa:
     database: postgresql
+    open-in-view: false
     hibernate:
-      #ddl-auto: update
-      ddl-auto: create-drop
+      ddl-auto: validate
     properties:
       hibernate:
         order_inserts: true
         order_updates: true
-        show_sql: true
+        show_sql: false
         jdbc:
-          prepare_sql: false
           time_zone: UTC
         connection:
           provider_disables_autocommit: true
 
+# Los secretos NO viven en este archivo: variables de entorno o application-local.yml (ignorado por git).
 supabase:
-  #url: ${SB_URL}
-  #serviceKey: ${SB_SERVICE_KEY}
-  url: https://eehevpofwzkhmfetldyz.supabase.co
-  serviceKey: sb_secret_ECnwK-OqYyF0OlN-stFnrw_mhgWX9SF
-
+  url: ${SB_URL:}
+  serviceKey: ${SB_SERVICE_KEY:}
   storage:
     buckets:
       events: events
       document-templates: document-templates
+      branding: branding
 
 app:
+  # URL pública del front (enlaces de invitación y recuperación)
+  frontend-url: ${FRONTEND_URL:http://localhost:4200}
+
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:4200}
+
+  # Archivos (logos, etc.). local = carpeta del disco (desarrollo); supabase = Supabase Storage (bucket "branding").
+  storage:
+    provider: ${STORAGE_PROVIDER:local}
+    local-dir: ${STORAGE_LOCAL_DIR:./storage}
+    supabase-bucket: branding
+
+  # Integraciones (M23). Dominios de correo que se dan por verificados sin consultar DNS (solo pruebas; separa con comas).
+  # Las pruebas SMTP a hosts privados solo se permiten con app.dev.reset-on-start=true o app.integrations.allow-private-hosts=true.
+  integrations:
+    trusted-domains: ${INTEGRATIONS_TRUSTED_DOMAINS:}
+
   jwt:
-    time-in-minutes: 20
-    #secret: ${JWT_SECRET}
-    secret: r3g157ry_499l1c4t10n_574nd4rd_cl13n7_53cr37
+    # >= 32 bytes. Obligatorio; la aplicación no arranca sin él.
+    secret: ${JWT_SECRET:}
+    access-minutes: 15
+    refresh-days: 7
+    # token intermedio (MFA pendiente / elegir contexto / configuración obligatoria)
+    pre-auth-minutes: 10
+
+  security:
+    # clave AES-256 en Base64 para cifrar secretos MFA en reposo (openssl rand -base64 32)
+    mfa-key: ${MFA_ENC_KEY:}
+    max-failed-attempts: 5
+    lock-minutes: 15
+    invite-ttl-hours: 72
+    reset-ttl-minutes: 60
+    # límite por IP+usuario: intentos de login por ventana
+    rate-limit-attempts: 10
+    rate-limit-window-minutes: 15
+    # cierre por inactividad (se aplica en front; el back solo lo publica)
+    idle-minutes-platform: 30
+    idle-minutes-org: 480
+
+  bootstrap:
+    # Primer SYSTEM_ADMIN (solo si no existe ningún personal de plataforma)
+    enabled: ${BOOTSTRAP_ENABLED:true}
+    email: ${BOOTSTRAP_EMAIL:}
+    password: ${BOOTSTRAP_PASSWORD:}
+    first-name: ${BOOTSTRAP_FIRST_NAME:Admin}
+    last-name: ${BOOTSTRAP_LAST_NAME:Sistema}
+    doc-type: ${BOOTSTRAP_DOC_TYPE:DNI}
+    doc-number: ${BOOTSTRAP_DOC_NUMBER:}
+
+  mail:
+    # Mientras no exista M19: el correo se registra en el log (modo desarrollo)
+    mode: ${MAIL_MODE:log}
+
+# Swagger solo si se habilita explícitamente (DOCS_ENABLED=true); apagado por defecto.
+springdoc:
+  api-docs:
+    enabled: ${DOCS_ENABLED:false}
+  swagger-ui:
+    enabled: ${DOCS_ENABLED:false}

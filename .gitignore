@@ -73,7 +73,8 @@ Thumbs.db
 # =========================
 # Spring Boot
 # =========================
-application.yml
+# Configuración local (secretos): solo la carpeta config/. El application.yml de resources SÍ va a git y no lleva secretos.
+/config/
 application-local.yml
 application-local.properties
 
@@ -83,3 +84,6 @@ application-local.properties
 *.tmp
 *.swp
 *.swo
+
+# Archivos de marca en desarrollo (M02)
+/storage/

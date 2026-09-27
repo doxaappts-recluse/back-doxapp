@@ -8,27 +8,26 @@ import org.springframework.http.HttpStatus;
 /**
  * Excepción de negocio con soporte i18n.
  *
- * El primer argumento puede ser:
- *  - una clave de messages_xx.properties (recomendado, prefijo "error."), o
- *  - un mensaje literal (comportamiento legado).
- *
- * Si la clave no existe en el bundle, se usa la clave/mensaje tal cual
- * como fallback (ver {@link #resolve}), así que no rompe nada que no
- * haya sido migrado todavía a claves — la migración es incremental.
+ * El primer argumento es la clave de messages_xx.properties (formato error.&lt;dom&gt;.&lt;motivo&gt;).
+ * {@link #getCode()} devuelve esa clave y viaja al cliente en el cuerpo de error (ApiError.code);
+ * el mensaje ya viene traducido según Accept-Language.
  */
 @Getter
 public class Exceptions extends RuntimeException {
 
     private final HttpStatus status;
+    private final String code;
 
     public Exceptions(String messageOrKey, HttpStatus status) {
         super(resolve(messageOrKey, null));
         this.status = status;
+        this.code = messageOrKey;
     }
 
     public Exceptions(String key, HttpStatus status, Object... args) {
         super(resolve(key, args));
         this.status = status;
+        this.code = key;
     }
 
     private static String resolve(String key, Object[] args) {
