@@ -35,6 +35,7 @@ public class AttendanceMaintenanceService {
     private final NotificationService notifications;
     private final AuditService audit;
     private final Clock clock;
+    private final List<AbsenceAlertParticipant> participants;
 
     @Transactional
     public Map<String, Integer> run() {
@@ -124,6 +125,9 @@ public class AttendanceMaintenanceService {
             notifications.toPersons(NotificationType.ATTENDANCE_ABSENCE, c.orgId(), notifications.branchAdmins(c.orgId(), c.branchId()),
                     Map.of("person", c.name(), "weeks", String.valueOf(c.weeks()), "branch", c.branchName()), "/app/persons/" + c.personId(), "abs:" + id);
             audit.record(new AuditService.Command("ATTENDANCE", "ABSENCE_ALERT", "AttendanceAbsenceAlert", id, c.orgId(), c.branchId(), Map.of("weeks", c.weeks())));
+            for (AbsenceAlertParticipant p : participants) {
+                p.onAbsenceAlert(c.orgId(), c.branchId(), c.personId(), c.last(), c.weeks(), id);
+            }
         }
         return n;
     }
