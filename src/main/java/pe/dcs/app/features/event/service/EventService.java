@@ -482,7 +482,12 @@ public class EventService {
         if (e.spaceId() != null) {
             reservationProvider.getObject().cancelBySource(e.orgId(), RESERVATION_SOURCE, id, "Evento cancelado" + (reason == null ? "" : ": " + reason));
         }
-        audit.record(new AuditService.Command(MODULE, "CANCEL", ENTITY, id, e.orgId(), e.branchId(), Map.of("reason", reason, "affected", people.size())));
+        // Map.of() lanza NPE si algún valor es null, y "reason" es null cuando no hay inscritos activos (motivo opcional
+        // en ese caso) [HALLAZGO M14-3]: cancelar un evento sin inscritos y sin motivo crasheaba con 500.
+        Map<String, Object> cancelDetail = new java.util.HashMap<>();
+        cancelDetail.put("reason", reason);
+        cancelDetail.put("affected", people.size());
+        audit.record(new AuditService.Command(MODULE, "CANCEL", ENTITY, id, e.orgId(), e.branchId(), cancelDetail));
         return get(scope, id);
     }
 

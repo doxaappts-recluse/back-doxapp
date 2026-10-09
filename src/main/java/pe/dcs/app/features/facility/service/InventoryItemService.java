@@ -143,12 +143,15 @@ public class InventoryItemService {
         BigDecimal minStock = FacilitySupport.optionalAmount(r.minStock(), "stock mínimo");
         UUID id = UUID.randomUUID();
         try {
+            // La fila se inserta con quantity = 0: el saldo inicial lo aplica recordInternal() más abajo (que ya SUMA
+            // la cantidad sobre lo existente). Insertarla ya con :q y luego sumar otra vez duplicaba el stock
+            // [HALLAZGO M16-4: quantity quedaba en 2× initialQuantity].
             jdbc.update("insert into inventory_item (id, organization_id, branch_id, code, name, category_code, kind, unit, quantity, min_stock, location,"
                             + " acquisition_date, cost, currency, condition, serial_no, status, created_at, created_by) values (:id, :o, :b, :c, :n, :cat,"
-                            + " :k, :u, :q, :ms, :loc, :ad, :cost, :cu, :cond, :sn, 'ACTIVE', :at, :by)",
+                            + " :k, :u, 0, :ms, :loc, :ad, :cost, :cu, :cond, :sn, 'ACTIVE', :at, :by)",
                     new MapSqlParameterSource("id", id).addValue("o", scope.organizationId()).addValue("b", branchId).addValue("c", code.toUpperCase())
                             .addValue("n", name).addValue("cat", blank(r.categoryCode())).addValue("k", kind)
-                            .addValue("u", FacilitySupport.hasText(r.unit()) ? r.unit().trim() : "UNIDAD").addValue("q", qty).addValue("ms", minStock)
+                            .addValue("u", FacilitySupport.hasText(r.unit()) ? r.unit().trim() : "UNIDAD").addValue("ms", minStock)
                             .addValue("loc", FacilitySupport.trim(r.location(), 150, "ubicación")).addValue("ad", r.acquisitionDate())
                             .addValue("cost", cost).addValue("cu", FacilitySupport.hasText(r.currency()) ? r.currency().trim().toUpperCase() : "PEN")
                             .addValue("cond", condition).addValue("sn", FacilitySupport.trim(r.serialNo(), 80, "serie"))
@@ -157,7 +160,11 @@ public class InventoryItemService {
             throw new Exceptions("error.inventory.codeTaken", HttpStatus.CONFLICT);                                        // [V9]
         }
         if (qty.signum() > 0) {
-            movements.recordInternal(scope, id, "IN", "PURCHASE", qty, r.acquisitionDate() == null ? java.time.LocalDate.now() : r.acquisitionDate(),
+            // Reason "ADJUSTMENT" (no "PURCHASE"): el saldo inicial al crear el ítem no es una compra nueva que deba
+            // generar un egreso en Finanzas con fondo obligatorio — eso bloqueaba por completo el alta cuando
+            // FIN_MOVEMENTS estaba contratado y se indicaba costo [HALLAZGO M16-3]. El costo se sigue guardando en
+            // el movimiento igual; una reposición real posterior sí usa PURCHASE con su fondo correspondiente.
+            movements.recordInternal(scope, id, "IN", "ADJUSTMENT", qty, r.acquisitionDate() == null ? java.time.LocalDate.now() : r.acquisitionDate(),
                     cost, null, "Saldo inicial", null);
         }
         audit.record(new AuditService.Command(FacilitySupport.MOD_INVENTORY, "CREATE", ENTITY, id, scope.organizationId(), branchId, Map.of("code", code)));
@@ -224,6 +231,14 @@ public class InventoryItemService {
         }
         Integer n = jdbc.queryForObject("select count(*) from inventory_movement where item_id = :id", new MapSqlParameterSource("id", id), Integer.class);
         if (n != null && n > 0) {
+            throw new Exceptions("error.inventory.hasMovements", HttpStatus.CONFLICT);                                      // [V14]
+        }
+        // Una asignación histórica (incluso ya RETURNED) también bloquea el borrado por la FK
+        // inventory_assignment_item_id_fkey, antes sin validar aquí: chocaba contra la base y se traducía al
+        // genérico 409 error.common.duplicate, un código/mensaje incorrecto para una violación de integridad
+        // referencial [HALLAZGO M16-5].
+        Integer na = jdbc.queryForObject("select count(*) from inventory_assignment where item_id = :id", new MapSqlParameterSource("id", id), Integer.class);
+        if (na != null && na > 0) {
             throw new Exceptions("error.inventory.hasMovements", HttpStatus.CONFLICT);                                      // [V14]
         }
         jdbc.update("delete from inventory_item where id = :id", new MapSqlParameterSource("id", id));

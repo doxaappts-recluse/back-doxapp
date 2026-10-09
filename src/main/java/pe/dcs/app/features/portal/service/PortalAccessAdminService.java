@@ -53,6 +53,14 @@ public class PortalAccessAdminService {
         if (r.branchId() == null || !scope.canSeeBranch(r.branchId())) {
             throw new Exceptions("error.common.required", HttpStatus.BAD_REQUEST, "sede");
         }
+        // AccessScope.canSeeBranch() devuelve true incondicionalmente para allBranches=true (ORG_ADMIN), sin comprobar
+        // que la sede sea realmente de su organización [HALLAZGO M24-2]. Se valida aquí explícitamente para no dejar
+        // pasar un branchId de otra organización hasta chocar con la FK y devolver un 409 engañoso.
+        Boolean sameOrg = jdbc.queryForObject("select exists(select 1 from branch where id = :b and organization_id = :o)",
+                new MapSqlParameterSource("b", r.branchId()).addValue("o", scope.organizationId()), Boolean.class);
+        if (!Boolean.TRUE.equals(sameOrg)) {
+            throw new Exceptions("error.common.required", HttpStatus.BAD_REQUEST, "sede");
+        }
         Organization org = organizations.findById(scope.organizationId()).orElseThrow(() -> new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND));
         AccessProvisioner.PersonInput input = new AccessProvisioner.PersonInput(r.personId(), r.docType(), r.docNumber(), r.firstName(), r.lastName(),
                 r.email(), r.phone());
@@ -107,7 +115,7 @@ public class PortalAccessAdminService {
         return jdbc.query("""
                 select p.id as person_id, p.first_name, p.last_name, p.doc_number, a.branch_id, b.name as branch_name, a.status, a.id as access_id
                 from user_access a join person p on p.id = a.person_id left join branch b on b.id = a.branch_id
-                where """ + w, ps, (rs, i) -> new AccessRow((UUID) rs.getObject("person_id"), rs.getString("first_name") + " " + rs.getString("last_name"),
+                where """ + " " + w, ps, (rs, i) -> new AccessRow((UUID) rs.getObject("person_id"), rs.getString("first_name") + " " + rs.getString("last_name"),
                 rs.getString("doc_number"), (UUID) rs.getObject("branch_id"), rs.getString("branch_name"), rs.getString("status"),
                 (UUID) rs.getObject("access_id")));
     }

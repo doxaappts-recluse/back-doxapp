@@ -13,6 +13,7 @@ import pe.dcs.app.features.person.service.PersonService;
 import pe.dcs.app.features.portal.dto.PortalDtos.PublicBranchOption;
 import pe.dcs.app.features.portal.dto.PortalDtos.SignupPublicConfig;
 import pe.dcs.app.features.portal.dto.PortalDtos.SignupPublicRequest;
+import pe.dcs.app.features.portal.dto.PortalDtos.SignupStatusResponse;
 import pe.dcs.app.security.authz.ContractGate;
 import pe.dcs.app.shared.audit.AuditService;
 import pe.dcs.app.shared.vo.ContactValidator;
@@ -127,6 +128,45 @@ public class PortalSignupPublicService {
         UUID reqId = engine.open(new ApprovalEngine.NewRequest(org.id(), branchId, null, "PORTAL_SIGNUP", "PERSON", personId, personId, null, payload));
         consents.grantDefaults(org.id(), personId, "PORTAL", null);
         audit.record(new AuditService.Command("PORTAL_SIGNUP", "CREATE", "ApprovalRequest", reqId, org.id(), branchId, Map.of("via", "PUBLIC_FORM")));
+    }
+
+    /**
+     * HALLAZGO M24-E06 (motivo de rechazo nunca visible): contraparte pública de lectura de {@code myRequests()}
+     * de {@code PortalMeService}, para el único caso en que ese endpoint autenticado es inalcanzable — el propio
+     * solicitante RECHAZADO nunca recibió credencial. Mismo límite por IP [V5] que {@link #submit}: esta ruta
+     * también permite tantear documentos ajenos, así que se tarifica igual. Se devuelve SOLO la última solicitud
+     * (la más reciente), igual que mostraría {@code /me/requests} si pudiera verla. 404 genérico tanto si la
+     * organización/persona no existe como si no hay ninguna solicitud de autorregistro para ese documento — no
+     * hay forma de distinguir "documento desconocido" de "sin solicitudes" sin abrir una rendija de enumeración.
+     */
+    @Transactional(readOnly = true)
+    public SignupStatusResponse status(String slug, String ip, String rawDocType, String rawDocNumber) {
+        if (!limiter.tryAcquire((ip == null ? "unknown" : ip))) {                                                    // [V5]
+            throw new Exceptions("error.portal.rateLimited", HttpStatus.TOO_MANY_REQUESTS);
+        }
+        Org org = org(slug);
+        DocumentType type;
+        try {
+            type = DocumentType.valueOf((rawDocType == null ? "" : rawDocType).trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND);
+        }
+        String doc = DocumentValidator.normalize(rawDocNumber);
+        PersonLookupService.PersonMin person = lookup.find(org.id(), type, doc).orElse(null);
+        if (person == null) {
+            throw new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND);
+        }
+        List<SignupStatusResponse> rows = jdbc.query("""
+                select status, decision_note, decided_at from approval_request
+                where organization_id = :o and type = 'PORTAL_SIGNUP' and subject_id = :p
+                order by created_at desc limit 1
+                """, new MapSqlParameterSource("o", org.id()).addValue("p", person.id()),
+                (rs, i) -> new SignupStatusResponse(rs.getString("status"),
+                        rs.getTimestamp("decided_at") == null ? null : rs.getTimestamp("decided_at").toInstant(), rs.getString("decision_note")));
+        if (rows.isEmpty()) {
+            throw new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND);
+        }
+        return rows.get(0);
     }
 
     private boolean hasAnyAccess(UUID personId) {

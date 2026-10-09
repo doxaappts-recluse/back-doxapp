@@ -439,7 +439,9 @@ public class PersonService {
         }
         BranchRef dest = activeBranch(scope, r.branchId());
         if (dest.id().equals(p.getPrimaryBranchId())) {
-            return toResponse(actor, p);
+            // Antes retornaba 200 de éxito sin trasladar ni auditar nada [HALLAZGO M06-2] — podía confundir a un
+            // administrador o integración que confiara en la respuesta sin revisar el historial.
+            throw new Exceptions("error.person.alreadyInBranch", HttpStatus.CONFLICT);
         }
         LocalDate today = LocalDate.now(clock);
         String fromName = p.getPrimaryBranchId() == null ? null : branchRef(scope.organizationId(), p.getPrimaryBranchId()).name();

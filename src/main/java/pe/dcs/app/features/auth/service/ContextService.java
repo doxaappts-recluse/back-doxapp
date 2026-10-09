@@ -46,9 +46,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ContextService {
 
-    /** Clave de la única opción de una organización que todavía no tiene sedes (solo ORG_ADMIN). */
-    private static final UUID NO_BRANCH = new UUID(0L, 0L);
-
     private final UserAccessRepository accesses;
     private final BranchRepository branches;
     private final OrganizationRepository organizations;
@@ -105,18 +102,19 @@ public class ContextService {
                 .sorted(Comparator.comparing((UserAccess a) -> a.getRole().level())) // el rol más alto gana en cada sede
                 .toList();
         Map<UUID, Branch> active = activeBranches(org.getId());
+        // ORG_ADMIN es un acceso de organización completa: UNA sola tarjeta ("todas las sedes"), nunca se expande
+        // por sede (eso ocultaba el acceso real y distinto de quien además tiene un rol propio en una sede).
+        List<ContextInfo> result = new java.util.ArrayList<>();
+        list.stream().filter(a -> a.getBranchId() == null).findFirst()
+                .ifPresent(a -> result.add(info(a, org, null)));
         Map<UUID, ContextInfo> byBranch = new LinkedHashMap<>();
         for (UserAccess a : list) {
-            if (a.getBranchId() == null) {
-                if (active.isEmpty()) {
-                    byBranch.putIfAbsent(NO_BRANCH, info(a, org, null)); // organización aún sin sedes
-                }
-                active.values().forEach(b -> byBranch.putIfAbsent(b.getId(), info(a, org, b)));
-            } else if (active.containsKey(a.getBranchId())) {
+            if (a.getBranchId() != null && active.containsKey(a.getBranchId())) {
                 byBranch.putIfAbsent(a.getBranchId(), info(a, org, active.get(a.getBranchId())));
             }
         }
-        return byBranch.values().stream()
+        result.addAll(byBranch.values());
+        return result.stream()
                 .sorted(Comparator.comparing((ContextInfo i) -> i.branchName() == null ? "" : i.branchName().toLowerCase()))
                 .toList();
     }
@@ -144,10 +142,14 @@ public class ContextService {
         }
         Map<UUID, Branch> active = activeBranches(org.getId());
         Branch branch;
-        if (a.getBranchId() == null) { // ORG_ADMIN: la sede de trabajo la elige él (obligatoria si hay sedes)
-            branch = branchId == null ? null : active.get(branchId);
-            if (branchId == null ? !active.isEmpty() : branch == null) {
-                throw new Exceptions("error.auth.contextInvalid", HttpStatus.FORBIDDEN);
+        if (a.getBranchId() == null) { // ORG_ADMIN: alcance de toda la organización; la sede de trabajo es opcional
+            if (branchId == null) {
+                branch = null;
+            } else {
+                branch = active.get(branchId);
+                if (branch == null) {
+                    throw new Exceptions("error.auth.contextInvalid", HttpStatus.FORBIDDEN);
+                }
             }
         } else { // rol de sede: la suya, y debe seguir activa
             branch = active.get(a.getBranchId());

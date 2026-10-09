@@ -96,7 +96,9 @@ public class ReservationService {
             w.append(" and r.requested_by = :me");
             ps.addValue("me", scope.personId());
         }
-        String from = " from reservation r join space sp on sp.id = r.space_id left join person p on p.id = r.requested_by where ";
+        // Falta el join a branch (el SELECT sí referencia el alias "b") [HALLAZGO M16-2]: search() quedaba desalineado de get().
+        String from = " from reservation r join space sp on sp.id = r.space_id left join branch b on b.id = sp.branch_id"
+                + " left join person p on p.id = r.requested_by where ";
         Long total = jdbc.queryForObject("select count(*)" + from + w, ps, Long.class);
         int size = req == null || req.pagination() == null ? 20 : Math.max(1, Math.min(req.pagination().getSize(), 200));
         int page = req == null || req.pagination() == null ? 0 : Math.max(0, req.pagination().getPage());

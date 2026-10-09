@@ -22,6 +22,7 @@ import pe.dcs.app.util.Exceptions;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -139,11 +140,16 @@ public class InventoryMovementService {
         boolean low = newQty.compareTo(minStock) <= 0;
         boolean alreadyAlerted = row.get("low_stock_alerted_at") != null;
         if (low && !alreadyAlerted) {
+            Instant alertedAt = clock.instant();
             jdbc.update("update inventory_item set low_stock_alerted_at = :at where id = :id",
-                    new MapSqlParameterSource("at", Timestamp.from(clock.instant())).addValue("id", itemId));
+                    new MapSqlParameterSource("at", Timestamp.from(alertedAt)).addValue("id", itemId));
             List<UUID> to = notifications.branchAdmins(scope.organizationId(), (UUID) row.get("branch_id"));
+            // La dedupeKey era fija ("lowstock:"+itemId): el índice único ux_notif_dedupe bloqueaba para siempre
+            // cualquier alerta futura del mismo ítem tras la primera, aunque el rearme (low_stock_alerted_at) sí
+            // funcionara [HALLAZGO M16-6]. Se incluye el instante del rearme para que cada ciclo tenga su propia clave.
             notifications.toPersons(NotificationType.INVENTORY_LOW_STOCK, scope.organizationId(), to,
-                    Map.of("item", String.valueOf(row.get("name")), "min", minStock.toPlainString()), "/app/inventory/items/" + itemId, "lowstock:" + itemId);
+                    Map.of("item", String.valueOf(row.get("name")), "min", minStock.toPlainString()), "/app/inventory/items/" + itemId,
+                    "lowstock:" + itemId + ":" + alertedAt.toEpochMilli());
         } else if (!low && alreadyAlerted) {
             jdbc.update("update inventory_item set low_stock_alerted_at = null where id = :id", new MapSqlParameterSource("id", itemId));
         }

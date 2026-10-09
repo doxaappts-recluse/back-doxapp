@@ -16,6 +16,7 @@ import pe.dcs.app.security.authz.AuthorizationService;
 import pe.dcs.app.shared.audit.AuditService;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.RoleType;
+import pe.dcs.app.features.organization.service.FiscalPeriodPort;
 
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -30,12 +31,25 @@ import java.util.UUID;
  * y todas las cajas de ese mes CLOSED [V11 implícito]; reabrir (Z) exige motivo y solo ORG_ADMIN.
  * Al cerrar el periodo, los presupuestos APPROVED de ese mismo mes pasan a CLOSED (decisión propia: el spec no dice cuándo un
  * presupuesto pasa a CLOSED; cerrar el periodo contable del mes es el punto natural para congelar también su ejecución).
+ *
+ * <p>Implementa {@link FiscalPeriodPort} para M02 [V13]: reemplaza aquí al stub {@code NoFiscalPeriods} ahora que
+ * M15 existe (antes M02 nunca podía detectar un periodo cerrado real y dejaba cambiar el mes de inicio fiscal siempre).
  */
 @Service
 @RequiredArgsConstructor
-public class FiscalPeriodService {
+public class FiscalPeriodService implements FiscalPeriodPort {
 
     record Row(UUID id, int year, int month, String status) {
+    }
+
+    /** [V13] M02: ¿esta organización ya tiene algún periodo fiscal CLOSED (en cualquier año/mes)? */
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasClosedPeriod(UUID organizationId) {
+        Integer n = jdbc.queryForObject(
+                "select count(*) from fin_fiscal_period where organization_id = :o and status = 'CLOSED'",
+                new MapSqlParameterSource("o", organizationId), Integer.class);
+        return n != null && n > 0;
     }
 
     private final NamedParameterJdbcTemplate jdbc;

@@ -56,16 +56,21 @@ public class PastoralMergeParticipant implements PersonMergeParticipant {
         jdbc.update("update prayer_request set requested_by = :t where organization_id = :o and requested_by = :s", ps);
         jdbc.update("update prayer_request set for_person_id = :t where organization_id = :o and for_person_id = :s", ps);
         jdbc.update("update prayer_request set moderated_by = :t where organization_id = :o and moderated_by = :s", ps);
-        jdbc.update("update prayer_support set person_id = :t where person_id = :s and request_id in (select id from prayer_request where organization_id = :o)"
-                + " on conflict do nothing", ps);
-        jdbc.update("delete from prayer_support where person_id = :s and request_id in (select id from prayer_request where organization_id = :o)", ps);
+        // ON CONFLICT no es válido en UPDATE (solo en INSERT). Primero se descartan los apoyos del origen
+        // que colisionarían con un apoyo ya existente del destino para la misma petición (UNIQUE(request_id, person_id)),
+        // y luego se migran los que sí quedan libres para actualizarse sin violar esa restricción.
+        jdbc.update("delete from prayer_support ps1 where ps1.person_id = :s"
+                + " and ps1.request_id in (select id from prayer_request where organization_id = :o)"
+                + " and exists (select 1 from prayer_support ps2 where ps2.request_id = ps1.request_id and ps2.person_id = :t)", ps);
+        jdbc.update("update prayer_support set person_id = :t where person_id = :s and request_id in (select id from prayer_request where organization_id = :o)", ps);
     }
 
     /** Borra notas y testimonios; los casos abiertos quedan sin identidad de texto pero conservan sus métricas. */
     @Override
     public void anonymize(UUID orgId, UUID personId) {
         MapSqlParameterSource ps = new MapSqlParameterSource("o", orgId).addValue("p", personId);
-        jdbc.update("update case_note set text = null where case_id in (select id from pastoral_case where organization_id = :o and person_id = :p)", ps);
+        // case_note.text es NOT NULL: no se puede vaciar a null (causaba 409 engañoso); se redacta igual que prayer_request.text.
+        jdbc.update("update case_note set text = '(anonimizado)' where case_id in (select id from pastoral_case where organization_id = :o and person_id = :p)", ps);
         jdbc.update("update follow_up_contact set notes = null where organization_id = :o and subject_type = 'PASTORAL_CASE'"
                 + " and subject_id in (select id from pastoral_case where organization_id = :o and person_id = :p)", ps);
         jdbc.update("update prayer_request set testimony = null, text = '(anonimizado)' where organization_id = :o and requested_by = :p", ps);

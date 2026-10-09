@@ -185,7 +185,8 @@ public class SupportService {
 
     /** Sede principal de la organización (siempre existe y está activa, [V5] de M04) — ver comentario en {@code open()}. */
     private UUID mainBranchId(UUID orgId) {
-        List<UUID> id = jdbc.queryForList("select id from branch where organization_id = ? and main = true limit 1", UUID.class, orgId);
+        // La columna real es is_main (el DTO de /admin/branches la expone como "main", de ahí la confusión) [confirmado B04/B08].
+        List<UUID> id = jdbc.queryForList("select id from branch where organization_id = ? and is_main = true limit 1", UUID.class, orgId);
         if (id.isEmpty()) {
             throw new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND);
         }

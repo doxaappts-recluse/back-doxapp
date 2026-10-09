@@ -281,7 +281,9 @@ public class LeaveRequestService {
                 new MapSqlParameterSource("s", staffId).addValue("y", year), (rs, i) -> new BigDecimal[]{rs.getBigDecimal(1), rs.getBigDecimal(2), rs.getBigDecimal(3)}).get(0);
     }
 
-    @Transactional(readOnly = true)
+    // No readOnly: hace un INSERT (ensure-row) que Postgres rechaza dentro de una transacción de solo lectura,
+    // aunque sea un no-op [HALLAZGO M17-1, mismo patrón que M16-1 en SpaceService.rules()].
+    @Transactional
     public List<HrDtos.LeaveBalanceView> balances(AccessScope scope, UUID staffId, Integer year) {
         int y = year == null ? support.today().getYear() : year;
         StaffService.Row s = staff.raw(staffId);

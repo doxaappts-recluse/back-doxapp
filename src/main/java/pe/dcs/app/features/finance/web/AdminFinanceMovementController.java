@@ -12,6 +12,7 @@ import pe.dcs.app.security.authz.AccessScopeResolver;
 import pe.dcs.app.security.authz.Action;
 import pe.dcs.app.security.authz.ModuleAccess;
 import pe.dcs.app.util.ApiResponse;
+import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.pagination.PageResponse;
 
 import java.time.LocalDate;
@@ -83,7 +84,13 @@ public class AdminFinanceMovementController {
 
     @PostMapping(value = "/{id}/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ModuleAccess(module = MODULE, action = Action.E)
-    public ApiResponse<FinanceDtos.MovementDetail> addAttachments(@PathVariable UUID id, @RequestParam("files") List<MultipartFile> files) {
+    public ApiResponse<FinanceDtos.MovementDetail> addAttachments(@PathVariable UUID id, @RequestParam(value = "files", required = false) List<MultipartFile> files) {
+        // "files" venía sin required=false y sin manejador para MissingServletRequestPartException: una llamada
+        // sin ninguna parte "files" caía en el 500 genérico en vez del 400 error.common.required ("archivo") documentado
+        // [HALLAZGO M15-1]. Ahora se valida explícitamente aquí, igual que el resto de adjuntos obligatorios del sistema.
+        if (files == null || files.isEmpty()) {
+            throw new Exceptions("error.common.required", HttpStatus.BAD_REQUEST, "archivo");
+        }
         return new ApiResponse<>(200, "ok.common.updated", service.addAttachments(resolver.actor(), resolver.current(), id, files));
     }
 

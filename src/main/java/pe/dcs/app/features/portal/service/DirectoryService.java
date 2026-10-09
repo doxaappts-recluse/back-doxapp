@@ -70,7 +70,7 @@ public class DirectoryService {
         return jdbc.query("""
                 select p.first_name, p.last_name, p.phone, p.email, b.name as branch_name, cast(dp.fields as text) as fields
                 from directory_preference dp join person p on p.id = dp.person_id left join branch b on b.id = p.primary_branch_id
-                where """ + w + " order by lower(p.first_name)", ps, (rs, i) -> {
+                where """ + " " + w + " order by lower(p.first_name)", ps, (rs, i) -> {
             Map<String, Object> f = fields(rs.getString("fields"));
             boolean showPhone = Boolean.TRUE.equals(f.get("phone"));
             boolean showEmail = Boolean.TRUE.equals(f.get("email"));

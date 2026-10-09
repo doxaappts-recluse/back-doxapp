@@ -50,6 +50,16 @@ public final class PortalDtos {
                                       String phone, String branchCode, Boolean consent, String website) {
     }
 
+    /**
+     * HALLAZGO M24-E06 (motivo de rechazo nunca visible): única forma de que el propio solicitante vea el estado y
+     * el motivo de su autorregistro cuando fue RECHAZADO — como nunca recibe {@code UserAccess} en ese camino (ver
+     * {@code PortalSignupService}), {@code GET /portal/me/requests} (autenticado) le es inalcanzable. Deliberadamente
+     * sin datos de la persona (nombre, sede, etc.): solo el estado de SU PROPIA solicitud, consultada con el mismo
+     * documento con el que la envió.
+     */
+    public record SignupStatusResponse(String status, Instant decidedAt, String reason) {
+    }
+
     // ---------------------------------------------------------------- /portal/me
     public record ProfileResponse(String fullName, String docType, String docNumber, String email, String phone, LocalDate birthDate,
                                   String branchName, String status) {

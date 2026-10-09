@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import pe.dcs.app.security.AuthenticatedActor;
+import pe.dcs.app.security.authz.AccessStateCache;
 import pe.dcs.app.util.Exceptions;
 import pe.dcs.app.util.enums.RoleType;
 
@@ -18,10 +19,22 @@ import pe.dcs.app.util.enums.RoleType;
 public class PortalGuard {
 
     private final PortalSettingsService settings;
+    /**
+     * HALLAZGO M24-G02 (sesión no se invalida): al saltarse {@code AuthorizationService.require} (ver nota de
+     * clase), este candado nunca pasaba por {@link AccessStateCache#isEffective}, el único punto que hace que
+     * revocar/desactivar un acceso (M24 N3: "revoca acceso") surta efecto en ≤15 s — sin esto, un miembro cuyo
+     * acceso se revoca podía seguir usando {@code /portal/me/**} con su JWT hasta que expirara (15 min), a
+     * diferencia de cualquier otro módulo del sistema. Se agrega aquí el mismo chequeo, con el mismo código de
+     * error genérico ({@code error.common.forbidden}) que usa {@code AuthorizationService.require} para este caso.
+     */
+    private final AccessStateCache accessState;
 
     public void requireMember(AuthenticatedActor actor) {
         if (actor.isStaff() || actor.role() != RoleType.MEMBER) {
             throw new Exceptions("error.portal.wrongArea", HttpStatus.FORBIDDEN);
+        }
+        if (!accessState.isEffective(actor)) {
+            throw new Exceptions("error.common.forbidden", HttpStatus.FORBIDDEN);
         }
     }
 

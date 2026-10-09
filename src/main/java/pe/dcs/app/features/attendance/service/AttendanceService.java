@@ -349,7 +349,9 @@ public class AttendanceService {
         }
         String status = r.status() == null || r.status().isBlank() ? "PRESENT" : r.status().trim().toUpperCase();
         String method = r.method() == null || r.method().isBlank() ? "MANUAL" : r.method().trim().toUpperCase();
-        if (!STATUSES.contains(status) || !Set.of("MANUAL", "LIST").contains(method)) {
+        // Antes validaba contra un Set.of("MANUAL","LIST") inline, desalineado de la constante canónica METHODS
+        // (que sí incluye QR/SELF) — bloqueaba todo check-in por QR [HALLAZGO M14-2].
+        if (!STATUSES.contains(status) || !METHODS.contains(method)) {
             throw new Exceptions("error.common.invalid", HttpStatus.BAD_REQUEST, "registro");
         }
         return recordInternal(s, r.personId(), status, method, actor.ownerId());

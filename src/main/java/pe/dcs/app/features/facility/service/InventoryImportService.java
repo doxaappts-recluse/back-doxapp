@@ -92,6 +92,12 @@ public class InventoryImportService {
         try {
             table = TabularReader.read(file.getOriginalFilename(), data, MAX_ROWS + 1);
         } catch (TabularReader.Unreadable e) {
+            // El flag tooLarge() ya distingue "demasiadas filas" de "archivo ilegible", pero se ignoraba aquí y
+            // ambos casos caían en el mismo 400 error.common.fileType ("tipo de archivo no permitido"), un mensaje
+            // engañoso para un XLSX perfectamente válido que solo tiene más filas de las permitidas [HALLAZGO M16-7].
+            if (e.tooLarge()) {
+                throw new Exceptions("error.inventory.tooManyRows", HttpStatus.BAD_REQUEST, MAX_ROWS);
+            }
             throw new Exceptions("error.common.fileType", HttpStatus.BAD_REQUEST, "CSV, XLSX");
         }
         if (table.size() < 2) {

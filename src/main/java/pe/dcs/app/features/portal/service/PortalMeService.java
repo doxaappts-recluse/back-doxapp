@@ -106,14 +106,23 @@ public class PortalMeService {
                 .stream().findFirst().orElseThrow(() -> new Exceptions("error.common.notFound", HttpStatus.NOT_FOUND));
     }
 
+    /**
+     * HALLAZGO (detectado en verificación en vivo de M24-E06, no documentado antes): leía la columna {@code reason}
+     * (el motivo con el que el SOLICITANTE abrió la solicitud) en vez de {@code decision_note} (el motivo con el
+     * que QUIEN DECIDE aprueba/rechaza — ver {@code ApprovalEngine.reject()}/{@code approve()}). Confirmado en vivo:
+     * tras rechazar un autorregistro con un motivo real, este método seguía devolviendo {@code reason: null} — el
+     * mismo defecto que E06 documentó para el camino público, pero aquí en el propio endpoint autenticado que E06
+     * señalaba como "la forma correcta" de verlo. Sin este fix, arreglar solo E06 (status público) no bastaba:
+     * el solicitante aprobado que SÍ puede loguearse también veía null en el motivo de cualquier decisión.
+     */
     @Transactional(readOnly = true)
     public List<MyRequestRow> myRequests(AuthenticatedActor actor) {
         return jdbc.query("""
-                select id, type, status, reason, created_at, decided_at from approval_request
+                select id, type, status, decision_note, created_at, decided_at from approval_request
                 where organization_id = :o and requested_by = :p order by created_at desc limit 100
                 """, new MapSqlParameterSource("o", actor.organizationId()).addValue("p", actor.ownerId()), (rs, i) -> new MyRequestRow(
                 (UUID) rs.getObject("id"), rs.getString("type"), rs.getString("status"), rs.getTimestamp("created_at").toInstant(),
-                rs.getTimestamp("decided_at") == null ? null : rs.getTimestamp("decided_at").toInstant(), rs.getString("reason")));
+                rs.getTimestamp("decided_at") == null ? null : rs.getTimestamp("decided_at").toInstant(), rs.getString("decision_note")));
     }
 
     @Transactional(readOnly = true)

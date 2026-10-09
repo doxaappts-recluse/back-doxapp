@@ -216,7 +216,9 @@ public class SpaceService {
 
     // ---------------------------------------------------------------- reglas del espacio (org)
 
-    @Transactional(readOnly = true)
+    // No readOnly: ensureRules() hace un INSERT (ensure-row) que Postgres rechaza dentro de una
+    // transacción de solo lectura, aunque sea un no-op [HALLAZGO M16-1].
+    @Transactional
     public FacilityDtos.SpaceRulesView rules(UUID orgId) {
         ensureRules(orgId);
         return jdbc.query("select max_duration_hours, reservation_requesters, max_recurrence, updated_at from space_rules where organization_id = :o",
