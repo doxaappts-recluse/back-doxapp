@@ -1,0 +1,23 @@
+# Propiedades SOLO para pruebas automatizadas (src/test). No afectan application.yml de producción/desarrollo.
+# spring.datasource.* se fija en cada prueba vía @DynamicPropertySource (apunta al contenedor de Testcontainers
+# con el rol NO superusuario que las pruebas crean, para que RLS/FORCE RLS se comporte como en producción).
+app:
+  dev:
+    reset-on-start: true   # aplica las 39 migraciones + dev/import.sql (datos de prueba reales) en cada prueba
+  bootstrap:
+    enabled: false         # ya hay personal de plataforma en dev/import.sql; evita ruido en el arranque
+  jwt:
+    secret: test-only-jwt-secret-must-be-at-least-32-bytes-long
+  security:
+    mfa-key: Mrab6+Zz/BSZRM4R4qxHMFxBj0z1ul3Y3+zXA8FPguw=
+  storage:
+    provider: local
+    local-dir: ./target/test-storage
+
+spring:
+  flyway:
+    clean-disabled: false  # DevDatabaseReset necesita flyway.clean() para dejar el contenedor como nuevo
+  datasource:
+    hikari:
+      auto-commit: false   # igual que en application.yml principal: SET LOCAL (RlsAwareDataSource) necesita
+                            # que la transacción quede abierta hasta el commit explícito, no por-statement.

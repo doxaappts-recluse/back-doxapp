@@ -85,6 +85,7 @@ public class AuthenticationService {
     private final AuditService audit;
     private final AccessStateCache accessState;
     private final Clock clock;
+    private final javax.sql.DataSource dataSource;
 
     /** MFA obligatorio para el personal y exigido a quien lo tenga activo. Apagado por ahora (app.security.mfa-enforced). */
     private final boolean mfaEnforced;
@@ -102,7 +103,7 @@ public class AuthenticationService {
                                  PasswordEncoder encoder, PasswordPolicy passwordPolicy, LoginRateLimiter limiter,
                                  LoginEventService events, OneTimeTokenService oneTime, InvitationService invitations,
                                  TotpService totp, SecretCipher cipher, AuditService audit,
-                                 AccessStateCache accessState, Clock clock,
+                                 AccessStateCache accessState, Clock clock, javax.sql.DataSource dataSource,
                                  @Value("${app.security.mfa-enforced:false}") boolean mfaEnforced,
                                  @Value("${app.security.max-failed-attempts:5}") int maxFailedAttempts,
                                  @Value("${app.security.lock-minutes:15}") long lockMinutes,
@@ -126,6 +127,7 @@ public class AuthenticationService {
         this.audit = audit;
         this.accessState = accessState;
         this.clock = clock;
+        this.dataSource = dataSource;
         this.mfaEnforced = mfaEnforced;
         this.maxFailedAttempts = maxFailedAttempts;
         this.lockDuration = Duration.ofMinutes(lockMinutes);
@@ -147,7 +149,16 @@ public class AuthenticationService {
         String key = rateKey(client, slug, req.username());
         limiter.assertAllowed(key);
         Organization org = organizations.findBySlug(slug).orElse(null);
-        Credential c = org == null ? null : credentials.findPersonByUsername(org.getId(), req.username().trim()).orElse(null);
+        // [#4, auditoría 2026-10-09, RLS] la organización viene de la URL (slug), no de un JWT: todavía no existe
+        // ninguno en este paso. AuthenticationService es @Transactional a nivel de clase, así que la conexión de
+        // esta transacción ya se abrió (con el ThreadLocal vacío) antes de llegar aquí — hay que aplicar el
+        // contexto DIRECTO sobre esa conexión ya abierta (RlsAwareDataSource.applyNow), no sobre el ThreadLocal
+        // (que solo lo vería una conexión NUEVA, y esta transacción ya tiene la suya).
+        if (org == null) {
+            return authenticate(null, null, req, key, client);
+        }
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, org.getId().toString(), false);
+        Credential c = credentials.findPersonByUsername(org.getId(), req.username().trim()).orElse(null);
         return authenticate(c, org, req, key, client);
     }
 
@@ -159,6 +170,12 @@ public class AuthenticationService {
      * siguen siendo genéricos: no se distingue usuario inexistente de contraseña errónea.
      */
     public AuthResponse login(LoginRequest req, ClientInfo client) {
+        // [#4, auditoría 2026-10-09, RLS] este login busca la credencial en TODAS las organizaciones por
+        // usuario (ver el porqué en el comentario de arriba) — no hay una sola organización que fijar como
+        // contexto. La autorización real la da la contraseña verificada más abajo, no el filtro de RLS. Ver el
+        // aviso sobre @Transactional de clase en RlsAwareDataSource: hay que aplicarlo directo a la conexión ya
+        // abierta de esta transacción, no al ThreadLocal.
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, null, true);
         String username = req.username().trim();
         String choice = req.organizationSlug() == null || req.organizationSlug().isBlank() ? null : req.organizationSlug().trim();
         String key = rateKey(client, "direct", username); // sin la elección: rotarla no reinicia el límite
@@ -409,6 +426,17 @@ public class AuthenticationService {
 
     /** Elige (o cambia a) un contexto. Token CONTEXT (tras el login) o ACCESS (cambio desde la sesión abierta). */
     public AuthResponse selectContext(ContextRequest req, AuthenticatedActor actor, ClientInfo client) {
+        // [#4, auditoría 2026-10-09, RLS] con un token CONTEXT (varias iglesias con el mismo usuario) el acceso
+        // elegido puede ser de una credencial "hermana" en OTRA organización — OrgContextFilter ya fijó el
+        // ThreadLocal a la organización de la PRIMERA credencial antes de llegar aquí, pero esta conexión de
+        // transacción ya se abrió con ese valor; hay que ampliarlo a mano sobre esa misma conexión (ver el aviso
+        // de @Transactional de clase en RlsAwareDataSource). La comprobación de pertenencia de abajo (owner ==
+        // c, o owner en actor.branchIds()) es la que de verdad autoriza el cambio, no el contexto de RLS.
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, null, true);
+        return selectContextInternal(req, actor, client);
+    }
+
+    private AuthResponse selectContextInternal(ContextRequest req, AuthenticatedActor actor, ClientInfo client) {
         Credential c = credential(actor);
         if (actor.tokenType() == TokenType.CONTEXT && !actor.branchIds().isEmpty()) {
             // pantalla de contexto con varias iglesias: el acceso elegido puede ser de una credencial hermana
@@ -472,14 +500,19 @@ public class AuthenticationService {
 
         String slug = req.organizationSlug() == null || req.organizationSlug().isBlank() ? null : req.organizationSlug().trim();
         String username = req.username().trim();
+        // [#4, auditoría 2026-10-09, RLS] igual que el login: con slug ya se conoce la organización; sin slug
+        // se busca a propósito en todas (mismo motivo que login()). Aplicado directo a la conexión ya abierta
+        // de esta transacción (ver el aviso de @Transactional de clase en RlsAwareDataSource).
         if (slug != null) {
             Organization org = organizations.findBySlug(slug).orElse(null);
             if (org != null) {
+                pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, org.getId().toString(), false);
                 credentials.findPersonByUsername(org.getId(), username).ifPresent(c -> sendReset(c, org));
             }
             return;
         }
         // sin organización: todas las cuentas con ese usuario (plataforma y organizaciones); cada aviso va al correo de su dueño
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, null, true);
         for (Credential c : credentials.findAllByUsername(username)) {
             Organization org = c.getOrganizationId() == null ? null : organizations.findById(c.getOrganizationId()).orElse(null);
             if (c.getOrganizationId() == null || org != null) {
@@ -501,6 +534,14 @@ public class AuthenticationService {
     }
 
     public void resetPassword(ResetPasswordRequest req, ClientInfo client) {
+        // [#4, auditoría 2026-10-09, RLS] la credencial se busca por el token de un solo uso, no por
+        // organización — el token válido y de un solo uso es lo que autoriza esto, no el contexto de RLS.
+        // Aplicado directo a la conexión ya abierta de esta transacción (ver RlsAwareDataSource).
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, null, true);
+        resetPasswordInternal(req, client);
+    }
+
+    private void resetPasswordInternal(ResetPasswordRequest req, ClientInfo client) {
         UUID credentialId = oneTime.peek(req.token(), TokenPurpose.RESET);
         Credential c = credentials.findById(credentialId)
                 .filter(x -> x.getStatus() == AccessStatus.ACTIVE)
@@ -518,6 +559,14 @@ public class AuthenticationService {
 
     /** Acepta la invitación: fija la contraseña, activa la credencial y los accesos pendientes. No inicia sesión. */
     public void acceptInvite(AcceptInviteRequest req, ClientInfo client) {
+        // [#4, auditoría 2026-10-09, RLS] mismo caso que resetPassword: autoriza el token de un solo uso, no un
+        // contexto de organización que todavía no existe en este paso. Aplicado directo a la conexión ya
+        // abierta de esta transacción (ver RlsAwareDataSource).
+        pe.dcs.app.security.RlsAwareDataSource.applyNow(dataSource, null, true);
+        acceptInviteInternal(req, client);
+    }
+
+    private void acceptInviteInternal(AcceptInviteRequest req, ClientInfo client) {
         UUID credentialId = oneTime.peek(req.token(), TokenPurpose.INVITE);
         Credential c = credentials.findById(credentialId)
                 .filter(x -> x.getStatus() == AccessStatus.INVITED || x.getStatus() == AccessStatus.ACTIVE)

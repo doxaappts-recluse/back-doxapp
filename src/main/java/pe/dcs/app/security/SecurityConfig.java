@@ -37,6 +37,9 @@ public class SecurityConfig {
 
     private final JwtService jwtService;
     private final JwtEntryPoint entryPoint;
+    private final GlobalRateLimitFilter globalRateLimitFilter;
+    private final HttpsRedirectFilter httpsRedirectFilter;
+    private final OrgContextFilter orgContextFilter;
 
     @Value("${app.cors.allowed-origins:http://localhost:4200,http://127.0.0.1:4200}")
     private String allowedOrigins;
@@ -84,7 +87,14 @@ public class SecurityConfig {
                         // todo lo demás: solo tokens de acceso completos
                         .requestMatchers(API + "/**").hasAuthority("SCOPE_ACCESS")
                         .anyRequest().denyAll())
-                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                // [#4, auditoría 2026-10-09] RLS acotado: necesita el actor ya resuelto por JwtAuthFilter, así
+                // que corre justo después, antes de llegar a cualquier controlador/servicio.
+                .addFilterAfter(orgContextFilter, JwtAuthFilter.class)
+                // [#11, auditoría 2026-10-09] límite general por IP, antes de todo lo demás, incluidas rutas públicas.
+                .addFilterBefore(globalRateLimitFilter, JwtAuthFilter.class)
+                // [#19, auditoría 2026-10-09] redirección a https antes que cualquier otra cosa, incluido el límite de arriba.
+                .addFilterBefore(httpsRedirectFilter, GlobalRateLimitFilter.class);
         return http.build();
     }
 
