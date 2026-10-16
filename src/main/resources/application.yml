@@ -4,6 +4,22 @@ server:
   forward-headers-strategy: framework
 
 spring:
+  mail:
+    # Datos del relay SMTP (p.ej. Brevo: smtp-relay.brevo.com, 587). Solo se usan si app.mail.mode=smtp.
+    host: ${MAIL_HOST:smtp-relay.brevo.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/doxapp_v2}
     username: ${DB_USER:postgres}
@@ -100,6 +116,14 @@ app:
     # cierre por inactividad (se aplica en front; el back solo lo publica)
     idle-minutes-platform: 30
     idle-minutes-org: 480
+    # [#11, auditoría 2026-10-09] límite general por IP sobre TODA la API (ver GlobalRateLimitFilter); 0 lo apaga.
+    global-rate-limit:
+      requests: ${GLOBAL_RATE_LIMIT_REQUESTS:300}
+      window-seconds: ${GLOBAL_RATE_LIMIT_WINDOW_SECONDS:60}
+    # [#19, auditoría 2026-10-09] redirección 301 a https cuando X-Forwarded-Proto=http (ver HttpsRedirectFilter).
+    # Apagado por defecto porque rompería el desarrollo local; en Render ya se sirve con TLS (confirmar "Force
+    # HTTPS" en el panel de cada servicio), así que esto es una segunda capa, no el único mecanismo.
+    force-https: ${FORCE_HTTPS:false}
 
   bootstrap:
     # Primer SYSTEM_ADMIN (solo si no existe ningún personal de plataforma)
@@ -112,8 +136,10 @@ app:
     doc-number: ${BOOTSTRAP_DOC_NUMBER:}
 
   mail:
-    # Mientras no exista M19: el correo se registra en el log (modo desarrollo)
+    # log = se registra en el log (desarrollo, por defecto). smtp = sale de verdad por el relay SMTP de abajo.
     mode: ${MAIL_MODE:log}
+    from: ${MAIL_FROM:no-responder@doxapp.app}
+    from-name: ${MAIL_FROM_NAME:DoxApp}
 
 # Swagger solo si se habilita explícitamente (DOCS_ENABLED=true); apagado por defecto.
 springdoc:
