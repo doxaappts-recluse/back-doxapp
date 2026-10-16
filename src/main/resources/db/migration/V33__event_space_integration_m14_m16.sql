@@ -1,0 +1,35 @@
+-- V33 · Integración M14 (eventos) → M16 (espacios/reservas): cierra el lado de M14 del [D1] documentado en el
+-- encabezado de V27__spaces_inventory_m16.sql ("las reservas automáticas de M14/M10/M13 [createLinked] están listas
+-- pero ningún módulo las llama todavía — integración pendiente de una entrega aparte"). Segundo punto de integración
+-- elegido tras M24, siguiendo el mismo patrón ya usado en V32 (M14→M15): campo opcional en el módulo origen, sin
+-- tocar el módulo destino (ReservationService.createLinked/cancelBySource ya existían desde M16 sin ningún llamador).
+--
+-- Solo se cierra el lado de M14 en esta entrega: M10 (grupos) y M13 (dictados) quedan para entregas aparte porque su
+-- forma de agendar es distinta a la de un evento y no reutiliza este mismo cableado sin diseño propio —
+--   - M10 (group_meeting) solo tiene fecha + hora de inicio opcional, sin hora de fin ni duración en ningún lado del
+--     esquema, así que reservar un espacio real exigiría antes decidir una duración por defecto (o agregar una
+--     columna nueva) que nadie pidió todavía.
+--   - M13 (course_class) sí tiene start_time/end_time, pero es un dictado recurrente semanal de hasta 80 sesiones
+--     (ver CourseClassService.classDates/MAX_SESSIONS): createLinked() solo crea una reserva puntual, no una serie,
+--     así que enlazarlo exige repetir ese mismo bucle de "generar ocurrencias y omitir choques" que ya tiene
+--     ReservationService.submit() para las reservas manuales recurrentes, en vez de una sola llamada.
+-- Ambos quedan anotados aquí para que quien los tome después siga el mismo espíritu (opcional, aditivo, con
+-- CONTRACT_GATE sobre SPACES) pero con su propio diseño de duración/recurrencia, no una copia literal de este cambio.
+--
+-- org_event.space_id: espacio opcional de M16 donde ocurre el evento (independiente del campo "location", que sigue
+-- siendo texto libre para cuando el evento no usa un espacio administrado por M16, o es en un lugar externo). Solo
+-- tiene sentido para eventos de alcance BRANCH (un evento de organización no tiene una sede fija, así que no hay un
+-- espacio único que reservar) — lo valida EventService.validateSpace(). FK dura a "space" porque el módulo SPACES
+-- siempre existe como tabla aunque la organización no lo tenga contratado (mismo caso que org_event.fund_id → fin_fund
+-- en V32); lo que sí decide si se llega a reservar de verdad es el CONTRACT_GATE sobre SPACES en tiempo de publicación.
+--
+-- Comportamiento: EventService.publish() crea la reserva (CONFIRMED, ReservationService.createLinked, source_type
+-- 'EVENT') solo si el evento tiene espacio configurado y la organización tiene SPACES contratado; si el espacio ya
+-- está ocupado en ese horario, createLinked() lanza 409 (error.reservation.overlap) y la publicación falla — el
+-- evento se queda en DRAFT, igual que si le faltara lugar/fecha [V3]. EventService.update() sobre un evento ya
+-- PUBLISHED reordena la reserva (la cancela y crea una nueva) si cambia el espacio o las fechas; EventService.cancel()
+-- libera la reserva con cancelBySource(). Sin espacio configurado, o sin SPACES contratado, el comportamiento es
+-- exactamente el de antes: "location" sigue siendo el único dato de lugar, sin ninguna reserva real de por medio.
+
+ALTER TABLE org_event
+    ADD COLUMN space_id UUID REFERENCES space (id);

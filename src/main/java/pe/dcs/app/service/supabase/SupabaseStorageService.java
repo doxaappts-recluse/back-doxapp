@@ -66,6 +66,20 @@ public class SupabaseStorageService {
     }
 
     // -------------------------
+    // DELETE
+    // -------------------------
+    public void delete(String bucketKey, String path) {
+        String bucket = resolveBucket(bucketKey);
+        webClient.delete()
+                .uri(props.getUrl() + "/storage/v1/object/" + bucket + "/" + path)
+                .header("Authorization", "Bearer " + props.getServiceKey())
+                .header("apikey", props.getServiceKey())
+                .retrieve()
+                .bodyToMono(Void.class)
+                .block();
+    }
+
+    // -------------------------
     // DOWNLOAD
     // -------------------------
     public InputStream download(String bucketKey, String path) {

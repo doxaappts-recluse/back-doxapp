@@ -1,0 +1,13 @@
+-- M22 · automatización de CONTRACT_REQUEST y NEW_BRANCH_REQUEST (spec M22-T11/T12), ahora que doxapp-spec/modulos/M22_soporte_auditoria.md
+-- volvió a estar accesible desde esta sesión. Deja fuera, a propósito, el acceso asistido (AssistedAccessGrant + enforcement de alcance
+-- de configuración en todos los controladores) documentado en el mismo spec: es una pieza mucho más grande y sensible (seguridad/alcance
+-- cruzado entre plataforma y organización) que merece su propio diseño y entrega, no algo para encadenar sin poder confirmar supuestos.
+--
+-- support_case.approval_request_id: enlace opcional (sin FK dura, mismo patrón que financial_movement_id de M15/M16/M17) a la
+-- approval_request que SupportService.open() crea automáticamente al abrir un caso CONTRACT_CHANGE o NEW_BRANCH. Al resolver el caso,
+-- SupportService.changeStatus() aprueba esa solicitud internamente (ApprovalEngine.decideInternal, sin pasar por el chequeo de alcance
+-- de sede porque quien decide es SYSTEM_ADMIN de plataforma, no alguien de la organización): para NEW_BRANCH_REQUEST el propio
+-- NewBranchRequestHandler crea la sede real en M04 (BranchService.create, con el mismo tope [V6] de maxBranches ya validado); para
+-- CONTRACT_REQUEST no hay acción automática porque el cambio de términos (plan, precio, fechas) lo hace SYSTEM_ADMIN a mano en M03
+-- antes de resolver — el handler solo cierra el ciclo.
+alter table support_case add column approval_request_id uuid;

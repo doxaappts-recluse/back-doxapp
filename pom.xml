@@ -23,6 +23,10 @@
     <properties>
         <java.version>17</java.version>
         <maven.compiler.release>17</maven.compiler.release>
+        <!-- El 1.19.7 que fija spring-boot-dependencies (3.2.5) usa un cliente Docker que negocia con una
+             versión de API demasiado vieja (1.32) para un Docker Engine moderno (API >= 1.40); se sube solo
+             para pruebas de integración (Testcontainers), sin tocar ninguna otra dependencia administrada. -->
+        <testcontainers.version>1.21.3</testcontainers.version>
     </properties>
 
     <dependencies>
@@ -50,6 +54,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- Correo (M19): SMTP via JavaMailSender -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
         <!-- Lombok -->
@@ -120,6 +130,36 @@
             <groupId>com.github.librepdf</groupId>
             <artifactId>openpdf</artifactId>
             <version>2.0.3</version>
+        </dependency>
+
+        <!-- Migraciones versionadas (spec 00 §10: sin import.sql) -->
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+
+        <!-- MFA TOTP (RFC 6238) para personal de plataforma y accesos opcionales -->
+        <dependency>
+            <groupId>dev.samstevens.totp</groupId>
+            <artifactId>totp</artifactId>
+            <version>1.7.1</version>
+        </dependency>
+
+        <!-- Pruebas de integración contra PostgreSQL real -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
         </dependency>
 
         <!-- Documentación automática de la API (OpenAPI/Swagger) -->

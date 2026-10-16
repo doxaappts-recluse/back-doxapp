@@ -1,6 +1,7 @@
 package pe.dcs.app.security;
 
 import jakarta.annotation.PreDestroy;
+import org.springframework.jdbc.datasource.DelegatingDataSource;
 import org.springframework.stereotype.Component;
 
 import javax.sql.DataSource;
@@ -16,8 +17,15 @@ public class DataSourceCloser {
 
     @PreDestroy
     public void close() throws Exception {
-        if (dataSource instanceof com.zaxxer.hikari.HikariDataSource) {
-            ((com.zaxxer.hikari.HikariDataSource) dataSource).close();
+        // [#4, auditoría 2026-10-09] Desde RlsAwareDataSource (RLS acotado), el bean "dataSource" ya no es
+        // directamente el HikariDataSource sino un DelegatingDataSource que lo envuelve — hay que desenvolverlo
+        // antes de revisar el tipo, o este cierre dejaría de pasar nunca y el pool quedaría abierto al apagar.
+        DataSource target = dataSource;
+        while (target instanceof DelegatingDataSource delegating) {
+            target = delegating.getTargetDataSource();
+        }
+        if (target instanceof com.zaxxer.hikari.HikariDataSource hikari) {
+            hikari.close();
         }
     }
 }
