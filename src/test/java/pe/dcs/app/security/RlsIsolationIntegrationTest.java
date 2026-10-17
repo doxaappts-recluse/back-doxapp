@@ -9,11 +9,11 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import pe.dcs.app.features.auth.dto.AuthResponse;
-import pe.dcs.app.features.auth.dto.AuthStatus;
-import pe.dcs.app.features.auth.dto.LoginRequest;
-import pe.dcs.app.features.auth.service.AuthenticationService;
-import pe.dcs.app.features.auth.service.ClientInfo;
+import features.auth.dto.AuthResponse;
+import features.auth.dto.AuthStatus;
+import features.auth.dto.LoginRequest;
+import features.auth.service.AuthenticationService;
+import features.auth.service.ClientInfo;
 import pe.dcs.app.util.Exceptions;
 
 import java.sql.Connection;

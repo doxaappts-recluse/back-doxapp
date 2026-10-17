@@ -2,8 +2,8 @@ package pe.dcs.app.security.authz;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pe.dcs.app.features.contract.domain.ContractRepository;
-import pe.dcs.app.features.dashboard.service.DashboardCache;
+import features.contract.domain.ContractRepository;
+import features.dashboard.service.DashboardCache;
 
 import java.time.Clock;
 import java.time.Duration;

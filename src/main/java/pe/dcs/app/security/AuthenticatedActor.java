@@ -1,6 +1,6 @@
 package pe.dcs.app.security;
 
-import pe.dcs.app.features.access.domain.ActorType;
+import features.access.domain.ActorType;
 import pe.dcs.app.util.enums.RoleType;
 
 import java.util.Set;

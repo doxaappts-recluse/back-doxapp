@@ -2,13 +2,13 @@ package pe.dcs.app.security.authz;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pe.dcs.app.features.access.domain.AccessStatus;
-import pe.dcs.app.features.access.domain.PlatformStaff;
-import pe.dcs.app.features.access.domain.UserAccess;
-import pe.dcs.app.features.access.repo.PlatformStaffRepository;
-import pe.dcs.app.features.access.repo.UserAccessRepository;
-import pe.dcs.app.features.organization.domain.Organization;
-import pe.dcs.app.features.organization.domain.OrganizationRepository;
+import features.access.domain.AccessStatus;
+import features.access.domain.PlatformStaff;
+import features.access.domain.UserAccess;
+import features.access.repo.PlatformStaffRepository;
+import features.access.repo.UserAccessRepository;
+import features.organization.domain.Organization;
+import features.organization.domain.OrganizationRepository;
 import pe.dcs.app.security.AuthenticatedActor;
 
 import java.time.Clock;

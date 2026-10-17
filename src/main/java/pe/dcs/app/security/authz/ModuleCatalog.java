@@ -2,8 +2,8 @@ package pe.dcs.app.security.authz;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import pe.dcs.app.features.module.domain.AppModule;
-import pe.dcs.app.features.module.domain.AppModuleRepository;
+import features.module.domain.AppModule;
+import features.module.domain.AppModuleRepository;
 
 import java.time.Clock;
 import java.time.Duration;
