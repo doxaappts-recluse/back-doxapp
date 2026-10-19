@@ -32,6 +32,7 @@ public class SmtpMailPort implements MailPort {
         Locale locale = message.locale() == null || message.locale().isBlank() ? new Locale("es") : new Locale(message.locale());
         String subject = resolve(message.templateKey() + ".subject", locale, message.templateKey());
         String body = fill(resolve(message.templateKey() + ".body", locale, ""), message.params());
+        String footer = resolve("footer.support", locale, "");
 
         try {
             MimeMessage mime = sender.createMimeMessage();
@@ -39,7 +40,7 @@ public class SmtpMailPort implements MailPort {
             helper.setTo(message.to());
             helper.setFrom(fromAddress, fromName);
             helper.setSubject(subject);
-            helper.setText(body, toHtml(body));
+            helper.setText(body, toHtml(body, footer));
             sender.send(mime);
         } catch (Exception e) {
             // Cualquier falla (SMTP, codificación del remitente, red) solo se registra: nunca debe tumbar la
@@ -65,13 +66,16 @@ public class SmtpMailPort implements MailPort {
         return out;
     }
 
-    /** Envoltorio HTML mínimo con la marca, para que el correo no llegue en texto plano desnudo. */
-    private static String toHtml(String plainText) {
+    /** Envoltorio HTML mínimo con la marca y un pie con el correo de soporte, para que el correo no llegue en texto plano desnudo. */
+    private static String toHtml(String plainText, String footer) {
         String escaped = plainText.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace("\n", "<br>");
+        String footerHtml = footer == null || footer.isBlank() ? "" :
+                "<div style=\"margin-top:20px;padding-top:16px;border-top:1px solid #e2e8f0;"
+                + "color:#64748b;font-size:12px\">" + footer.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;") + "</div>";
         return "<div style=\"font-family:Arial,sans-serif;max-width:480px;margin:0 auto\">"
                 + "<div style=\"background:#27b7f5;padding:16px 24px;border-radius:8px 8px 0 0\">"
                 + "<span style=\"color:#ffffff;font-size:18px;font-weight:600\">DoxApp</span></div>"
                 + "<div style=\"border:1px solid #e2e8f0;border-top:none;padding:24px;border-radius:0 0 8px 8px;"
-                + "color:#0f172a;line-height:1.6;font-size:14px\">" + escaped + "</div></div>";
+                + "color:#0f172a;line-height:1.6;font-size:14px\">" + escaped + footerHtml + "</div></div>";
     }
 }
